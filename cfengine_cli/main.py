@@ -2,20 +2,16 @@ import argparse
 import os
 import sys
 
-from cfengine_cli import log
+from cf_remote import log
 from cfengine_cli import version
 from cfengine_cli import commands
-from cf_remote.utils import (
-    user_error,
-)
-from cf_remote.utils import cache
+from cfengine_cli.utils import UserError
 
 
 def print_version_info():
     print("CFEngine CLI version %s" % version.string())
 
 
-@cache
 def _get_arg_parser():
     ap = argparse.ArgumentParser(
         description="Human-oriented CLI for interacting with CFEngine tools",
@@ -62,14 +58,14 @@ def get_args():
     return args
 
 
-def run_command_with_args(command, _):
+def run_command_with_args(command, _) -> int:
     if command == "info":
         return commands.info()
     if command == "run":
         return commands.run()
     if command == "update":
         return commands.update()
-    user_error("Unknown command: '{}'".format(command))
+    raise UserError("Unknown command: '{}'".format(command))
 
 
 def validate_command(_command, _args):
@@ -77,14 +73,21 @@ def validate_command(_command, _args):
 
 
 def main():
-    args = get_args()
-    if args.log_level:
-        log.set_level(args.log_level)
-    validate_command(args.command, args)
+    try:
+        args = get_args()
+        if args.log_level:
+            log.set_level(args.log_level)
+        validate_command(args.command, args)
 
-    exit_code = run_command_with_args(args.command, args)
-    assert type(exit_code) is int
-    sys.exit(exit_code)
+        exit_code = run_command_with_args(args.command, args)
+        assert type(exit_code) is int
+        sys.exit(exit_code)
+    except AssertionError as e:
+        print(f"Error: {str(e)} (programmer error, please file a bug)")
+        sys.exit(-1)
+    except UserError as e:
+        print(str(e))
+        sys.exit(-1)
 
 
 if __name__ == "__main__":

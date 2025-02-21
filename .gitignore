@@ -2,7 +2,7 @@ build
 dist
 /cfengine_cli/VERSION
 /cfengine_cli/__pycache__/
-/cfengine_cli.egg-info/
+/cfengine.egg-info/
 /venv
 /.venv
 __pycache__/
