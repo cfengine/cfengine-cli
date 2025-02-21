@@ -1,6 +1,11 @@
-# CFEngine CLI
+# CFEngine command line interface (CLI)
 
-A simple CLI for interacting with various CFEngine tools, such as cf-agent, cf-remote, cf-hub, cf-remote, and cfbs.
+A CLI for humans to interact with CFEngine, enabling downloading and installing packages, building policy sets, deploying, and enforcing policy.
+It is practically a wrapper around our other tools, like `cf-agent`, `cf-hub`, `cf-remote` and `cfbs`.
+
+**Warning:** This is an early version.
+Things might be missing or changed.
+Proceed with caution and excitement.
 
 ## Installation
 
@@ -41,3 +46,8 @@ This CLI is entirely intended for humans.
 If you put it into scripts and automation, expect it to break in the future.
 In order to make the user experience better, we might add, change, or remove commands.
 We will also be experimenting with different types of interactive prompts and input.
+
+## Development, maintenance, contributions, and releases
+
+Looking for more information related to contributing code, releasing new versions or otherwise maintaining the CFEngine CLI?
+Please see the [HACKING.md](./HACKING.md) file.
