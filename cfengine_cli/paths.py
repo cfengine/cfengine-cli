@@ -1,21 +1,25 @@
+import re
 import os
-from cfengine_cli.utils import user_error
-
-
-def path_append(dir, subdir):
-    dir = os.path.abspath(os.path.expanduser(dir))
-    return dir if not subdir else os.path.join(dir, subdir)
+from cfengine_cli.utils import UserError
+from cf_remote.paths import path_append
 
 
 def cfengine_dir(subdir=None):
-    override_dir = os.getenv("CF_REMOTE_DIR")
+    """
+    Returns the directory used by the Python tools for temporary files,
+    global config, downloads, etc.
+
+    Defaults to ~/.cfengine/, but can be overridden via the CFENGINE_DIR
+    environment variable.
+    """
+    override_dir = os.getenv("CFENGINE_DIR")
 
     if override_dir:
         override_dir = os.path.normpath(override_dir)
         parent = os.path.dirname(override_dir)
 
         if not os.path.exists(parent):
-            user_error(
+            raise UserError(
                 "'{}' doesn't exist. Make sure this path is correct and exists.".format(
                     parent
                 )
@@ -26,19 +30,15 @@ def cfengine_dir(subdir=None):
     return path_append("~/.cfengine/", subdir)
 
 
-def cf_remote_dir(subdir=None):
-    return path_append(cfengine_dir("cf-remote"), subdir)
+def bin(component: str) -> str:
+    """
+    Get the path to a binary for use in a command.
 
+    For example: "cf-agent" -> "/var/cfengine/bin/cf-agent"
 
-def cf_remote_file(fname=None):
-    return path_append(cfengine_dir("cf-remote"), fname)
-
-
-def cf_remote_packages_dir(subdir=None):
-    return path_append(cf_remote_dir("packages"), subdir)
-
-
-CLOUD_CONFIG_FNAME = "cloud_config.json"
-CLOUD_CONFIG_FPATH = cf_remote_file(CLOUD_CONFIG_FNAME)
-CLOUD_STATE_FNAME = "cloud_state.json"
-CLOUD_STATE_FPATH = cf_remote_file(CLOUD_STATE_FNAME)
+    # Warning: Don't use this function with untrusted input.
+    """
+    # Stop things like semicolons, slashes, spaces, etc.
+    # Only letters and dashes allowed currently.
+    assert re.fullmatch(r"[-a-zA-Z]+", component)
+    return f"/var/cfengine/bin/{component}"

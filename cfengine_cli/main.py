@@ -42,11 +42,12 @@ def _get_arg_parser():
     subp.add_parser("help", help="Print help information")
 
     subp.add_parser(
-        "run", help="Run the CFEngine agent, evaluating and enforcing policy"
+        "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
     )
 
     subp.add_parser(
-        "update", help="Update the policy, downloading it from the policy server"
+        "report",
+        help="Run the agent and hub commands necessary to get new reporting data",
     )
 
     return ap
@@ -59,12 +60,12 @@ def get_args():
 
 
 def run_command_with_args(command, _) -> int:
-    if command == "info":
-        return commands.info()
     if command == "run":
         return commands.run()
-    if command == "update":
-        return commands.update()
+    if command == "report":
+        return commands.report()
+    if command == "help":
+        return commands.help()
     raise UserError("Unknown command: '{}'".format(command))
 
 
