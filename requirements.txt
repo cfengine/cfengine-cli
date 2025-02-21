@@ -1,2 +1,2 @@
 cfbs==4.3.1
-cf-remote==0.6.2
+cf-remote==0.6.3
