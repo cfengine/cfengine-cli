@@ -11,4 +11,4 @@ def test_cfbs_is_a_commit_hash():
 
 
 def test_cf_remote_canonify():
-    assert canonify(" CF-REMOTE ") == "cf_remote"
+    assert canonify(" CF-REMOTE ") == "cf-remote"
