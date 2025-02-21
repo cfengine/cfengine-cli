@@ -5,7 +5,7 @@ import sys
 import time
 from multiprocessing.dummy import Pool
 
-from cf_remote.remote import (
+from cfengine_cli.remote import (
     get_info,
     print_info,
     HostInstaller,
@@ -14,15 +14,15 @@ from cf_remote.remote import (
     transfer_file,
     deploy_masterfiles,
 )
-from cf_remote.packages import Releases
-from cf_remote.web import download_package
-from cf_remote.paths import (
+from cfengine_cli.packages import Releases
+from cfengine_cli.web import download_package
+from cfengine_cli.paths import (
     cf_remote_dir,
     CLOUD_CONFIG_FPATH,
     CLOUD_STATE_FPATH,
     cf_remote_packages_dir,
 )
-from cf_remote.utils import (
+from cfengine_cli.utils import (
     copy_file,
     mkdir,
     save_file,
@@ -33,11 +33,11 @@ from cf_remote.utils import (
     get_package_name,
     user_error,
 )
-from cf_remote.utils import user_error, is_package_url, print_progress_dot
-from cf_remote.spawn import VM, VMRequest, Providers, AWSCredentials, GCPCredentials
-from cf_remote.spawn import spawn_vms, destroy_vms, dump_vms_info, get_cloud_driver
-from cf_remote import log
-from cf_remote import cloud_data
+from cfengine_cli.utils import user_error, is_package_url, print_progress_dot
+from cfengine_cli.spawn import VM, VMRequest, Providers, AWSCredentials, GCPCredentials
+from cfengine_cli.spawn import spawn_vms, destroy_vms, dump_vms_info, get_cloud_driver
+from cfengine_cli import log
+from cfengine_cli import cloud_data
 
 
 def info(hosts, users=None):

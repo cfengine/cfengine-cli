@@ -2,18 +2,18 @@ import argparse
 import os
 import sys
 
-from cf_remote import log
-from cf_remote import version
-from cf_remote import commands, paths
-from cf_remote.utils import (
+from cfengine_cli import log
+from cfengine_cli import version
+from cfengine_cli import commands, paths
+from cfengine_cli.utils import (
     user_error,
     exit_success,
     expand_list_from_file,
     is_file_string,
 )
-from cf_remote.utils import strip_user, read_json, is_package_url, cache
-from cf_remote.packages import Releases
-from cf_remote.spawn import Providers
+from cfengine_cli.utils import strip_user, read_json, is_package_url, cache
+from cfengine_cli.packages import Releases
+from cfengine_cli.spawn import Providers
 
 
 def print_version_info():

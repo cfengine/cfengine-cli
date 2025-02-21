@@ -1,4 +1,4 @@
-from cf_remote.spawn import _get_image_criteria
+from cfengine_cli.spawn import _get_image_criteria
 
 
 def test_get_image_criteria():

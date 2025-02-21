@@ -5,15 +5,15 @@ import re
 import urllib.request
 import json
 from collections import OrderedDict
-from cf_remote.utils import (
+from cfengine_cli.utils import (
     is_different_checksum,
     user_error,
     write_json,
     mkdir,
     parse_json,
 )
-from cf_remote import log
-from cf_remote.paths import cf_remote_dir, cf_remote_packages_dir
+from cfengine_cli import log
+from cfengine_cli.paths import cf_remote_dir, cf_remote_packages_dir
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 

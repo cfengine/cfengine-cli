@@ -6,7 +6,7 @@ import re
 import json
 import getpass
 from collections import OrderedDict
-from cf_remote import log
+from cfengine_cli import log
 from datetime import datetime
 
 

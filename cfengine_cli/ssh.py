@@ -6,10 +6,10 @@ import signal
 import subprocess
 from urllib.parse import urlparse
 
-from cf_remote import aramid
-from cf_remote import log
-from cf_remote import paths
-from cf_remote.utils import whoami
+from cfengine_cli import aramid
+from cfengine_cli import log
+from cfengine_cli import paths
+from cfengine_cli.utils import whoami
 
 
 class LocalConnection:

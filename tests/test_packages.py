@@ -1,9 +1,9 @@
 import json
 from collections import OrderedDict
 
-from cf_remote.packages import Release
-from cf_remote.utils import read_json
-from cf_remote import log
+from cfengine_cli.packages import Release
+from cfengine_cli.utils import read_json
+from cfengine_cli import log
 
 # log.set_level("debug")
 

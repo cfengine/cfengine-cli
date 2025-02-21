@@ -1,7 +1,7 @@
 from os.path import basename, splitext, expanduser, abspath
-from cf_remote.web import get_json
-from cf_remote.utils import is_in_past, canonify
-from cf_remote import log
+from cfengine_cli.web import get_json
+from cfengine_cli.utils import is_in_past, canonify
+from cfengine_cli import log
 import re
 import sys
 

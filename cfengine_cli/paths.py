@@ -1,5 +1,5 @@
 import os
-from cf_remote.utils import user_error
+from cfengine_cli.utils import user_error
 
 
 def path_append(dir, subdir):

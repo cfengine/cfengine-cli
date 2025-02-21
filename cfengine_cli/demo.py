@@ -1,10 +1,10 @@
 import os
 import json
 
-from cf_remote import log
-from cf_remote.paths import cf_remote_dir
-from cf_remote.utils import save_file
-from cf_remote.ssh import scp, ssh_sudo, ssh_cmd, auto_connect
+from cfengine_cli import log
+from cfengine_cli.paths import cf_remote_dir
+from cfengine_cli.utils import save_file
+from cfengine_cli.ssh import scp, ssh_sudo, ssh_cmd, auto_connect
 
 
 @auto_connect

@@ -10,10 +10,10 @@ from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from libcloud.compute.base import NodeSize, NodeImage
 
-from cf_remote.cloud_data import aws_image_criteria, aws_defaults
-from cf_remote.utils import whoami
-from cf_remote import log
-from cf_remote import cloud_data
+from cfengine_cli.cloud_data import aws_image_criteria, aws_defaults
+from cfengine_cli.utils import whoami
+from cfengine_cli import log
+from cfengine_cli import cloud_data
 
 _NAME_RANDOM_PART_LENGTH = 4
 

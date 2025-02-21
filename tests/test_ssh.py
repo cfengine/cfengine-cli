@@ -1,4 +1,4 @@
-from cf_remote.ssh import auto_connect, ssh_cmd
+from cfengine_cli.ssh import auto_connect, ssh_cmd
 
 # for debugging, uncomment the following two lines
 # from cf_remote import log

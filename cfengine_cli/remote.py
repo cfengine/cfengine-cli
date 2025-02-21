@@ -4,7 +4,7 @@ import re
 from os.path import basename, dirname, join, exists
 from collections import OrderedDict
 
-from cf_remote.utils import (
+from cfengine_cli.utils import (
     error_and_none,
     os_release,
     column_print,
@@ -15,12 +15,12 @@ from cf_remote.utils import (
     parse_systeminfo,
     parse_version,
 )
-from cf_remote.ssh import ssh_sudo, ssh_cmd, scp, auto_connect
-from cf_remote import log
-from cf_remote.web import download_package
-from cf_remote.packages import Releases, Artifact, filter_artifacts
+from cfengine_cli.ssh import ssh_sudo, ssh_cmd, scp, auto_connect
+from cfengine_cli import log
+from cfengine_cli.web import download_package
+from cfengine_cli.packages import Releases, Artifact, filter_artifacts
 
-import cf_remote.demo as demo_lib
+import cfengine_cli.demo as demo_lib
 
 
 def powershell(cmd):

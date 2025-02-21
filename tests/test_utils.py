@@ -1,4 +1,4 @@
-from cf_remote.utils import has_unescaped_character, parse_envfile
+from cfengine_cli.utils import has_unescaped_character, parse_envfile
 
 
 def test_parse_envfile():
