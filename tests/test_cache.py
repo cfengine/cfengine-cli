@@ -1,4 +1,4 @@
-from cfengine_cli.utils import cache
+from cf_remote.utils import cache
 
 _calls = 0
 

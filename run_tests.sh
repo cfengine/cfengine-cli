@@ -1,6 +1,7 @@
+#!/bin/bash
 set -e
 set -x
-black --check cf_remote/*.py || true
+black --check cfengine_cli/*.py || true
 black --check tests/*.py || true
 if [ -z "$1" ]; then
   python3 -m coverage run -m pytest

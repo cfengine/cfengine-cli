@@ -48,9 +48,9 @@ jobs:
           pip install dist/cf_remote-*.whl
       - name: Sanity check
         run: cf-remote -V
-      - name: Run docker test
+      - name: Run docker tests
         run: |
           bash tests/docker/0*.sh
-      - name: Run unsafe tests
+      - name: Run shell tests
         run: |
-          bash tests/unsafe/0*.sh
+          bash tests/shell/0*.sh
