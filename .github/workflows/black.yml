@@ -31,4 +31,4 @@ jobs:
       - name: Check formatting with black
         run: |
           shopt -s globstar
-          black --check cf_remote/*.py cf_remote/**/*.py tests/*.py tests/**/*.py
+          black --check cfengine_cli/ tests/

@@ -24,7 +24,7 @@ jobs:
       - name: Reformat with black
         run: |
           shopt -s globstar
-          black cf_remote/*.py cf_remote/**/*.py tests/*.py tests/**/*.py > black_output.txt 2>&1
+          black cfengine_cli/ tests/ > black_output.txt 2>&1
       - name: Check if there are changes
         run: |
           git diff --exit-code || touch git_diff_exists
@@ -45,7 +45,7 @@ jobs:
           git config user.name 'GitHub'
           git config user.email '<noreply@github.com>'
           shopt -s globstar
-          git add cf_remote/*.py cf_remote/**/*.py tests/*.py tests/**/*.py
+          git add cfengine_cli/*.py cfengine_cli/**/*.py tests/*.py tests/**/*.py
           git commit -F commit_message.txt
       - id: commit-message-from-file
         name: Parse commit message from file into variable
