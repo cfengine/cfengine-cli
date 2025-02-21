@@ -56,7 +56,7 @@ jobs:
           echo ::set-output name=body::$body
       - name: Create Pull Request
         if: hashFiles('git_diff_exists') != ''
-        uses: cfengine/create-pull-request@v6
+        uses: cfengine/create-pull-request@158a28c1bf5c08c846b8e7d26d13becbd4136eda # v7.0.7a
         with:
           title: Reformatted python code using Black formatter
           body: ${{ steps.commit-message-from-file.outputs.body }}
