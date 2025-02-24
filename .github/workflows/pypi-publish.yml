@@ -24,5 +24,6 @@ jobs:
       - name: Build and publish
         run: |
           git fetch --all --tags
-          uv build
+          uv lock --check
+          uv build --locked
           uv publish
