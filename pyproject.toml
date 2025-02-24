@@ -7,6 +7,7 @@ name = "cfengine"
 dynamic = ["version"]
 description = "Human-oriented CLI for interacting with CFEngine tools"
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.9"
 dependencies = [
     "cf-remote>=0.6.4",
