@@ -21,10 +21,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install uv
-      - name: Build and publish
-        id-token: write
+      - name: Build
         run: |
           git fetch --all --tags
           uv lock --check
           uv build
+      - name: Build and publish
+        permissions:
+          contents: "read"
+          id-token: "read"
+        run: |
           uv publish
