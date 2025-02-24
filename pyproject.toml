@@ -7,7 +7,8 @@ name = "cfengine"
 dynamic = ["version"]
 description = "Human-oriented CLI for interacting with CFEngine tools"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
     "cf-remote>=0.6.4",
@@ -29,6 +30,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 ]
 
 [project.scripts]
