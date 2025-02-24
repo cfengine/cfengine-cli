@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: build release distributions
+      - name: Build release distributions
         run: |
           git fetch --all --tags
           python -m pip install pip
@@ -26,7 +26,7 @@ jobs:
           uv lock --check
           uv build
 
-      - name: upload windows dists
+      - name: Upload release-dists as artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
