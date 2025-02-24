@@ -44,7 +44,7 @@ jobs:
       - name: Install
         run: |
           uv lock --check
-          uv build --locked
+          uv build
           uv pip install .
       - name: Sanity check
         run: cf-remote -V
