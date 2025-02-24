@@ -50,6 +50,11 @@ def _get_arg_parser():
         help="Run the agent and hub commands necessary to get new reporting data",
     )
 
+    subp.add_parser(
+        "version",
+        help="Print the version string",
+    )
+
     return ap
 
 
@@ -66,6 +71,8 @@ def run_command_with_args(command, _) -> int:
         return commands.report()
     if command == "help":
         return commands.help()
+    if command == "version":
+        return commands.versions()
     raise UserError("Unknown command: '{}'".format(command))
 
 

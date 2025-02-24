@@ -1,5 +1,6 @@
 from cfengine_cli.shell import user_command
 from cfengine_cli.paths import bin
+from cfengine_cli.version import string as version_string
 
 
 def run() -> int:
@@ -17,4 +18,9 @@ def report() -> int:
 def help() -> int:
     print("Example usage:")
     print("cfengine run")
+    return 0
+
+
+def version() -> int:
+    print(version_string())
     return 0
