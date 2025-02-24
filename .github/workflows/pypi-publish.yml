@@ -32,10 +32,22 @@ jobs:
           name: release-dists
           path: dist/
 
+  pre-release-tests:
+    runs-on: ubuntu-24.04
+    needs:
+      - release-build
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: ./.github/workflows/tests.yml
+
   pypi-publish:
     runs-on: ubuntu-24.04
     needs:
       - release-build
+      - pre-release-tests
     permissions:
       id-token: write
 
