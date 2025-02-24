@@ -7,10 +7,28 @@ name = "cfengine"
 dynamic = ["version"]
 description = "Human-oriented CLI for interacting with CFEngine tools"
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.9"
 dependencies = [
     "cf-remote>=0.6.4",
     "cfbs>=4.3.1",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Intended Audience :: Information Technology",
+  "Topic :: Security",
+  "Topic :: Software Development :: Build Tools",
+  "Topic :: System :: Distributed Computing",
+  "Topic :: System :: Systems Administration",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 [project.scripts]
