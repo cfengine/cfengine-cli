@@ -1,10 +1,9 @@
 build
 dist
-/cfengine_cli/VERSION
-/cfengine_cli/__pycache__/
-/cfengine.egg-info/
-/venv
-/.venv
-__pycache__/
-**/.DS_STORE
+VERSION
+cfengine.egg-info
+venv
+.venv
+__pycache__
+.DS_STORE
 .pytest_cache

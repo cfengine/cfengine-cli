@@ -1,0 +1,17 @@
+[project]
+name = "cfengine"
+dynamic = ["version"]
+description = "Human-oriented CLI for interacting with CFEngine tools"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "cf-remote>=0.6.4",
+    "cfbs>=4.3.1",
+]
+
+[project.scripts]
+cfengine = "cfengine_cli.main:main"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
