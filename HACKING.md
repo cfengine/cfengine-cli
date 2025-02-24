@@ -39,6 +39,29 @@ Once you know the version number, proceed with making the release:
 
 If it does not work, click the failing GitHub Actions and try to understand what went wrong.
 
+### Releasing using GitHub CLI (gh)
+
+The process is virtually identical to using the GUI.
+Once you've determined what the version number should be, use the `gh release create`, and answer the prompts in a similar way to above:
+
+```
+$ gh release create
+? Choose a tag Create a new tag
+? Tag name 0.2.0
+? Title (optional) 0.2.0
+? Release notes Write using generated notes as template
+? Is this a prerelease? No
+? Submit? Publish release
+https://github.com/cfengine/cfengine-cli/releases/tag/0.2.0
+$
+```
+
+Then check that everything went well;
+
+https://github.com/cfengine/cfengine-cli/actions
+
+https://pypi.org/project/cfengine/
+
 ## Rotating secrets
 
 The GH Action shown above requires a PyPI token to have access to publish new versions to PyPI.
