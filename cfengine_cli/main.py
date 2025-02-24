@@ -72,7 +72,7 @@ def run_command_with_args(command, _) -> int:
     if command == "help":
         return commands.help()
     if command == "version":
-        return commands.versions()
+        return commands.version()
     raise UserError("Unknown command: '{}'".format(command))
 
 
