@@ -10,6 +10,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: "read"
+      id-token: "read"
 
     steps:
       - uses: actions/checkout@v3
@@ -27,8 +30,5 @@ jobs:
           uv lock --check
           uv build
       - name: Build and publish
-        permissions:
-          contents: "read"
-          id-token: "read"
         run: |
           uv publish
