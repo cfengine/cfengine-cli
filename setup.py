@@ -46,7 +46,10 @@ setuptools.setup(
     python_requires=">=3.9",
     entry_points={"console_scripts": ["cfengine = cfengine_cli.main:main"]},
     install_requires=[
-        "cfbs >= 4.3.1",
-        "cf-remote >= 0.6.2",
+        "cfbs>=4.3.0,<5.0.0",
+        "cf-remote>=0.6.0,<1.0.0",
     ],
+    # Note: Upgrade these when you rely on fixes / features in newer versions of
+    #       cfbs / cf-remote. Intentionally not synced with requirements.txt.
+    #       See: https://packaging.python.org/en/latest/discussions/install-requires-vs-requirements/
 )
