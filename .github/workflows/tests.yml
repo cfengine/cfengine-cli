@@ -47,7 +47,7 @@ jobs:
           uv build
           uv pip install .
       - name: Sanity check
-        run: cf-remote -V
+        run: cfengine --version
       - name: Run docker tests
         run: |
           bash tests/docker/0*.sh
