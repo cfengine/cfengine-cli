@@ -3,13 +3,9 @@ import os
 import sys
 
 from cf_remote import log
-from cfengine_cli import version
+from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli import commands
 from cfengine_cli.utils import UserError
-
-
-def print_version_info():
-    print("CFEngine CLI version %s" % version.string())
 
 
 def _get_arg_parser():
@@ -27,10 +23,9 @@ def _get_arg_parser():
     ap.add_argument(
         "--version",
         "-V",
-        help="Print or specify version",
-        nargs="?",
-        type=str,
-        const=True,
+        help="Print version number",
+        action="version",
+        version=f"{cfengine_cli_version_string()}",
     )
 
     command_help_hint = (
@@ -65,6 +60,8 @@ def get_args():
 
 
 def run_command_with_args(command, _) -> int:
+    if not command:
+        raise UserError("No command specified - try 'cfengine help'")
     if command == "run":
         return commands.run()
     if command == "report":
@@ -73,7 +70,7 @@ def run_command_with_args(command, _) -> int:
         return commands.help()
     if command == "version":
         return commands.version()
-    raise UserError("Unknown command: '{}'".format(command))
+    raise UserError(f"Unknown command: '{command}'")
 
 
 def validate_command(_command, _args):

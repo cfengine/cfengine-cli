@@ -31,4 +31,4 @@ jobs:
       - name: Check formatting with black
         run: |
           shopt -s globstar
-          black --check cfengine_cli/ tests/
+          black --check .

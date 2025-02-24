@@ -24,7 +24,7 @@ jobs:
       - name: Reformat with black
         run: |
           shopt -s globstar
-          black cfengine_cli/ tests/ > black_output.txt 2>&1
+          black . > black_output.txt 2>&1
       - name: Check if there are changes
         run: |
           git diff --exit-code || touch git_diff_exists
