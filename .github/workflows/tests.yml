@@ -45,7 +45,7 @@ jobs:
         run: |
           uv lock --check
           uv build
-          uv pip install .
+          pip install .
       - name: Sanity check
         run: cfengine --version
       - name: Run docker tests
