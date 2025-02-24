@@ -7,3 +7,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    prefix: "pip"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "olehermanse"
+    prefix: "GitHub Actions"
