@@ -34,13 +34,12 @@ jobs:
 
   pre-release-tests:
     runs-on: ubuntu-24.04
-    needs:
-      - release-build
 
     permissions:
       contents: read
 
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/workflows/tests.yml
 
   pypi-publish:
@@ -59,4 +58,4 @@ jobs:
           path: dist/
 
       - name: Publish release distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc
+        uses: pypa/gh-action-pypi-publish@v1.12.4
