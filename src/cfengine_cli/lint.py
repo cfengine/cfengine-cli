@@ -10,16 +10,15 @@ Usage:
 $ cfengine lint
 """
 
-import sys
 import os
 import json
 import tree_sitter_cfengine as tscfengine
-from tree_sitter import Language, Parser, Node, Tree
+from tree_sitter import Language, Parser
 from cfbs.validate import validate_config
 from cfbs.cfbs_config import CFBSConfig
 
 
-def lint_cfbs_json(filename):
+def lint_cfbs_json(filename) -> int:
     assert os.path.isfile(filename)
     assert filename.endswith("cfbs.json")
 
@@ -28,12 +27,14 @@ def lint_cfbs_json(filename):
 
     if r == 0:
         print(f"PASS: {filename}")
-        return
+        return 0
     print(f"FAIL: {filename}")
+    return r
 
 
-def lint_json(filename):
+def lint_json(filename) -> int:
     assert os.path.isfile(filename)
+
     with open(filename, "r") as f:
         data = f.read()
 

@@ -41,7 +41,7 @@ def format() -> int:
 def lint() -> int:
     errors = 0
     for filename in find(".", extension=".json"):
-        if filename.startswith("./."):
+        if filename.startswith(("./.", "./out/")):
             continue
         if filename.endswith("/cfbs.json"):
             lint_cfbs_json(filename)
@@ -49,7 +49,7 @@ def lint() -> int:
         errors += lint_json(filename)
 
     for filename in find(".", extension=".cf"):
-        if filename.startswith("./."):
+        if filename.startswith(("./.", "./out/")):
             continue
         errors += lint_policy_file(filename)
 
