@@ -35,26 +35,22 @@ def _get_arg_parser():
     subp = ap.add_subparsers(dest="command", title=command_help_hint)
 
     subp.add_parser("help", help="Print help information")
-
+    subp.add_parser(
+        "version",
+        help="Print the version string",
+    )
+    subp.add_parser("build", help="Build a policy set from a CFEngine Build project")
     subp.add_parser("format", help="Autoformat .json and .cf files")
-
     subp.add_parser(
         "lint",
         help="Look for syntax errors and other simple mistakes",
     )
-
     subp.add_parser(
         "report",
         help="Run the agent and hub commands necessary to get new reporting data",
     )
-
     subp.add_parser(
         "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
-    )
-
-    subp.add_parser(
-        "version",
-        help="Print the version string",
     )
 
     return ap
@@ -73,6 +69,8 @@ def run_command_with_args(command, _) -> int:
         return commands.help()
     if command == "version":
         return commands.version()
+    if command == "build":
+        return commands.build()
     if command == "format":
         return commands.format()
     if command == "lint":

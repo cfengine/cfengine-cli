@@ -129,7 +129,6 @@ pip3 install .
   - The command should be able to take a filename as an argument, and also take file content from stdin.
   - It would be nice if we refactored `validate_config()` in `cfbs` so it would take a simple dictionary (JSON) instead of a special CFBSConfig object.
 - Missing commands:
-  - `cfengine build` - Build policy set (Wrapping `cfbs build`).
   - `cfengine deploy` - Deploy policy set (Wrapping `cf-remote deploy`).
   - `cfengine install` - Install CFEngine packages / binaries (Wrapping `cf-remote install`).
   - `cfengine dev` - Subcommand for CFEngine developers / maintainers.

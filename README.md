@@ -29,7 +29,7 @@ cfengine run
 cfengine help
 ```
 
-### CFEngine CLI version
+### Print CFEngine CLI version
 
 ```bash
 cfengine run
@@ -52,9 +52,17 @@ Note that since we use a different parser than `cf-agent` / `cf-promises`, they 
 We aim to make the tree-sitter parser (used in this tool) more strict in general, so that when `cfengine lint` is happy with your policy, `cf-agent` will also accept it.
 (But the opposite is not a goal, that `cfengine lint` must accept any policy `cf-agent` would find acceptable).
 
+### Build a policy set
+
+```bash
+cfengine build
+```
+
+(This is equivalent to running `cfbs build`).
+
 ## Supported platforms and versions
 
-This tool will only support a limited number of platforms, it is not int.
+This tool will only support a limited number of platforms, it is not intended to run everywhere CFEngine runs.
 Currently we are targeting:
 
 - Officially supported versions of macOS, Ubuntu, and Fedora.

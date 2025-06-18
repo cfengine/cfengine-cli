@@ -5,16 +5,25 @@ from cfengine_cli.paths import bin
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli.format import format_policy_file, format_json_file
 from cfbs.utils import find, user_error
+from cfbs.commands import build_command
 
 
-def require_cfagent():
+def _require_cfagent():
     if not os.path.exists(bin("cf-agent")):
         user_error(f"cf-agent not found at {bin('cf-agent')}")
 
 
-def require_cfhub():
+def _require_cfhub():
     if not os.path.exists(bin("cf-hub")):
         user_error(f"cf-hub not found at {bin('cf-hub')}")
+
+
+def build() -> int:
+    r = build_command()
+    if r is None:
+        # Workaround for https://github.com/cfengine/cfbs/pull/231
+        return 0
+    return r
 
 
 def format() -> int:
@@ -50,8 +59,8 @@ def lint() -> int:
 
 
 def report() -> int:
-    require_cfhub()
-    require_cfagent()
+    _require_cfhub()
+    _require_cfagent()
     user_command(f"{bin('cf-agent')} -KIf update.cf && {bin('cf-agent')} -KI")
     user_command(f"{bin('cf-hub')} --query rebase -H 127.0.0.1")
     user_command(f"{bin('cf-hub')} --query delta -H 127.0.0.1")
@@ -59,7 +68,7 @@ def report() -> int:
 
 
 def run() -> int:
-    require_cfagent()
+    _require_cfagent()
     user_command(f"{bin('cf-agent')} -KIf update.cf && {bin('cf-agent')} -KI")
     return 0
 
