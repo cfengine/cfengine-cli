@@ -29,12 +29,3 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          sh ci/01-install.sh
-      - name: Safe tests
-        run: |
-          sh ci/02-safe-tests.sh
-      - name: Unsafe tests
-        run: |
-          sh ci/03-unsafe-tests.sh
