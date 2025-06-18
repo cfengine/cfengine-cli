@@ -230,27 +230,26 @@ def parse_args():
     return parser.parse_args()
 
 
-def old_main():
+def old_main(path, syntax_check, languages, output_check):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
-    args = parse_args()
 
-    if not os.path.exists(args.path):
+    if not os.path.exists(path):
         user_error("This path doesn't exist")
 
     if (
-        args.syntax_check
-        and "cf3" in args.languages
+        syntax_check
+        and "cf3" in languages
         and not which("/var/cfengine/bin/cf-promises")
     ):
         user_error("cf-promises is not installed")
 
-    for language in args.languages:
+    for language in languages:
         if language not in supported_languages:
             user_error(
                 f"Unsupported language '{language}'. The supported languages are: {", ".join(supported_languages.keys())}"
             )
 
-    parsed_markdowns = get_markdown_files(args.path, args.languages)
+    parsed_markdowns = get_markdown_files(path, languages)
 
     for origin_path in parsed_markdowns["files"].keys():
         offset = 0
@@ -266,7 +265,7 @@ def old_main():
             language = supported_languages[code_block["language"]]
             snippet_path = f"{origin_path}.snippet-{i+1}.{language}"
 
-            if args.extract and "noextract" not in code_block["flags"]:
+            if extract and "noextract" not in code_block["flags"]:
                 extract(
                     origin_path,
                     snippet_path,
@@ -275,7 +274,7 @@ def old_main():
                     code_block["last_line"],
                 )
 
-            if args.syntax_check and "novalidate" not in code_block["flags"]:
+            if syntax_check and "novalidate" not in code_block["flags"]:
                 check_syntax(
                     origin_path,
                     snippet_path,
@@ -284,7 +283,7 @@ def old_main():
                     code_block["last_line"],
                 )
 
-            if args.autoformat and "noautoformat" not in code_block["flags"]:
+            if autoformat and "noautoformat" not in code_block["flags"]:
                 autoformat(
                     origin_path,
                     snippet_path,
@@ -293,10 +292,10 @@ def old_main():
                     code_block["last_line"],
                 )
 
-            if args.output_check and "noexecute" not in code_block["flags"]:
+            if output_check and "noexecute" not in code_block["flags"]:
                 check_output()
 
-            if args.replace and "noreplace" not in code_block["flags"]:
+            if replace and "noreplace" not in code_block["flags"]:
                 offset = replace(
                     origin_path,
                     snippet_path,
@@ -306,5 +305,10 @@ def old_main():
                 )
 
 
+def main():
+    args = parse_args()
+    old_main(args.path, args.syntax_check, args.languages, args.output_check)
+
+
 if __name__ == "__main__":
-    old_main()
+    main()
