@@ -163,7 +163,7 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
             except IOError:
                 raise UserError(f"Couldn't open '{snippet_path}'")
             except json.decoder.JSONDecodeError:
-                raise UserError(f"Invalid json")
+                raise UserError(f"Invalid json in '{snippet_path}'")
 
 
 def _markdown_code_checker(
