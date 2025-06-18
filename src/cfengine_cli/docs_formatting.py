@@ -21,13 +21,6 @@ import subprocess
 IGNORED_DIRS = [".git"]
 
 
-def update_docs() -> int:
-    """Entry point to be called by other files
-
-    I.e. what is actually run when you do cfengine dev docs-formatting"""
-    return 0
-
-
 def extract_inline_code(path, languages):
     """extract inline code, language and filters from markdown"""
 
@@ -82,8 +75,7 @@ def get_markdown_files(start, languages):
     return return_dict
 
 
-def extract(origin_path, snippet_path, _language, first_line, last_line):
-
+def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
     try:
         with open(origin_path, "r") as f:
             content = f.read()
@@ -96,7 +88,7 @@ def extract(origin_path, snippet_path, _language, first_line, last_line):
         user_error(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
 
-def check_syntax(origin_path, snippet_path, language, first_line, _last_line):
+def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line):
     snippet_abs_path = os.path.abspath(snippet_path)
 
     if not os.path.exists(snippet_path):
@@ -127,12 +119,11 @@ def check_syntax(origin_path, snippet_path, language, first_line, _last_line):
                 user_error("Timed out")
 
 
-def check_output():
+def fn_check_output():
     pass
 
 
-def replace(origin_path, snippet_path, _language, first_line, last_line):
-
+def fn_replace(origin_path, snippet_path, _language, first_line, last_line):
     try:
         with open(snippet_path, "r") as f:
             pretty_content = f.read()
@@ -159,8 +150,7 @@ def replace(origin_path, snippet_path, _language, first_line, last_line):
     return offset  # TODO: offset can be undefined here
 
 
-def autoformat(_origin_path, snippet_path, language, _first_line, _last_line):
-
+def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line):
     match language:
         case "json":
             try:
@@ -230,7 +220,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def old_main(path, syntax_check, languages, output_check):
+def old_main(path, syntax_check, extract, replace, autoformat, languages, output_check):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
 
     if not os.path.exists(path):
@@ -266,7 +256,7 @@ def old_main(path, syntax_check, languages, output_check):
             snippet_path = f"{origin_path}.snippet-{i+1}.{language}"
 
             if extract and "noextract" not in code_block["flags"]:
-                extract(
+                fn_extract(
                     origin_path,
                     snippet_path,
                     language,
@@ -275,7 +265,7 @@ def old_main(path, syntax_check, languages, output_check):
                 )
 
             if syntax_check and "novalidate" not in code_block["flags"]:
-                check_syntax(
+                fn_check_syntax(
                     origin_path,
                     snippet_path,
                     language,
@@ -284,7 +274,7 @@ def old_main(path, syntax_check, languages, output_check):
                 )
 
             if autoformat and "noautoformat" not in code_block["flags"]:
-                autoformat(
+                fn_autoformat(
                     origin_path,
                     snippet_path,
                     language,
@@ -293,10 +283,10 @@ def old_main(path, syntax_check, languages, output_check):
                 )
 
             if output_check and "noexecute" not in code_block["flags"]:
-                check_output()
+                fn_check_output()
 
             if replace and "noreplace" not in code_block["flags"]:
-                offset = replace(
+                offset = fn_replace(
                     origin_path,
                     snippet_path,
                     language,
@@ -307,8 +297,32 @@ def old_main(path, syntax_check, languages, output_check):
 
 def main():
     args = parse_args()
-    old_main(args.path, args.syntax_check, args.languages, args.output_check)
+    old_main(
+        args.path,
+        args.syntax_check,
+        args.extract,
+        args.replace,
+        args.autoformat,
+        args.languages,
+        args.output_check,
+    )
 
 
 if __name__ == "__main__":
     main()
+
+
+def update_docs() -> int:
+    """Entry point to be called by other files
+
+    I.e. what is actually run when you do cfengine dev docs-formatting"""
+    old_main(
+        path=".",
+        syntax_check=False,
+        extract=True,
+        replace=True,
+        autoformat=True,
+        languages=["cf3", "json", "yml"],
+        output_check=False,
+    )
+    return 0
