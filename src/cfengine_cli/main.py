@@ -54,6 +54,14 @@ def _get_arg_parser():
         "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
     )
 
+    dev_parser = subp.add_parser(
+        "dev", help="Utilities intended for developers / maintainers of CFEngine"
+    )
+    dev_subparsers = dev_parser.add_subparsers(dest="dev_command")
+    dev_subparsers.add_parser("dependency-tables")
+    dev_subparsers.add_parser("docs-formatting")
+    dev_subparsers.add_parser("release-information")
+
     return ap
 
 
@@ -63,31 +71,34 @@ def get_args():
     return args
 
 
-def run_command_with_args(command, _) -> int:
-    if not command:
+def run_command_with_args(args) -> int:
+    if not args.command:
         raise UserError("No command specified - try 'cfengine help'")
-    if command == "help":
+    if args.command == "help":
         return commands.help()
-    if command == "version":
+    if args.command == "version":
         return commands.version()
     # The real commands:
-    if command == "build":
+    if args.command == "build":
         return commands.build()
-    if command == "deploy":
+    if args.command == "deploy":
         return commands.deploy()
-    if command == "format":
+    if args.command == "format":
         return commands.format()
-    if command == "lint":
+    if args.command == "lint":
         return commands.lint()
-    if command == "report":
+    if args.command == "report":
         return commands.report()
-    if command == "run":
+    if args.command == "run":
         return commands.run()
-    raise UserError(f"Unknown command: '{command}'")
+    if args.command == "dev":
+        return commands.dev(args.dev_command)
+    raise UserError(f"Unknown command: '{args.command}'")
 
 
-def validate_command(_command, _args):
-    pass
+def validate_args(args):
+    if args.command == "dev" and args.dev_command is None:
+        raise UserError("Missing subcommand - cfengine dev <subcommand>")
 
 
 def main():
@@ -95,9 +106,9 @@ def main():
         args = get_args()
         if args.log_level:
             log.set_level(args.log_level)
-        validate_command(args.command, args)
+        validate_args(args)
 
-        exit_code = run_command_with_args(args.command, args)
+        exit_code = run_command_with_args(args)
         assert type(exit_code) is int
         sys.exit(exit_code)
     except AssertionError as e:
