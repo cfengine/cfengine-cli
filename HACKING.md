@@ -112,3 +112,26 @@ py.test
 git fetch --all --tags
 pip3 install .
 ```
+
+## Not implemented yet / TODOs
+
+- `cfengine run`
+  - The command could automatically detect that you have CFEngine installed on a remote hub, and run it there instead (using `cf-remote`).
+  - Handle when `cf-agent` is not installed, help users install.
+  - Prompt / help users do what they meant (i.e. build and deploy and run).
+- `cfengine format`
+  - Automatically break up and indent method calls, function calls, and nested function calls.
+  - Smarter placement of comments based on context.
+  - The command should be able to take a filename as an argument, and also operate using stdin and stdout.
+    (Receive file content on stdin, file type using command line arg, output formatted file to stdout).
+  - We can add a shortcut, `cfengine fmt`, since that matches other tools, like `deno`.
+- `cfengine lint`
+  - The command should be able to take a filename as an argument, and also take file content from stdin.
+  - It would be nice if we refactored `validate_config()` in `cfbs` so it would take a simple dictionary (JSON) instead of a special CFBSConfig object.
+- Missing commands:
+  - `cfengine build` - Build policy set (Wrapping `cfbs build`).
+  - `cfengine deploy` - Deploy policy set (Wrapping `cf-remote deploy`).
+  - `cfengine install` - Install CFEngine packages / binaries (Wrapping `cf-remote install`).
+  - `cfengine dev` - Subcommand for CFEngine developers / maintainers.
+    - `cfengine dev release-information` - Generate release information (Wrapping `cfbs generate-release-information`)
+    - `cfengine dev dependency-tables` - Update dependency tables in markdown files.

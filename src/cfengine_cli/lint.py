@@ -8,11 +8,6 @@ Currently implemented for:
 
 Usage:
 $ cfengine lint
-
-TODOS:
-- It would be nice if we refactored validate_config in cfbs
-  so it would take a simple dictionary (JSON) instead of a
-  special CFBSConfig object.
 """
 
 import sys
