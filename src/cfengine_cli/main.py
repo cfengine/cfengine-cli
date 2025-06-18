@@ -40,6 +40,7 @@ def _get_arg_parser():
         help="Print the version string",
     )
     subp.add_parser("build", help="Build a policy set from a CFEngine Build project")
+    subp.add_parser("deploy", help="Deploy a built policy set")
     subp.add_parser("format", help="Autoformat .json and .cf files")
     subp.add_parser(
         "lint",
@@ -69,8 +70,11 @@ def run_command_with_args(command, _) -> int:
         return commands.help()
     if command == "version":
         return commands.version()
+    # The real commands:
     if command == "build":
         return commands.build()
+    if command == "deploy":
+        return commands.deploy()
     if command == "format":
         return commands.format()
     if command == "lint":

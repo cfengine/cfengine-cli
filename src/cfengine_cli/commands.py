@@ -6,6 +6,7 @@ from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli.format import format_policy_file, format_json_file
 from cfbs.utils import find, user_error
 from cfbs.commands import build_command
+from cf_remote.commands import deploy as deploy_command
 
 
 def _require_cfagent():
@@ -23,6 +24,11 @@ def build() -> int:
     if r is None:
         # Workaround for https://github.com/cfengine/cfbs/pull/231
         return 0
+    return r
+
+
+def deploy() -> int:
+    r = deploy_command(None, None)
     return r
 
 

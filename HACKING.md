@@ -137,7 +137,6 @@ cat tests/shell/*.sh | bash
   - The command should be able to take a filename as an argument, and also take file content from stdin.
   - It would be nice if we refactored `validate_config()` in `cfbs` so it would take a simple dictionary (JSON) instead of a special CFBSConfig object.
 - Missing commands:
-  - `cfengine deploy` - Deploy policy set (Wrapping `cf-remote deploy`).
   - `cfengine install` - Install CFEngine packages / binaries (Wrapping `cf-remote install`).
   - `cfengine dev` - Subcommand for CFEngine developers / maintainers.
     - `cfengine dev release-information` - Generate release information (Wrapping `cfbs generate-release-information`)
