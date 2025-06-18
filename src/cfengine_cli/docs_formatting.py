@@ -220,7 +220,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def old_main(path, syntax_check, extract, replace, autoformat, languages, output_check):
+def markdown_code_checker(
+    path, syntax_check, extract, replace, autoformat, languages, output_check
+):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
 
     if not os.path.exists(path):
@@ -297,7 +299,7 @@ def old_main(path, syntax_check, extract, replace, autoformat, languages, output
 
 def main():
     args = parse_args()
-    old_main(
+    markdown_code_checker(
         args.path,
         args.syntax_check,
         args.extract,
@@ -316,13 +318,13 @@ def update_docs() -> int:
     """Entry point to be called by other files
 
     I.e. what is actually run when you do cfengine dev docs-formatting"""
-    old_main(
+    markdown_code_checker(
         path=".",
         syntax_check=False,
         extract=True,
         replace=True,
         autoformat=True,
-        languages=["cf3", "json", "yml"],
+        languages=["json"],
         output_check=False,
     )
     return 0
