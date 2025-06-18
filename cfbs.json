@@ -1,0 +1,7 @@
+{
+  "name": "Example project",
+  "description": "Example description",
+  "type": "policy-set",
+  "git": true,
+  "build": []
+}
