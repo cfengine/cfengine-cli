@@ -100,17 +100,25 @@ This makes it easy to run commands without installing the project, for example:
 uv run cfengine format
 ```
 
-## Running tests
-
-```bash
-py.test
-```
-
 ## Installing from source:
 
 ```bash
 git fetch --all --tags
 pip3 install .
+```
+
+## Running tests
+
+Unit tests:
+
+```bash
+py.test
+```
+
+Shell tests (requires installing first):
+
+```bash
+cat tests/shell/*.sh | bash
 ```
 
 ## Not implemented yet / TODOs
