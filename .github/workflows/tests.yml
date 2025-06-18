@@ -31,30 +31,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install uv
-      - name: Check lockfile
+          sh ci/01-install.sh
+      - name: Safe tests
         run: |
-          uv lock --check
-      - name: Lint with flake8
+          sh ci/02-safe-tests.sh
+      - name: Unsafe tests
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Test with pytest
-        run: |
-          uv run pytest
-      - name: Install
-        run: |
-          uv lock --check
-          uv build
-          pip install .
-      - name: Sanity check
-        run: cfengine --version
-      - name: Run docker tests
-        run: |
-          bash tests/docker/0*.sh
-      - name: Run shell tests
-        run: |
-          bash tests/shell/0*.sh
+          sh ci/03-unsafe-tests.sh
