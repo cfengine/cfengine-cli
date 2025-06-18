@@ -9,7 +9,7 @@ TODO: This code needs several adjustments to better fit into
 """
 
 from cfbs.pretty import pretty_file
-from cfbs.utils import user_error
+from cfengine_cli.utils import UserError
 import json
 from shutil import which
 import markdown_it
@@ -85,14 +85,14 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
         with open(snippet_path, "w") as f:
             f.write(code_snippet)
     except IOError:
-        user_error(f"Couldn't open '{origin_path}' or '{snippet_path}'")
+        raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
 
 def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line):
     snippet_abs_path = os.path.abspath(snippet_path)
 
     if not os.path.exists(snippet_path):
-        user_error(
+        raise UserError(
             f"Couldn't find the file '{snippet_path}'. Run --extract to extract the inline code."
         )
 
@@ -110,13 +110,13 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line)
                     err = err.replace(snippet_abs_path, f"{origin_path}:{first_line}")
                     print(err)
             except OSError:
-                user_error(f"'{snippet_abs_path}' doesn't exist")
+                raise UserError(f"'{snippet_abs_path}' doesn't exist")
             except ValueError:
-                user_error("Invalid subprocess arguments")
+                raise UserError("Invalid subprocess arguments")
             except subprocess.CalledProcessError:
-                user_error(f"Couldn't run cf-promises on '{snippet_abs_path}'")
+                raise UserError(f"Couldn't run cf-promises on '{snippet_abs_path}'")
             except subprocess.TimeoutExpired:
-                user_error("Timed out")
+                raise UserError("Timed out")
 
 
 def fn_check_output():
@@ -141,11 +141,11 @@ def fn_replace(origin_path, snippet_path, _language, first_line, last_line):
         with open(origin_path, "w") as f:
             f.write("\n".join(origin_lines))
     except FileNotFoundError:
-        user_error(
+        raise UserError(
             f"Couldn't find the file '{snippet_path}'. Run --extract to extract the inline code."
         )
     except IOError:
-        user_error(f"Couldn't open '{origin_path}' or '{snippet_path}'")
+        raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
     return offset  # TODO: offset can be undefined here
 
@@ -156,15 +156,15 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
             try:
                 pretty_file(snippet_path)
             except FileNotFoundError:
-                user_error(
+                raise UserError(
                     f"Couldn't find the file '{snippet_path}'. Run --extract to extract the inline code."
                 )
             except PermissionError:
-                user_error(f"Not enough permissions to open '{snippet_path}'")
+                raise UserError(f"Not enough permissions to open '{snippet_path}'")
             except IOError:
-                user_error(f"Couldn't open '{snippet_path}'")
+                raise UserError(f"Couldn't open '{snippet_path}'")
             except json.decoder.JSONDecodeError:
-                user_error(f"Invalid json")
+                raise UserError(f"Invalid json")
 
 
 def parse_args():
@@ -226,18 +226,18 @@ def markdown_code_checker(
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
 
     if not os.path.exists(path):
-        user_error("This path doesn't exist")
+        raise UserError("This path doesn't exist")
 
     if (
         syntax_check
         and "cf3" in languages
         and not which("/var/cfengine/bin/cf-promises")
     ):
-        user_error("cf-promises is not installed")
+        raise UserError("cf-promises is not installed")
 
     for language in languages:
         if language not in supported_languages:
-            user_error(
+            raise UserError(
                 f"Unsupported language '{language}'. The supported languages are: {", ".join(supported_languages.keys())}"
             )
 
