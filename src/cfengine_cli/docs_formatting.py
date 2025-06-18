@@ -14,7 +14,6 @@ import json
 from shutil import which
 import markdown_it
 import os
-import argparse
 import subprocess
 
 
@@ -167,66 +166,7 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
                 raise UserError(f"Invalid json")
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        prog="Markdown inline code checker",
-        description="Tool for checking the syntax, the format and the output of markdown inline code",
-    )
-    parser.add_argument(
-        "path",
-        help="path of file or directory to check syntax on",
-        nargs="?",
-        default=".",
-    )
-    parser.add_argument(
-        "--languages",
-        "-l",
-        nargs="+",
-        help="languages to check syntax of",
-        default=["cf3", "json", "yaml"],
-        required=False,
-    )
-    parser.add_argument(
-        "--extract",
-        help="extract the inline code into their own files",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--autoformat",
-        help="automatically format all inline code",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--syntax-check",
-        help="check syntax of all inline code",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--replace",
-        help="replace inline code",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--cleanup",
-        help="cleanup (delete) temporary files afterwards",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--output-check",
-        help="check output of all inline code",
-        action="store_true",
-        required=False,
-    )
-
-    return parser.parse_args()
-
-
-def markdown_code_checker(
+def _markdown_code_checker(
     path, syntax_check, extract, replace, autoformat, languages, output_check, cleanup
 ):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
@@ -305,29 +245,11 @@ def markdown_code_checker(
                 os.remove(snippet_path)
 
 
-def main():
-    args = parse_args()
-    markdown_code_checker(
-        args.path,
-        args.syntax_check,
-        args.extract,
-        args.replace,
-        args.autoformat,
-        args.languages,
-        args.output_check,
-        args.cleanup,
-    )
-
-
-if __name__ == "__main__":
-    main()
-
-
 def update_docs() -> int:
     """Entry point to be called by other files
 
     I.e. what is actually run when you do cfengine dev docs-formatting"""
-    markdown_code_checker(
+    _markdown_code_checker(
         path=".",
         syntax_check=False,
         extract=True,
