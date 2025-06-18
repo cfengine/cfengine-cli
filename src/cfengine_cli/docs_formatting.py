@@ -126,7 +126,7 @@ def fn_check_output():
 def fn_replace(origin_path, snippet_path, _language, first_line, last_line):
     try:
         with open(snippet_path, "r") as f:
-            pretty_content = f.read()
+            pretty_content = f.read().strip()
 
         with open(origin_path, "r") as f:
             origin_lines = f.read().split("\n")
@@ -211,6 +211,12 @@ def parse_args():
         required=False,
     )
     parser.add_argument(
+        "--cleanup",
+        help="cleanup (delete) temporary files afterwards",
+        action="store_true",
+        required=False,
+    )
+    parser.add_argument(
         "--output-check",
         help="check output of all inline code",
         action="store_true",
@@ -221,7 +227,7 @@ def parse_args():
 
 
 def markdown_code_checker(
-    path, syntax_check, extract, replace, autoformat, languages, output_check
+    path, syntax_check, extract, replace, autoformat, languages, output_check, cleanup
 ):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
 
@@ -295,6 +301,8 @@ def markdown_code_checker(
                     code_block["first_line"],
                     code_block["last_line"],
                 )
+            if cleanup:
+                os.remove(snippet_path)
 
 
 def main():
@@ -307,6 +315,7 @@ def main():
         args.autoformat,
         args.languages,
         args.output_check,
+        args.cleanup,
     )
 
 
@@ -326,5 +335,6 @@ def update_docs() -> int:
         autoformat=True,
         languages=["json"],
         output_check=False,
+        cleanup=True,
     )
     return 0
