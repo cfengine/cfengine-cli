@@ -1,3 +1,13 @@
+"""
+Tooling to extract code snippets from docs and then run
+commands on them (syntax checking, formatting, etc.)
+
+This was moved from cfengine/documentation repo.
+
+TODO: This code needs several adjustments to better fit into
+      the CFEngine CLI.
+"""
+
 from cfbs.pretty import pretty_file
 from cfbs.utils import user_error
 import json
@@ -6,6 +16,16 @@ import markdown_it
 import os
 import argparse
 import subprocess
+
+
+IGNORED_DIRS = [".git"]
+
+
+def update_docs() -> int:
+    """Entry point to be called by other files
+
+    I.e. what is actually run when you do cfengine dev docs-formatting"""
+    return 0
 
 
 def extract_inline_code(path, languages):
@@ -38,9 +58,6 @@ def extract_inline_code(path, languages):
             }
 
 
-ignored_dirs = [".git"]
-
-
 def get_markdown_files(start, languages):
     """locate all markdown files and call extract_inline_code on them"""
 
@@ -53,7 +70,7 @@ def get_markdown_files(start, languages):
 
     return_dict = {"files": {}}
     for root, dirs, files in os.walk(start):
-        dirs[:] = [d for d in dirs if d not in ignored_dirs]
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
 
         for f in files:
             if f.endswith(".markdown") or f.endswith(".md"):
@@ -139,7 +156,7 @@ def replace(origin_path, snippet_path, _language, first_line, last_line):
     except IOError:
         user_error(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
-    return offset
+    return offset  # TODO: offset can be undefined here
 
 
 def autoformat(_origin_path, snippet_path, language, _first_line, _last_line):
@@ -213,7 +230,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def old_main():
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
     args = parse_args()
 
@@ -287,3 +304,7 @@ if __name__ == "__main__":
                     code_block["first_line"],
                     code_block["last_line"],
                 )
+
+
+if __name__ == "__main__":
+    old_main()
