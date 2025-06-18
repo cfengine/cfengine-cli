@@ -39,6 +39,11 @@ def _get_arg_parser():
     subp.add_parser("format", help="Autoformat .json and .cf files")
 
     subp.add_parser(
+        "lint",
+        help="Look for syntax errors and other simple mistakes",
+    )
+
+    subp.add_parser(
         "report",
         help="Run the agent and hub commands necessary to get new reporting data",
     )
@@ -70,6 +75,8 @@ def run_command_with_args(command, _) -> int:
         return commands.version()
     if command == "format":
         return commands.format()
+    if command == "lint":
+        return commands.lint()
     if command == "report":
         return commands.report()
     if command == "run":

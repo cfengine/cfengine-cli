@@ -35,11 +35,40 @@ cfengine help
 cfengine run
 ```
 
+Not implemented yet - TODOs:
+
+- The command could automatically detect that you have CFEngine installed on a
+  remote hub, and run it there instead (using cf-remote)
+- Handle when `cf-agent` is not installed, help users install.
+- Prompt / help users do what they meant (i.e. build and deploy and run).
+
 ### Automatically format source code
 
 ```bash
 cfengine format
 ```
+
+Not implemented yet - TODOs:
+
+- Automatically break up and indent method calls, function calls, and nested function calls.
+- Smarter placement of comments based on context.
+- The command should be able to take a filename as an argument, and also operate using stdin and stdout.
+  (Receive file content on stdin, file type using command line arg, output formatted file to stdout).
+
+### Check for errors in source code
+
+```bash
+cfengine lint
+```
+
+Note that since we use a different parser than `cf-agent` / `cf-promises`, they are not 100% in sync.
+`cf-agent` could point out something as a syntax error, while `cfengine lint` does not and vice versa.
+We aim to make the tree-sitter parser (used in this tool) more strict in general, so that when `cfengine lint` is happy with your policy, `cf-agent` will also accept it.
+(But the opposite is not a goal, that `cfengine lint` must accept any policy `cf-agent` would find acceptable).
+
+Not implemented yet - TODOs:
+
+- The command should be able to take a filename as an argument, and also take file content from stdin
 
 ## Supported platforms and versions
 
