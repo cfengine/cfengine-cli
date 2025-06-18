@@ -44,8 +44,13 @@ If it does not work, click the failing GitHub Actions and try to understand what
 The process is virtually identical to using the GUI.
 Once you've determined what the version number should be, use the `gh release create`, and answer the prompts in a similar way to above:
 
+```bash
+gh release create
 ```
-$ gh release create
+
+Go through the prompts:
+
+```
 ? Choose a tag Create a new tag
 ? Tag name 0.2.0
 ? Title (optional) 0.2.0
@@ -53,7 +58,6 @@ $ gh release create
 ? Is this a prerelease? No
 ? Submit? Publish release
 https://github.com/cfengine/cfengine-cli/releases/tag/0.2.0
-$
 ```
 
 Then check that everything went well;
@@ -83,6 +87,28 @@ For simplicity's sake, we don't have a custom configuration, we use the tool's d
 
 If your editor does not do this automatically, you can run these tools from the command line:
 
-```
+```bash
 black . && prettier . --write
+```
+
+## Running commands during development
+
+This project uses `uv`.
+This makes it easy to run commands without installing the project, for example:
+
+```bash
+uv run cfengine format
+```
+
+## Running tests
+
+```bash
+py.test
+```
+
+## Installing from source:
+
+```bash
+git fetch --all --tags
+pip3 install .
 ```

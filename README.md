@@ -11,22 +11,34 @@ Proceed with caution and excitement.
 
 Install using pip:
 
-```
+```bash
 pip install cfengine
 ```
 
 ## Usage
 
-To perform an agent run:
+### Run the CFEngine agent - evaluate and enforce policy
 
-```
+```bash
 cfengine run
 ```
 
-To get additional help:
+### CFEngine CLI help
 
-```
+```bash
 cfengine help
+```
+
+### CFEngine CLI version
+
+```bash
+cfengine run
+```
+
+### Automatically format source code
+
+```bash
+cfengine format
 ```
 
 ## Supported platforms and versions

@@ -36,13 +36,15 @@ def _get_arg_parser():
 
     subp.add_parser("help", help="Print help information")
 
-    subp.add_parser(
-        "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
-    )
+    subp.add_parser("format", help="Autoformat .json and .cf files")
 
     subp.add_parser(
         "report",
         help="Run the agent and hub commands necessary to get new reporting data",
+    )
+
+    subp.add_parser(
+        "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
     )
 
     subp.add_parser(
@@ -62,14 +64,16 @@ def get_args():
 def run_command_with_args(command, _) -> int:
     if not command:
         raise UserError("No command specified - try 'cfengine help'")
-    if command == "run":
-        return commands.run()
-    if command == "report":
-        return commands.report()
     if command == "help":
         return commands.help()
     if command == "version":
         return commands.version()
+    if command == "format":
+        return commands.format()
+    if command == "report":
+        return commands.report()
+    if command == "run":
+        return commands.run()
     raise UserError(f"Unknown command: '{command}'")
 
 
