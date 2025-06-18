@@ -8,13 +8,15 @@ TODO: This code needs several adjustments to better fit into
       the CFEngine CLI.
 """
 
-from cfbs.pretty import pretty_file
-from cfengine_cli.utils import UserError
+import os
 import json
 from shutil import which
-import markdown_it
-import os
 import subprocess
+
+import markdown_it
+from cfbs.pretty import pretty_file
+
+from cfengine_cli.utils import UserError
 
 
 IGNORED_DIRS = [".git"]
