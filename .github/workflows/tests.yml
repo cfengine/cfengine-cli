@@ -29,3 +29,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - run: |
+          git fetch --all --tags
+          pip install uv
+          uv lock --check
+          uv build
+          uv run pytest
