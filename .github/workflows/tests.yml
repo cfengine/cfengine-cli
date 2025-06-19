@@ -1,18 +1,14 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Tests
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_call:
-
 permissions:
   contents: read
-
 jobs:
   all-tests:
     runs-on: ubuntu-22.04
@@ -20,7 +16,6 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
     steps:
       - uses: actions/checkout@v3
         with:
@@ -29,9 +24,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: |
+      - name: Set up
+        run: |
           git fetch --all --tags
           pip install uv
+      - name: Run tests
+        run: |
           uv lock --check
-          uv build
           uv run pytest
+      - name: Run build
+        run: |
+          uv build

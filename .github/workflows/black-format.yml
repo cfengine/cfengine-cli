@@ -1,16 +1,12 @@
 name: Automatically format with Black and submit PR
-
 permissions:
   contents: read
   pull-requests: write
-
 on:
   push:
     branches:
       - main
-
   workflow_dispatch:
-
 jobs:
   format:
     runs-on: ubuntu-22.04
