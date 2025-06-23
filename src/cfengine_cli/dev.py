@@ -1,3 +1,4 @@
+import os
 from cfbs.commands import generate_release_information_command
 from cfengine_cli.utils import UserError
 from cfengine_cli.dependency_tables import update_dependency_tables
@@ -12,7 +13,10 @@ def _continue_prompt() -> bool:
     return answer in ("y", "yes")
 
 
-def _repo_notice(repo) -> bool:
+def _expect_repo(repo) -> bool:
+    cwd = os.getcwd()
+    if cwd.endswith(repo):
+        return True
     print(f"Note: This command is intended to be run in the {repo} repo")
     print(f"      https://github.com/cfengine/{repo}")
     answer = _continue_prompt()
@@ -20,28 +24,28 @@ def _repo_notice(repo) -> bool:
 
 
 def dependency_tables() -> int:
-    answer = _repo_notice("buildscripts")
+    answer = _expect_repo("buildscripts")
     if answer:
         return update_dependency_tables()
     return 1
 
 
 def docs_format() -> int:
-    answer = _repo_notice("documentation")
+    answer = _expect_repo("documentation")
     if answer:
         return update_docs()
     return 1
 
 
 def docs_check() -> int:
-    answer = _repo_notice("documentation")
+    answer = _expect_repo("documentation")
     if answer:
         return check_docs()
     return 1
 
 
 def release_information() -> int:
-    answer = _repo_notice("release-information")
+    answer = _expect_repo("release-information")
     if answer:
         generate_release_information_command()
         return 0
