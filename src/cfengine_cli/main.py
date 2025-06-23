@@ -59,7 +59,8 @@ def _get_arg_parser():
     )
     dev_subparsers = dev_parser.add_subparsers(dest="dev_command")
     dev_subparsers.add_parser("dependency-tables")
-    dev_subparsers.add_parser("docs-formatting")
+    dev_subparsers.add_parser("docs-format")
+    dev_subparsers.add_parser("docs-check")
     dev_subparsers.add_parser("release-information")
 
     return ap

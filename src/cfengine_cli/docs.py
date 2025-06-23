@@ -16,6 +16,7 @@ import subprocess
 import markdown_it
 from cfbs.pretty import pretty_file
 
+from cfengine_cli.markdowner import markdown_prettify
 from cfengine_cli.utils import UserError
 
 
@@ -118,6 +119,17 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line)
                 raise UserError(f"Couldn't run cf-promises on '{snippet_abs_path}'")
             except subprocess.TimeoutExpired:
                 raise UserError("Timed out")
+        case "json":
+            try:
+                with open(snippet_abs_path, "r") as f:
+                    json.loads(f.read())
+            except json.decoder.JSONDecodeError as e:
+                raise UserError(
+                    f"Unknown error when checking '{snippet_abs_path}': {str(e)}"
+                )
+            except Exception as e:
+                print(str(e))
+                raise UserError(f"Unknown error when checking '{snippet_abs_path}'")
 
 
 def fn_check_output():
@@ -245,18 +257,43 @@ def _markdown_code_checker(
                 )
             if cleanup:
                 os.remove(snippet_path)
+        if autoformat:
+            markdown_prettify(origin_path)
 
 
 def update_docs() -> int:
-    """Entry point to be called by other files
+    """
+    Iterate through entire docs repo (.), autoformatting all JSONs.
 
-    I.e. what is actually run when you do cfengine dev docs-formatting"""
+    Will be expanded to more types of formatting in the future.
+
+    Run by the command:
+    cfengine dev docs-format
+    """
     _markdown_code_checker(
         path=".",
         syntax_check=False,
         extract=True,
         replace=True,
         autoformat=True,
+        languages=["json"],
+        output_check=False,
+        cleanup=True,
+    )
+    return 0
+
+
+def check_docs() -> int:
+    """Entry point to be called by other files
+
+    Run by the command:
+    cfengine dev docs-checking"""
+    _markdown_code_checker(
+        path=".",
+        syntax_check=True,
+        extract=True,
+        replace=False,
+        autoformat=False,
         languages=["json"],
         output_check=False,
         cleanup=True,

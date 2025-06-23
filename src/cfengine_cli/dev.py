@@ -1,7 +1,7 @@
 from cfbs.commands import generate_release_information_command
 from cfengine_cli.utils import UserError
 from cfengine_cli.dependency_tables import update_dependency_tables
-from cfengine_cli.docs_formatting import update_docs
+from cfengine_cli.docs import update_docs, check_docs
 
 
 def _continue_prompt() -> bool:
@@ -26,10 +26,17 @@ def dependency_tables() -> int:
     return 1
 
 
-def docs_formatting() -> int:
+def docs_format() -> int:
     answer = _repo_notice("documentation")
     if answer:
         return update_docs()
+    return 1
+
+
+def docs_check() -> int:
+    answer = _repo_notice("documentation")
+    if answer:
+        return check_docs()
     return 1
 
 
@@ -44,8 +51,10 @@ def release_information() -> int:
 def dispatch_dev_subcommand(subcommand) -> int:
     if subcommand == "dependency-tables":
         return dependency_tables()
-    if subcommand == "docs-formatting":
-        return docs_formatting()
+    if subcommand == "docs-format":
+        return docs_format()
+    if subcommand == "docs-check":
+        return docs_check()
     if subcommand == "release-information":
         return release_information()
 
