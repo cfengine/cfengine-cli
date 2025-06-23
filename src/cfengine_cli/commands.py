@@ -34,9 +34,6 @@ def version() -> int:
 
 def build() -> int:
     r = build_command()
-    if r is None:
-        # Workaround for https://github.com/cfengine/cfbs/pull/231
-        return 0
     return r
 
 

@@ -41,11 +41,11 @@ wheels = [
 
 [[package]]
 name = "cfbs"
-version = "4.4.2"
+version = "4.4.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2a/df/5139eec992e301533102739d32152dc6656e25e01c233976fab6685dc80d/cfbs-4.4.2.tar.gz", hash = "sha256:da4ebca067c201163d5eac424835447dc547bb8bafbbb832d85f7137053f246b", size = 71647 }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/47/1af40e19a722a0b690d4eb254d1f88c3e0393f73777f2f112d98e9f2feac/cfbs-4.4.3.tar.gz", hash = "sha256:e213e42c9ba6b890b412ce4503fe3bb6d892ef9dec4f40942772bcdd6fb076c0", size = 71704 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/17/09cacd8570c964800c9abd79614a30b853a23c850e2ff84cb1f396ceba3e/cfbs-4.4.2-py3-none-any.whl", hash = "sha256:36ac40ff995b8fdbcaf88cea612c37e2cb50aac264099403ce4c5e0c7b5f3a54", size = 70351 },
+    { url = "https://files.pythonhosted.org/packages/96/4e/197e49bd93a9ef7d347504b9f9dbed1b0eb0c9072788d13136ae637f081d/cfbs-4.4.3-py3-none-any.whl", hash = "sha256:b37c8c59e65faae4ab017948e1636eff8d6da77293a7a9e37840572f84bcc172", size = 70426 },
 ]
 
 [[package]]
@@ -69,7 +69,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cf-remote", specifier = ">=0.6.4" },
-    { name = "cfbs", specifier = ">=4.4.2" },
+    { name = "cfbs", specifier = ">=4.4.3" },
     { name = "markdown-it-py", specifier = ">=3.0.0" },
     { name = "tree-sitter", specifier = ">=0.23" },
     { name = "tree-sitter-cfengine", specifier = ">=1.0.8" },
