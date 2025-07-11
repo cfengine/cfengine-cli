@@ -1,7 +1,10 @@
 import os
 from cfbs.commands import generate_release_information_command
 from cfengine_cli.utils import UserError
-from cfengine_cli.dependency_tables import update_dependency_tables
+from cfengine_cli.deptool import (
+    update_dependency_tables,
+    print_release_dependency_tables,
+)
 from cfengine_cli.docs import update_docs, check_docs
 
 
@@ -23,10 +26,17 @@ def _expect_repo(repo) -> bool:
     return answer
 
 
-def dependency_tables() -> int:
+def deps_readme() -> int:
     answer = _expect_repo("buildscripts")
     if answer:
         return update_dependency_tables()
+    return 1
+
+
+def deps_release(args) -> int:
+    answer = _expect_repo("buildscripts")
+    if answer:
+        return print_release_dependency_tables(args)
     return 1
 
 
@@ -52,9 +62,11 @@ def release_information() -> int:
     return 1
 
 
-def dispatch_dev_subcommand(subcommand) -> int:
-    if subcommand == "dependency-tables":
-        return dependency_tables()
+def dispatch_dev_subcommand(subcommand, args) -> int:
+    if subcommand == "deps-readme":
+        return deps_readme()
+    if subcommand == "deps-release":
+        return deps_release(args)
     if subcommand == "docs-format":
         return docs_format()
     if subcommand == "docs-check":

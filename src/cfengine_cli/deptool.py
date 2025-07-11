@@ -707,27 +707,34 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-
-    if args.compare and len(args.refs) % 2 == 1:
+def deptool(
+    compare,
+    refs,
+    repo_path,
+    no_info,
+    json_path,
+    cdx_sbom_path_template,
+    patch,
+    skip_unchanged,
+):
+    if compare and len(refs) % 2 == 1:
         log.warning("comparing with an odd number of versions")
 
-    dr = DepsReader(repo_path=args.repo_path, log_info=not args.no_info)
+    dr = DepsReader(repo_path=repo_path, log_info=not no_info)
 
-    if args.json_path:
-        dr.write_deps_json(args.json_path, args.refs)
+    if json_path:
+        dr.write_deps_json(json_path, refs)
 
-    if args.cdx_sbom_path_template:
-        dr.write_cdx_sboms(args.cdx_sbom_path_template, args.refs)
+    if cdx_sbom_path_template:
+        dr.write_cdx_sboms(cdx_sbom_path_template, refs)
 
-    if args.patch or not args.compare:
+    if patch or not compare:
         updated_readme, updated_agent_table, updated_hub_table = (
-            dr.updated_deps_markdown_table(args.refs)
+            dr.updated_deps_markdown_table(refs)
         )
 
-    if args.compare:
-        comparison_table = dr.comparison_md_table(args.refs, args.skip_unchanged)
+    if compare:
+        comparison_table = dr.comparison_md_table(refs, skip_unchanged)
         print(comparison_table)
     else:
         print("### Agent dependencies\n")
@@ -735,8 +742,51 @@ def main():
         print("\n### Enterprise Hub dependencies\n")
         print(updated_hub_table)
 
-    if args.patch:
+    if patch:
         dr.patch_readme(updated_readme)
+    return 0
+
+
+def main() -> int:
+    args = parse_args()
+    return deptool(
+        compare=args.compare,
+        refs=args.refs,
+        repo_path=args.repo_path,
+        no_info=args.no_info,
+        json_path=args.json_path,
+        cdx_sbom_path_template=args.cdx_sbom_path_template,
+        patch=args.patch,
+        skip_unchanged=args.skip_unchanged,
+    )
+
+
+def update_dependency_tables() -> int:
+    deptool(
+        compare=False,
+        refs=ACTIVE_BRANCHES,
+        repo_path=".",
+        no_info=False,
+        json_path=None,
+        cdx_sbom_path_template=None,
+        patch=True,
+        skip_unchanged=False,
+    )
+    return 0
+
+
+def print_release_dependency_tables(versions) -> int:
+    deptool(
+        compare=True,
+        refs=versions,
+        repo_path=".",
+        no_info=False,
+        json_path=None,
+        cdx_sbom_path_template=None,
+        patch=False,
+        skip_unchanged=True,
+    )
+    return 0
 
 
 if __name__ == "__main__":
