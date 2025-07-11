@@ -93,7 +93,7 @@ def run_command_with_args(args) -> int:
     if args.command == "run":
         return commands.run()
     if args.command == "dev":
-        return commands.dev(args.dev_command)
+        return commands.dev(args.dev_command, args)
     raise UserError(f"Unknown command: '{args.command}'")
 
 

@@ -89,5 +89,5 @@ def run() -> int:
     return 0
 
 
-def dev(subcommand) -> int:
-    return dispatch_dev_subcommand(subcommand)
+def dev(subcommand, args) -> int:
+    return dispatch_dev_subcommand(subcommand, args)

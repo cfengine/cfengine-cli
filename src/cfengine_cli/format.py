@@ -1,7 +1,5 @@
-import sys
 import tree_sitter_cfengine as tscfengine
-from typing import Generator
-from tree_sitter import Language, Parser, Node, Tree
+from tree_sitter import Language, Parser, Node
 from cfbs.pretty import pretty_file
 
 

@@ -1,3 +1,4 @@
+name: Publish
 # Taken from GH docs:
 on:
   release:

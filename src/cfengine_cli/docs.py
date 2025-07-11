@@ -45,6 +45,7 @@ def extract_inline_code(path, languages):
         flags = info_string[1:]
 
         if language in languages:
+            assert child.map is not None
             yield {
                 "language": language,
                 "flags": flags,
@@ -124,9 +125,7 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line)
                 with open(snippet_abs_path, "r") as f:
                     json.loads(f.read())
             except json.decoder.JSONDecodeError as e:
-                raise UserError(
-                    f"Unknown error when checking '{snippet_abs_path}': {str(e)}"
-                )
+                raise UserError(f"Error when checking '{snippet_abs_path}': {str(e)}")
             except Exception as e:
                 print(str(e))
                 raise UserError(f"Unknown error when checking '{snippet_abs_path}'")
@@ -215,7 +214,7 @@ def _markdown_code_checker(
                 cb["last_line"] += offset
 
             language = supported_languages[code_block["language"]]
-            snippet_path = f"{origin_path}.snippet-{i+1}.{language}"
+            snippet_path = f"{origin_path}.snippet-{i + 1}.{language}"
 
             if extract and "noextract" not in code_block["flags"]:
                 fn_extract(
@@ -227,13 +226,18 @@ def _markdown_code_checker(
                 )
 
             if syntax_check and "novalidate" not in code_block["flags"]:
-                fn_check_syntax(
-                    origin_path,
-                    snippet_path,
-                    language,
-                    code_block["first_line"],
-                    code_block["last_line"],
-                )
+                try:
+                    fn_check_syntax(
+                        origin_path,
+                        snippet_path,
+                        language,
+                        code_block["first_line"],
+                        code_block["last_line"],
+                    )
+                except Exception as e:
+                    if cleanup:
+                        os.remove(snippet_path)
+                    raise e
 
             if autoformat and "noautoformat" not in code_block["flags"]:
                 fn_autoformat(

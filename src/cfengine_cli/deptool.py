@@ -95,11 +95,15 @@ class GitRepo:
         log_info=True,
     ):
         """
-        Creates an instance of the class for a Git repository in a given path, cloning from GitHub if the path doesn't exist, then configures it and optionally checks out a requested ref (branch or tag). Arguments:
-        * `repo_path`: local filesystem path of the Git repository, or of the GitHub repository to clone
+        Creates an instance of the class for a Git repository in a given path,
+        cloning from GitHub if the path doesn't exist, then configures it and
+        optionally checks out a requested ref (branch or tag). Arguments:
+        * `repo_path`: local filesystem path of the Git repository, or of the
+                       GitHub repository to clone
         * `repo_owner`: name of owner of the GitHub repository to clone
         * `repo_name`: name of GitHub repository to clone
-        * `checkout_ref`: optional name of ref to checkout. If not provided, a ref from previous work might be left checked out.
+        * `checkout_ref`: optional name of ref to checkout. If not provided,
+                          a ref from previous work might be left checked out.
         """
         self.repo_path = repo_path
 
@@ -128,7 +132,9 @@ class GitRepo:
             self.checkout(checkout_ref)
 
     def run_command(self, *command, **kwargs):
-        """Runs a git command in the Git repository. Syntactically this function tries to be as close to `subprocess.run` as possible, just adding `"git"` with some extra parameters at the beginning."""
+        """Runs a git command in the Git repository. Syntactically this
+        function tries to be as close to `subprocess.run` as possible,
+        just adding `"git"` with some extra parameters at the beginning."""
         git_command = [
             "git",
             "-C",
@@ -286,11 +292,12 @@ class DepsReader:
             match = re.search("-([0-9a-z.]*).tar", filename)
             if not match:
                 match = re.search("_([0-9a-z_]*).tar", filename)
+            assert match is not None
             version = match.group(1)
         elif dep == "pthreads-w32":
-            version = re.search("w32-([0-9-]*)-rel", filename).group(1)
+            version = re.search("w32-([0-9-]*)-rel", filename).group(1)  # type: ignore
         else:
-            version = re.search(r"[-_]([0-9.]*)[\.-]", filename).group(1)
+            version = re.search(r"[-_]([0-9.]*)[\.-]", filename).group(1)  # type: ignore
         return version
 
     def get_current_version(self, dep):
@@ -325,7 +332,9 @@ class DepsReader:
         return deps_versions
 
     def deps_dict(self, refs):
-        """Returns a 2D dictionary of dependencies and versions from all refs: `deps_dict[dep][ref] = version`, as well as a dictionary of widths of each column (ref)."""
+        """Returns a 2D dictionary of dependencies and versions from all refs:
+        `deps_dict[dep][ref] = version`, as well as a dictionary of widths of
+        each column (ref)."""
 
         deps_dict = {}
         ref_column_widths = {}
@@ -335,7 +344,7 @@ class DepsReader:
             deps_versions = self.deps_versions(ref)
 
             for dep in deps_versions:
-                if not dep in deps_dict:
+                if dep not in deps_dict:
                     deps_dict[dep] = collections.defaultdict(lambda: "-")
                 deps_dict[dep][ref] = deps_versions[dep]
                 ref_column_widths[ref] = max(
@@ -345,7 +354,10 @@ class DepsReader:
         return deps_dict, ref_column_widths
 
     def updated_deps_markdown_table(self, refs):
-        """Code from bot-tom's `depstable` that processes the README table directly, returning the updated README. The updated README will not contain dependencies that were not in the README beforehand, and will not automatically remove dependencies that no longer exist."""
+        """Code from bot-tom's `depstable` that processes the README table
+        directly, returning the updated README. The updated README will not
+        contain dependencies that were not in the README beforehand, and
+        will not automatically remove dependencies that no longer exist."""
         updated_hub_table_lines = []
         updated_agent_table_lines = []
 
@@ -356,6 +368,7 @@ class DepsReader:
         readme_lines = readme_file.split("\n")
         has_notes = False  # flag to say that we're in a table that has "Notes" column
         in_hub = False  # flag that we're in Hub section
+        column_widths = None
         for i, line in enumerate(readme_lines):
             if " Hub " in line:
                 in_hub = True
@@ -395,6 +408,7 @@ class DepsReader:
                     + " |"
                 )
             elif line.startswith("| :-"):
+                assert column_widths is not None
                 line = (
                     "| "
                     + (" | ".join((":" + "-" * (width - 1) for width in column_widths)))
@@ -423,6 +437,7 @@ class DepsReader:
                         line,
                     )
                     deps_dict[dep] = collections.defaultdict(lambda: "-")
+                note = None
                 if has_notes:
                     note = re.search(r"\| ([^|]*) \|$", line)
                     if not note:
@@ -432,11 +447,13 @@ class DepsReader:
                         note = note.group(1)
                 if in_hub:
                     dep = re.sub("-hub$", "", dep)
+                assert note is not None
                 row = (
                     ["[%s](%s)" % (dep_title, url)]
                     + [deps_dict[dep][ref] for ref in refs]
                     + ([note] if has_notes else [])
                 )
+                assert column_widths is not None
                 line = (
                     "| "
                     + (
@@ -562,7 +579,7 @@ class DepsReader:
 
         deps_name_urllink_mapping = {
             d: (
-                "[" + HUMAN_NAME.get(d, d) + "](" + HOME_URL[d] + ")"
+                "[" + HUMAN_NAME.get(d, d) + "](" + HOME_URL[d] + ")"  # type: ignore
                 if d in HOME_URL
                 else HUMAN_NAME.get(d, d)
             )
@@ -728,6 +745,10 @@ def deptool(
     if cdx_sbom_path_template:
         dr.write_cdx_sboms(cdx_sbom_path_template, refs)
 
+    updated_readme = None
+    updated_agent_table = None
+    updated_hub_table = None
+
     if patch or not compare:
         updated_readme, updated_agent_table, updated_hub_table = (
             dr.updated_deps_markdown_table(refs)
@@ -738,8 +759,10 @@ def deptool(
         print(comparison_table)
     else:
         print("### Agent dependencies\n")
+        assert updated_agent_table is not None
         print(updated_agent_table)
         print("\n### Enterprise Hub dependencies\n")
+        assert updated_hub_table is not None
         print(updated_hub_table)
 
     if patch:
