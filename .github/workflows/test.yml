@@ -10,8 +10,8 @@ on:
 permissions:
   contents: read
 jobs:
-  all-tests:
-    runs-on: ubuntu-22.04
+  test:
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: true
       matrix:
