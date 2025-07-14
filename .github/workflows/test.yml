@@ -28,10 +28,23 @@ jobs:
         run: |
           git fetch --all --tags
           pip install uv
-      - name: Run tests
+      - name: Python unit tests
         run: |
           uv lock --check
           uv run pytest
       - name: Run build
         run: |
           uv build
+      - name: Install
+        run: |
+          uv venv
+          uv pip install -r requirements.txt
+          uv pip install .
+      - name: Shell tests
+        run: |
+          source .venv/bin/activate
+          bash tests/run-shell-tests.sh
+      - name: Format tests
+        run: |
+          source .venv/bin/activate
+          bash tests/run-format-tests.sh
