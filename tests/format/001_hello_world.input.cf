@@ -1,5 +1,1 @@
-bundle agent main
-{
-  reports:
-    "Hello, world!";
-}
+bundle agent main {reports:"Hello, world!";}
