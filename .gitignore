@@ -8,3 +8,5 @@ __pycache__
 .DS_STORE
 .pytest_cache
 /out/
+/tmp/
+*.log
