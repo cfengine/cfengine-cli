@@ -1,0 +1,32 @@
+# This shows some basics of policy language, without getting
+# too deep into edge cases and wrappting etc.
+
+body common control
+{
+  inputs => {"/var/cfengine/inputs/some_file.cf"};
+  linux::
+    inputs => {"/var/cfengine/inputs/other_file.cf"};
+}
+
+promise agent example
+{
+  interpreter => "/usr/bin/python3";
+  linux::
+    path => "/var/cfengine/inputs/modules/promises/git.py";
+  windows::
+    path => "C:\Program files\Cfengine\inputs\modules\promises\git.py";
+}
+
+bundle agent main
+{
+  vars:
+    # Comment before promise
+    "foo"
+      if => "bar"
+      string => "some_value";
+    baz::
+      "bam"
+        if => "bar"
+        # Comment at atttribute level
+        string => "some_value";
+}

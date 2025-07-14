@@ -1,0 +1,119 @@
+bundle agent strings
+{
+  vars:
+    # Single-line promises are allowed, as long as there is only 1 attribute,
+    # and the whole promise fits in less than 80 chars.
+    "some_variable_name" string => "some_long_variable_value_but_not_past_80";
+
+    # Split attribute to separate line if we go over 80:
+    "some_variable_name"
+      string => "some_other_variable_value_which_would go_past_80";
+
+    # Also split to separate lines if more than one attribute:
+    "some_variable_name"
+      if => "any",
+      string => "some_long_variable_value_but_not_past_80";
+
+    "some_variable_name"
+      string => "sometimes strings are just too long and we cannot do anything about it, leave them as is";
+}
+
+bundle agent slists
+{
+  vars:
+    "variable_name" slist => {"one", "two", "three", "four", "five", "six"};
+
+    "variable_name"
+      slist => {"one", "two", "three", "four", "five", "six", "seven"};
+
+    "variable_name"
+      slist => {
+        "one", "two", "three", "four", "five", "six", "seven", "eight"
+      };
+
+    "variable_name"
+      slist => {
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "ten",
+        "eleven",
+      };
+}
+
+bundle agent function_calls
+{
+  vars:
+    "variable_name" string => concat("one", "two", "three", "four", "five");
+
+    "variable_name"
+      string => concat("one", "two", "three", "four", "five", "six");
+
+    "variable_name"
+      string => concat(
+        "one", "two", "three", "four", "five", "six", "seven", "eight"
+      );
+
+    "variable_name"
+      string => concat(
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+      );
+}
+
+bundle agent nested_function_calls
+{
+  vars:
+    "variable_name" string => concat("one", concat("two", "three", "four"));
+
+    "variable_name"
+      string => concat("one", concat("two", "three", "four", "five"));
+
+    "variable_name"
+      string => concat(
+        "one", concat("two", "three", "four", "five", "six", "seven")
+      );
+
+    "variable_name"
+      string => concat(
+        "one",
+        concat("two", "three", "four", "five", "six", "seven", "eight", ""),
+      );
+
+    "variable_name"
+      string => concat(
+        "one",
+        concat(
+          "two", "three", "four", "five", "six", "seven", "eight", "nine", ""
+        ),
+      );
+
+    "variable_name"
+      string => concat(
+        "one",
+        concat(
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "eight",
+          "nine",
+          "ten",
+        ),
+      );
+}
