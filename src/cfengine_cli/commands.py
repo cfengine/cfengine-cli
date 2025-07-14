@@ -1,10 +1,15 @@
+import sys
 import os
 from cfengine_cli.dev import dispatch_dev_subcommand
 from cfengine_cli.lint import lint_cfbs_json, lint_json, lint_policy_file
 from cfengine_cli.shell import user_command
 from cfengine_cli.paths import bin
 from cfengine_cli.version import cfengine_cli_version_string
-from cfengine_cli.format import format_policy_file, format_json_file
+from cfengine_cli.format import (
+    format_policy_file,
+    format_json_file,
+    format_policy_fin_fout,
+)
 from cfengine_cli.utils import UserError
 from cfbs.utils import find
 from cfbs.commands import build_command
@@ -42,15 +47,47 @@ def deploy() -> int:
     return r
 
 
-def format() -> int:
-    for filename in find(".", extension=".json"):
-        if filename.startswith("./."):
-            continue
+def _format_filename(filename):
+    if filename.startswith("./."):
+        return
+    if filename.endswith(".json"):
         format_json_file(filename)
-    for policy_file in find(".", extension=".cf"):
-        if policy_file.startswith("./."):
+        return
+    if filename.endswith(".cf"):
+        format_policy_file(filename)
+        return
+    raise UserError(f"Unrecognized file format: {filename}")
+
+
+def _format_dirname(directory):
+    for filename in find(directory, extension=".json"):
+        _format_filename(filename)
+    for filename in find(directory, extension=".cf"):
+        _format_filename(filename)
+
+
+def format(args) -> int:
+    if not args:
+        _format_dirname(".")
+        return 0
+    if len(args) == 1 and args[0] == "-":
+        # Special case, format policy file from stdin to stdout
+        format_policy_fin_fout(sys.stdin, sys.stdout)
+        return 0
+
+    for arg in args:
+        if arg == "-":
+            raise UserError(
+                "The - argument has a special meaning and cannot be combined with other paths"
+            )
+        if not os.path.exists(arg):
+            raise UserError(f"{arg} does not exist")
+        if os.path.isfile(arg):
+            _format_filename(arg)
             continue
-        format_policy_file(policy_file)
+        if os.path.isdir(arg):
+            _format_dirname(arg)
+            continue
     return 0
 
 

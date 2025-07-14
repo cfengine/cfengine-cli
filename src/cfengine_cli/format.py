@@ -223,3 +223,20 @@ def format_policy_file(filename):
         with open(filename, "w") as f:
             f.write(new_data)
         print(f"Policy file '{filename}' was reformatted")
+
+
+def format_policy_fin_fout(fin, fout):
+    PY_LANGUAGE = Language(tscfengine.language())
+    parser = Parser(PY_LANGUAGE)
+
+    macro_indent = 0
+    fmt = Formatter()
+    original_data = fin.read().encode("utf-8")
+    tree = parser.parse(original_data)
+
+    root_node = tree.root_node
+    assert root_node.type == "source_file"
+    autoformat(root_node, fmt, macro_indent)
+
+    new_data = fmt.buffer + "\n"
+    fout.write(new_data)
