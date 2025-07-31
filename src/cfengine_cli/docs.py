@@ -22,12 +22,17 @@ from cfengine_cli.utils import UserError
 
 IGNORED_DIRS = [".git"]
 
+def count_indent(string: str) -> int:
+    stripped = string.lstrip(" ")
+    return len(string) - len(stripped)
 
 def extract_inline_code(path, languages):
     """extract inline code, language and filters from markdown"""
 
     with open(path, "r") as f:
         content = f.read()
+
+    lines = content.split("\n")
 
     md = markdown_it.MarkdownIt("commonmark")
     ast = md.parse(content)
@@ -44,15 +49,23 @@ def extract_inline_code(path, languages):
         language = info_string[0]
         flags = info_string[1:]
         if flags and flags[0][0] == "{" and flags[-1][-1] == "}":
-                flags[0] = flags[0][1:]
-                flags[-1] = flags[-1][0:-1]
+            flags[0] = flags[0][1:]
+            flags[-1] = flags[-1][0:-1]
         if language in languages:
             assert child.map is not None
+            # Index of first line to include, the triple backtick fence:
+            first_line = child.map[0]
+            # The first line is triple backticks preceded by some spaces, count those:
+            indent = count_indent(lines[first_line])
+            # Index of first line to NOT include, the line after closing triple backtick:
+            last_line = child.map[1]
             yield {
                 "language": language,
                 "flags": flags,
                 "first_line": child.map[0],
                 "last_line": child.map[1],
+                "indent": indent,
+                "lines": lines[first_line:last_line] # Includes backtick fences on both sides
             }
 
 
@@ -137,7 +150,7 @@ def fn_check_output():
     pass
 
 
-def fn_replace(origin_path, snippet_path, _language, first_line, last_line):
+def fn_replace(origin_path, snippet_path, _language, first_line, last_line, indent):
     try:
         with open(snippet_path, "r") as f:
             pretty_content = f.read().strip()
@@ -145,6 +158,8 @@ def fn_replace(origin_path, snippet_path, _language, first_line, last_line):
         with open(origin_path, "r") as f:
             origin_lines = f.read().split("\n")
             pretty_lines = pretty_content.split("\n")
+
+            pretty_lines = [" " * indent + x for x in pretty_lines]
 
             offset = len(pretty_lines) - len(
                 origin_lines[first_line + 1 : last_line - 1]
@@ -264,6 +279,7 @@ def _markdown_code_checker(
                     language,
                     code_block["first_line"],
                     code_block["last_line"],
+                    code_block["indent"],
                 )
             if cleanup:
                 os.remove(snippet_path)
