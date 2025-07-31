@@ -43,7 +43,9 @@ def extract_inline_code(path, languages):
         info_string = child.info.split()
         language = info_string[0]
         flags = info_string[1:]
-
+        if flags and flags[0][0] == "{" and flags[-1][-1] == "}":
+                flags[0] = flags[0][1:]
+                flags[-1] = flags[-1][0:-1]
         if language in languages:
             assert child.map is not None
             yield {
