@@ -22,9 +22,11 @@ from cfengine_cli.utils import UserError
 
 IGNORED_DIRS = [".git"]
 
+
 def count_indent(string: str) -> int:
     stripped = string.lstrip(" ")
     return len(string) - len(stripped)
+
 
 def extract_inline_code(path, languages):
     """extract inline code, language and filters from markdown"""
@@ -65,7 +67,9 @@ def extract_inline_code(path, languages):
                 "first_line": child.map[0],
                 "last_line": child.map[1],
                 "indent": indent,
-                "lines": lines[first_line:last_line] # Includes backtick fences on both sides
+                "lines": lines[
+                    first_line:last_line
+                ],  # Includes backtick fences on both sides
             }
 
 
