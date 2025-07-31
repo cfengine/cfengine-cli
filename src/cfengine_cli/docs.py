@@ -218,7 +218,11 @@ def _markdown_code_checker(
             language = supported_languages[code_block["language"]]
             snippet_path = f"{origin_path}.snippet-{i + 1}.{language}"
 
-            if extract and "noextract" not in code_block["flags"]:
+            flags = code_block["flags"]
+            if "noextract" in flags or "skip" in flags:
+                # code block was marked to be skipped
+                continue
+            if extract:
                 fn_extract(
                     origin_path,
                     snippet_path,
