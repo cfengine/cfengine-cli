@@ -99,7 +99,7 @@ def _walk(filename, lines, node) -> int:
 
 def lint_policy_file(filename):
     assert os.path.isfile(filename)
-    assert filename.endswith(".cf")
+    assert filename.endswith((".cf", ".cfengine3", ".cf3", ".cf.sub"))
     PY_LANGUAGE = Language(tscfengine.language())
     parser = Parser(PY_LANGUAGE)
 

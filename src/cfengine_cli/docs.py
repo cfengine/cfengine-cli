@@ -16,6 +16,7 @@ import subprocess
 import markdown_it
 from cfbs.pretty import pretty_file
 
+from cfengine_cli.lint import lint_policy_file
 from cfengine_cli.utils import UserError
 
 
@@ -119,25 +120,9 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line)
 
     match language:
         case "cf":
-            try:
-                p = subprocess.run(
-                    ["/var/cfengine/bin/cf-promises", snippet_abs_path],
-                    capture_output=True,
-                    text=True,
-                )
-                err = p.stderr
-
-                if err:
-                    err = err.replace(snippet_abs_path, f"{origin_path}:{first_line}")
-                    print(err)
-            except OSError:
-                raise UserError(f"'{snippet_abs_path}' doesn't exist")
-            except ValueError:
-                raise UserError("Invalid subprocess arguments")
-            except subprocess.CalledProcessError:
-                raise UserError(f"Couldn't run cf-promises on '{snippet_abs_path}'")
-            except subprocess.TimeoutExpired:
-                raise UserError("Timed out")
+            r = lint_policy_file(snippet_abs_path)
+            if r != 0:
+                raise UserError(f"Error when checking '{snippet_abs_path}'")
         case "json":
             try:
                 with open(snippet_abs_path, "r") as f:
@@ -206,14 +191,6 @@ def _process_markdown_code_blocks(
 
     if not os.path.exists(path):
         raise UserError("This path doesn't exist")
-
-    # TODO: Switch to tree-sitter parser here:
-    if (
-        syntax_check
-        and "cf3" in languages
-        and not which("/var/cfengine/bin/cf-promises")
-    ):
-        raise UserError("cf-promises is not installed")
 
     for language in languages:
         if language not in supported_languages:
