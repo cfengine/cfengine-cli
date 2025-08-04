@@ -199,14 +199,15 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
                 raise UserError(f"Invalid json in '{snippet_path}'")
 
 
-def _markdown_code_checker(
-    path, syntax_check, extract, replace, autoformat, languages, output_check, cleanup
+def _process_markdown_code_blocks(
+    path, languages, extract, syntax_check, output_check, autoformat, replace, cleanup
 ):
     supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
 
     if not os.path.exists(path):
         raise UserError("This path doesn't exist")
 
+    # TODO: Switch to tree-sitter parser here:
     if (
         syntax_check
         and "cf3" in languages
@@ -263,6 +264,9 @@ def _markdown_code_checker(
                         os.remove(snippet_path)
                     raise e
 
+            if output_check and "noexecute" not in code_block["flags"]:
+                fn_check_output()
+
             if autoformat and "noautoformat" not in code_block["flags"]:
                 fn_autoformat(
                     origin_path,
@@ -271,9 +275,6 @@ def _markdown_code_checker(
                     code_block["first_line"],
                     code_block["last_line"],
                 )
-
-            if output_check and "noexecute" not in code_block["flags"]:
-                fn_check_output()
 
             if replace and "noreplace" not in code_block["flags"]:
                 offset = fn_replace(
@@ -332,14 +333,14 @@ def update_docs() -> int:
     print("Formatting markdown files with prettier...")
     _run_prettier()
     print("Formatting markdown code blocks according to our rules...")
-    _markdown_code_checker(
+    _process_markdown_code_blocks(
         path=".",
-        syntax_check=False,
+        languages=["json"], # TODO: Add cfengine3 here
         extract=True,
-        replace=True,
-        autoformat=True,
-        languages=["json"],
+        syntax_check=False,
         output_check=False,
+        autoformat=True,
+        replace=True,
         cleanup=True,
     )
     return 0
@@ -351,15 +352,15 @@ def check_docs() -> int:
     Currently only JSON syntax checking.
 
     Run by the command:
-    cfengine dev docs-checking"""
-    _markdown_code_checker(
+    cfengine dev docs-check"""
+    _process_markdown_code_blocks(
         path=".",
-        syntax_check=True,
-        extract=True,
-        replace=False,
-        autoformat=False,
         languages=["json"],
+        extract=True,
+        syntax_check=True,
         output_check=False,
+        autoformat=False,
+        replace=False,
         cleanup=True,
     )
     return 0
