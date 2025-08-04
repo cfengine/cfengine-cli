@@ -327,8 +327,11 @@ def update_docs() -> int:
     Run by the command:
     cfengine dev docs-format
     """
+    print("Formatting python files with black...")
     _run_black()
+    print("Formatting markdown files with prettier...")
     _run_prettier()
+    print("Formatting markdown code blocks according to our rules...")
     _markdown_code_checker(
         path=".",
         syntax_check=False,
