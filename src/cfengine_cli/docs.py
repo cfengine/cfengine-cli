@@ -299,7 +299,7 @@ def _run_black():
             cwd=path,
         )
     except:
-        raise UserError("Encountered an error running prettier")
+        raise UserError("Encountered an error running black")
 
 
 def _run_prettier():
