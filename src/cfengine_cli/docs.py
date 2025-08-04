@@ -299,7 +299,7 @@ def _run_black():
             cwd=path,
         )
     except:
-        raise UserError("Encountered an error running black")
+        raise UserError("Encountered an error running black\nInstall: pipx install black")
 
 
 def _run_prettier():
@@ -314,7 +314,7 @@ def _run_prettier():
             cwd=path,
         )
     except:
-        raise UserError("Encountered an error running prettier")
+        raise UserError("Encountered an error running prettier\nInstall: npm install --global prettier")
 
 def update_docs() -> int:
     """
