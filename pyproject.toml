@@ -15,6 +15,7 @@ dependencies = [
     "tree-sitter-cfengine>=1.0.8",
     "tree-sitter>=0.23",
     "markdown-it-py>=3.0.0",
+    "black>=25.1.0",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",

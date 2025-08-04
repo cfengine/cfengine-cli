@@ -16,7 +16,6 @@ import subprocess
 import markdown_it
 from cfbs.pretty import pretty_file
 
-from cfengine_cli.markdowner import markdown_prettify
 from cfengine_cli.utils import UserError
 
 
@@ -287,19 +286,49 @@ def _markdown_code_checker(
                 )
             if cleanup:
                 os.remove(snippet_path)
-        if autoformat:
-            markdown_prettify(origin_path)
 
+def _run_black():
+    path = "."
+    assert os.path.isdir(path)
+    try:
+        subprocess.run(
+            ["black", path],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=path,
+        )
+    except:
+        raise UserError("Encountered an error running prettier")
+
+
+def _run_prettier():
+    path = "."
+    assert os.path.isdir(path)
+    try:
+        subprocess.run(
+            ["prettier", "--write", "**.markdown", "**.md"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=path,
+        )
+    except:
+        raise UserError("Encountered an error running prettier")
 
 def update_docs() -> int:
     """
-    Iterate through entire docs repo (.), autoformatting all JSONs.
-
-    Will be expanded to more types of formatting in the future.
+    Iterate through entire docs repo (.), autoformatting as much as possible:
+    - python code with black
+    - markdown files with prettier
+    - code blocks inside markdown files are formatted for the formats supported by prettier
+    - JSON code blocks are re-formatted by cfbs pretty (we plan to expand this to CFEngine code blocks)
 
     Run by the command:
     cfengine dev docs-format
     """
+    _run_black()
+    _run_prettier()
     _markdown_code_checker(
         path=".",
         syntax_check=False,
@@ -314,7 +343,9 @@ def update_docs() -> int:
 
 
 def check_docs() -> int:
-    """Entry point to be called by other files
+    """
+    Run checks / tests on docs.
+    Currently only JSON syntax checking.
 
     Run by the command:
     cfengine dev docs-checking"""
