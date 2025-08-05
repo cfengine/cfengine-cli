@@ -10,7 +10,6 @@ TODO: This code needs several adjustments to better fit into
 
 import os
 import json
-from shutil import which
 import subprocess
 
 import markdown_it
