@@ -97,11 +97,17 @@ def _walk(filename, lines, node) -> int:
     return errors
 
 
-def lint_policy_file(filename, original_filename=None, original_line=None, snippet=None):
+def lint_policy_file(
+    filename, original_filename=None, original_line=None, snippet=None
+):
     assert original_filename is None or type(original_filename) is str
     assert original_line is None or type(original_line) is int
     assert snippet is None or type(snippet) is int
-    if original_filename is not None or original_line is not None or snippet is not None:
+    if (
+        original_filename is not None
+        or original_line is not None
+        or snippet is not None
+    ):
         assert original_filename and os.path.isfile(original_filename)
         assert original_line and original_line > 0
         assert snippet and snippet > 0
@@ -121,7 +127,9 @@ def lint_policy_file(filename, original_filename=None, original_line=None, snipp
     if not root_node.children:
         if snippet:
             assert original_filename and original_line
-            print(f"Error: Empty policy snippet {snippet} at '{original_filename}:{original_line}'")
+            print(
+                f"Error: Empty policy snippet {snippet} at '{original_filename}:{original_line}'"
+            )
         else:
             print(f"Error: Empty policy file '{filename}'")
         errors += 1

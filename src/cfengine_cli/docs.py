@@ -110,7 +110,9 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
         raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
 
-def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line, snippet_number):
+def fn_check_syntax(
+    origin_path, snippet_path, language, first_line, _last_line, snippet_number
+):
     snippet_abs_path = os.path.abspath(snippet_path)
 
     if not os.path.exists(snippet_path):
@@ -120,7 +122,9 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line,
 
     match language:
         case "cf":
-            r = lint_policy_file(snippet_abs_path, origin_path, first_line + 1, snippet_number)
+            r = lint_policy_file(
+                snippet_abs_path, origin_path, first_line + 1, snippet_number
+            )
             if r != 0:
                 raise UserError(f"Error when checking '{origin_path}'")
         case "json":
@@ -183,6 +187,7 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
             except json.decoder.JSONDecodeError:
                 raise UserError(f"Invalid json in '{snippet_path}'")
 
+
 def _translate_language(x):
     if x == "cf3" or x == "cfengine3":
         return "cf"
@@ -192,6 +197,7 @@ def _translate_language(x):
 
 
 SUPPORTED_LANGUAGES = ["cf", "cfengine3", "cf3", "json", "yml", "yaml"]
+
 
 def _process_markdown_code_blocks(
     path, languages, extract, syntax_check, output_check, autoformat, replace, cleanup
@@ -282,6 +288,7 @@ def _process_markdown_code_blocks(
             if cleanup:
                 os.remove(snippet_path)
 
+
 def _run_black():
     path = "."
     assert os.path.isdir(path)
@@ -294,7 +301,9 @@ def _run_black():
             cwd=path,
         )
     except:
-        raise UserError("Encountered an error running black\nInstall: pipx install black")
+        raise UserError(
+            "Encountered an error running black\nInstall: pipx install black"
+        )
 
 
 def _run_prettier():
@@ -309,7 +318,10 @@ def _run_prettier():
             cwd=path,
         )
     except:
-        raise UserError("Encountered an error running prettier\nInstall: npm install --global prettier")
+        raise UserError(
+            "Encountered an error running prettier\nInstall: npm install --global prettier"
+        )
+
 
 def update_docs() -> int:
     """
@@ -329,7 +341,7 @@ def update_docs() -> int:
     print("Formatting markdown code blocks according to our rules...")
     _process_markdown_code_blocks(
         path=".",
-        languages=["json"], # TODO: Add cfengine3 here
+        languages=["json"],  # TODO: Add cfengine3 here
         extract=True,
         syntax_check=False,
         output_check=False,
