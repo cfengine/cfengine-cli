@@ -110,7 +110,7 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
         raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
 
-def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line):
+def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line, snippet_number):
     snippet_abs_path = os.path.abspath(snippet_path)
 
     if not os.path.exists(snippet_path):
@@ -120,9 +120,9 @@ def fn_check_syntax(origin_path, snippet_path, language, first_line, _last_line)
 
     match language:
         case "cf":
-            r = lint_policy_file(snippet_abs_path)
+            r = lint_policy_file(snippet_abs_path, origin_path, first_line + 1, snippet_number)
             if r != 0:
-                raise UserError(f"Error when checking '{snippet_abs_path}'")
+                raise UserError(f"Error when checking '{origin_path}'")
         case "json":
             try:
                 with open(snippet_abs_path, "r") as f:
@@ -183,19 +183,34 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
             except json.decoder.JSONDecodeError:
                 raise UserError(f"Invalid json in '{snippet_path}'")
 
+def _translate_language(x):
+    if x == "cf3" or x == "cfengine3":
+        return "cf"
+    if x == "yaml":
+        return "yml"
+    return x
+
+
+SUPPORTED_LANGUAGES = ["cf", "cfengine3", "cf3", "json", "yml", "yaml"]
 
 def _process_markdown_code_blocks(
     path, languages, extract, syntax_check, output_check, autoformat, replace, cleanup
 ):
-    supported_languages = {"cf3": "cf", "json": "json", "yaml": "yml"}
-
     if not os.path.exists(path):
         raise UserError("This path doesn't exist")
 
+    languages = set(languages)
+    if "cf3" in languages or "cf" in languages or "cfengine3" in languages:
+        languages.add("cf3")
+        languages.add("cfengine3")
+        languages.add("cf")
+    if "yaml" in languages or "yml" in languages:
+        languages.add("yml")
+        languages.add("yaml")
     for language in languages:
-        if language not in supported_languages:
+        if language not in SUPPORTED_LANGUAGES:
             raise UserError(
-                f"Unsupported language '{language}'. The supported languages are: {", ".join(supported_languages.keys())}"
+                f"Unsupported language '{language}'. The supported languages are: {", ".join(SUPPORTED_LANGUAGES)}"
             )
 
     parsed_markdowns = get_markdown_files(path, languages)
@@ -211,8 +226,9 @@ def _process_markdown_code_blocks(
                 cb["first_line"] += offset
                 cb["last_line"] += offset
 
-            language = supported_languages[code_block["language"]]
-            snippet_path = f"{origin_path}.snippet-{i + 1}.{language}"
+            language = _translate_language(code_block["language"])
+            snippet_number = i + 1
+            snippet_path = f"{origin_path}.snippet-{snippet_number}.{language}"
 
             flags = code_block["flags"]
             if "noextract" in flags or "skip" in flags:
@@ -235,6 +251,7 @@ def _process_markdown_code_blocks(
                         language,
                         code_block["first_line"],
                         code_block["last_line"],
+                        snippet_number,
                     )
                 except Exception as e:
                     if cleanup:
@@ -332,7 +349,7 @@ def check_docs() -> int:
     cfengine dev docs-check"""
     _process_markdown_code_blocks(
         path=".",
-        languages=["json"],
+        languages=["json", "cf3"],
         extract=True,
         syntax_check=True,
         output_check=False,

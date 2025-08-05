@@ -97,7 +97,14 @@ def _walk(filename, lines, node) -> int:
     return errors
 
 
-def lint_policy_file(filename):
+def lint_policy_file(filename, original_filename=None, original_line=None, snippet=None):
+    assert original_filename is None or type(original_filename) is str
+    assert original_line is None or type(original_line) is int
+    assert snippet is None or type(snippet) is int
+    if original_filename is not None or original_line is not None or snippet is not None:
+        assert original_filename and os.path.isfile(original_filename)
+        assert original_line and original_line > 0
+        assert snippet and snippet > 0
     assert os.path.isfile(filename)
     assert filename.endswith((".cf", ".cfengine3", ".cf3", ".cf.sub"))
     PY_LANGUAGE = Language(tscfengine.language())
@@ -112,12 +119,24 @@ def lint_policy_file(filename):
     assert root_node.type == "source_file"
     errors = 0
     if not root_node.children:
-        print(f"Error: Empty policy file '{filename}'")
+        if snippet:
+            assert original_filename and original_line
+            print(f"Error: Empty policy snippet {snippet} at '{original_filename}:{original_line}'")
+        else:
+            print(f"Error: Empty policy file '{filename}'")
         errors += 1
     errors += _walk(filename, lines, root_node)
     if errors == 0:
-        print(f"PASS: {filename}")
+        if snippet:
+            assert original_filename and original_line
+            print(f"PASS: Snippet {snippet} at '{original_filename}:{original_line}'")
+        else:
+            print(f"PASS: {filename}")
         return 0
 
-    print(f"FAIL: {filename} ({errors} error{'s' if errors > 0 else ''})")
+    if snippet:
+        assert original_filename and original_line
+        print(f"FAIL: Snippet {snippet} at '{original_filename}:{original_line}'")
+    else:
+        print(f"FAIL: {filename} ({errors} error{'s' if errors > 0 else ''})")
     return errors
