@@ -67,7 +67,7 @@ requires-dist = [
     { name = "cfbs", specifier = ">=4.4.3" },
     { name = "markdown-it-py", specifier = ">=3.0.0" },
     { name = "tree-sitter", specifier = ">=0.25" },
-    { name = "tree-sitter-cfengine", specifier = ">=1.0.10" },
+    { name = "tree-sitter-cfengine", specifier = ">=1.0.11" },
 ]
 
 [package.metadata.requires-dev]
@@ -362,17 +362,17 @@ wheels = [
 
 [[package]]
 name = "tree-sitter-cfengine"
-version = "1.0.10"
+version = "1.0.11"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2f/bb/1bed771d2f40baf5d45a3df89fab407825126c023ab32681b0a6b4b38861/tree_sitter_cfengine-1.0.10.tar.gz", hash = "sha256:0d600edbe16669e2fabc78f6327ee2f7507d9efbb9586d6a9e71077889b6142a", size = 14587 }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/98/2a8ec55f8f72a1968ff48ada6694e7d99fb34b9bc1022960aad6adcddca9/tree_sitter_cfengine-1.0.11.tar.gz", hash = "sha256:ff4f5b0282aa9c10dd0c3e643a521c82c95f78ae5c4e30b00f91763fa138c93d", size = 15141 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/ad/42f918e4f4b2eeda79544124a886b0c3431cb4cb38bc28aaba3320b7783a/tree_sitter_cfengine-1.0.10-cp39-abi3-macosx_10_9_x86_64.whl", hash = "sha256:80586e716ba33ffaa454ffac4d51f4c6bd669057cc6a6f70239b8850644bd4f5", size = 11609 },
-    { url = "https://files.pythonhosted.org/packages/71/ba/e14e1b21f5305bf599886933a034ce5e3429adbeb03bd9889137ec85f652/tree_sitter_cfengine-1.0.10-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:04624627ee44dbd54c6bd816646940bf92d19d9c31c24b279b1bd4990ceef5b8", size = 12094 },
-    { url = "https://files.pythonhosted.org/packages/76/7f/c9c59d810eb1c746350defecfcc31c86d4236864bc4357170d34c4fc0207/tree_sitter_cfengine-1.0.10-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c700a1ce3b3cd52b23d67761179964a179a9322285c947e19080ed68e5ef2aba", size = 24159 },
-    { url = "https://files.pythonhosted.org/packages/a3/b5/5e821aacbfa0607c871404768d92019d00683f712aa6b66a179286735ed7/tree_sitter_cfengine-1.0.10-cp39-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:128b7ecbd84f9fc5a73d28b84d8b28bed0051d6fe66995a66d93ab0b31ccd103", size = 23811 },
-    { url = "https://files.pythonhosted.org/packages/7d/10/39a91bf81f9a9c414e9bbd2d49464bf62599d28ee5ac91a623e3f87a8cfd/tree_sitter_cfengine-1.0.10-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:3d21cf8f04eb5925f0dd66e2463e906e5e23159db7eb2a9a3e10f841d8879fd1", size = 22166 },
-    { url = "https://files.pythonhosted.org/packages/56/67/da52459e8e6a3e3d641f468b4b990ee7c03dc6a874bb3cd4562d150b39f2/tree_sitter_cfengine-1.0.10-cp39-abi3-win_amd64.whl", hash = "sha256:26590c4bc75cfc167cd4611d141e1e1f0dcbdd429a5414588a6998d2d67aae33", size = 14684 },
-    { url = "https://files.pythonhosted.org/packages/a6/a5/7c67c2516eea6be0f8a8dcdc86b1ac0a5d169959030f40a033e82a0f0a3d/tree_sitter_cfengine-1.0.10-cp39-abi3-win_arm64.whl", hash = "sha256:d6bb9312625680e422ceae805679974c3f5ec3fcb476e3fa6125409f14d86be9", size = 13486 },
+    { url = "https://files.pythonhosted.org/packages/10/14/9877edb41f4fda07799120e67e6d54bc6ebc3a5b25b0fe7035e3e2d9f7e1/tree_sitter_cfengine-1.0.11-cp39-abi3-macosx_10_9_x86_64.whl", hash = "sha256:32ca7d616a22a86c91b296cf2f38d0ed77e7bf1e48c385212eff154118a0af61", size = 12269 },
+    { url = "https://files.pythonhosted.org/packages/f4/82/330f3d65ae276ef51bc393968a0613d8b53acbbf68f3f6595d485e804410/tree_sitter_cfengine-1.0.11-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:c286571aeafe1752bea44b4ac46b41441b3cad383dd8d6a1eb5e28733b897dd2", size = 12619 },
+    { url = "https://files.pythonhosted.org/packages/12/f8/e4f656d8b45a86665077d0eff9e1120e93e14c1b0748ef4e4f11e2ce4247/tree_sitter_cfengine-1.0.11-cp39-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:dd2249962095ea10c0cec38bfa7c37f1eb868a5ff83864a271e374706af73aef", size = 23021 },
+    { url = "https://files.pythonhosted.org/packages/a1/0d/eb8d3d2c9a5cf74af03b6a36e55451ef5f8976c1c2c07d662db75e146655/tree_sitter_cfengine-1.0.11-cp39-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9fcf1774374c9e42a664ef6e9bbc8161bb1582bc8eede1c39685a4e4d0673847", size = 24552 },
+    { url = "https://files.pythonhosted.org/packages/52/cc/2e4f2fd32799da09dbc87d64e17802686fbc0c6e10d7cc7f6b3ceb8f3d34/tree_sitter_cfengine-1.0.11-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:8cd8246670e0430f4175eba653ba67bc1b788be48c2fc2cc02af9148882c38f0", size = 22838 },
+    { url = "https://files.pythonhosted.org/packages/db/c9/eb22d365c7cd2643f748cbb0696b77fccd9cfe7e1bb9cd979f4c75e8347b/tree_sitter_cfengine-1.0.11-cp39-abi3-win_amd64.whl", hash = "sha256:f9b263810a8eb08657eed40c48b1397a14c1caffe50cbeb17f736fba3108d476", size = 15210 },
+    { url = "https://files.pythonhosted.org/packages/8c/7f/29df033275b06d4dea10c70d104ce8866e5cafb65cbd7ab941343a487fd5/tree_sitter_cfengine-1.0.11-cp39-abi3-win_arm64.whl", hash = "sha256:d463c8b1246cd74c51d85130a719e03bc33dc4fafb1fe479a568749c4ba6c0c8", size = 14047 },
 ]
 
 [[package]]
