@@ -109,7 +109,7 @@ def split_rval_list(node, indent, args):
     first = text(node.children[0])
     last = " " * indent + text(node.children[-1])
     middle = node.children[1:-1]
-    elements = maybe_split_generic_list(middle, indent + 2, args)
+    elements = maybe_split_generic_list(middle, indent + args.indent, args)
     return [first, *elements, last]
 
 
@@ -120,7 +120,7 @@ def split_rval_call(node, indent, args):
     first = text(node.children[0]) + "("
     last = " " * indent + text(node.children[-1])
     middle = node.children[2:-1]
-    elements = maybe_split_generic_list(middle, indent + 2, args)
+    elements = maybe_split_generic_list(middle, indent + args.indent, args)
     return [first, *elements, last]
 
 
@@ -188,7 +188,7 @@ def autoformat(node, fmt, args, macro_indent, indent=0):
         "promise",
         "attribute",
     ]:
-        indent += 2
+        indent += args.indent
     if node.type == "attribute":
         lines = stringify(node, indent, args)
         fmt.print_lines(lines, indent=0)

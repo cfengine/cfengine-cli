@@ -46,6 +46,7 @@ def _get_arg_parser():
     fmt.add_argument(
         "--max-line-length", default=80, type=int, help="Maximum line length"
     )
+    fmt.add_argument("--indent", default=2, type=int, help="Indentation increase")
     subp.add_parser(
         "lint",
         help="Look for syntax errors and other simple mistakes",
