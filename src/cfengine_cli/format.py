@@ -80,14 +80,14 @@ def split_generic_value(node, indent):
     return [stringify_single_line(node)]
 
 
-def split_generic_list(middle, indent):
+def split_generic_list(middle, indent, args):
     elements = []
     for element in middle:
         if elements and element.type == ",":
             elements[-1] = elements[-1] + ","
             continue
         line = " " * indent + stringify_single_line(element)
-        if len(line) < 80:
+        if len(line) < args.max_line_length:
             elements.append(line)
         else:
             lines = split_generic_value(element, indent)
@@ -96,50 +96,50 @@ def split_generic_list(middle, indent):
     return elements
 
 
-def maybe_split_generic_list(nodes, indent):
+def maybe_split_generic_list(nodes, indent, args):
     string = " " * indent + stringify_children(nodes)
-    if len(string) < 80:
+    if len(string) < args.max_line_length:
         return [string]
-    return split_generic_list(nodes, indent)
+    return split_generic_list(nodes, indent, args)
 
 
-def split_rval_list(node, indent):
+def split_rval_list(node, indent, args):
     assert node.type == "list"
     assert node.children[0].type == "{"
     first = text(node.children[0])
     last = " " * indent + text(node.children[-1])
     middle = node.children[1:-1]
-    elements = maybe_split_generic_list(middle, indent + 2)
+    elements = maybe_split_generic_list(middle, indent + 2, args)
     return [first, *elements, last]
 
 
-def split_rval_call(node, indent):
+def split_rval_call(node, indent, args):
     assert node.type == "call"
     assert node.children[0].type == "calling_identifier"
     assert node.children[1].type == "("
     first = text(node.children[0]) + "("
     last = " " * indent + text(node.children[-1])
     middle = node.children[2:-1]
-    elements = maybe_split_generic_list(middle, indent + 2)
+    elements = maybe_split_generic_list(middle, indent + 2, args)
     return [first, *elements, last]
 
 
-def split_rval(node, indent):
+def split_rval(node, indent, args):
     if node.type == "list":
-        return split_rval_list(node, indent)
+        return split_rval_list(node, indent, args)
     if node.type == "call":
-        return split_rval_call(node, indent)
+        return split_rval_call(node, indent, args)
     return [stringify_single_line(node)]
 
 
-def maybe_split_rval(node, indent, offset):
+def maybe_split_rval(node, indent, offset, args):
     line = stringify_single_line(node)
-    if len(line) + offset < 80:
+    if len(line) + offset < args.max_line_length:
         return [line]
-    return split_rval(node, indent)
+    return split_rval(node, indent, args)
 
 
-def attempt_split_attribute(node, indent):
+def attempt_split_attribute(node, indent, args):
     assert len(node.children) == 3
     lval = node.children[0]
     arrow = node.children[1]
@@ -148,22 +148,22 @@ def attempt_split_attribute(node, indent):
     if rval.type == "list" or rval.type == "call":
         prefix = " " * indent + text(lval) + " " + text(arrow) + " "
         offset = len(prefix)
-        lines = maybe_split_rval(rval, indent, offset)
+        lines = maybe_split_rval(rval, indent, offset, args)
         lines[0] = prefix + lines[0]
         return lines
     return [stringify_single_line(node)]
 
 
-def stringify(node, indent):
+def stringify(node, indent, args):
     single_line = " " * indent + stringify_single_line(node)
-    if len(single_line) < 80:
+    if len(single_line) < args.max_line_length:
         return [single_line]
     if node.type == "attribute":
-        return attempt_split_attribute(node, indent)
+        return attempt_split_attribute(node, indent, args)
     return [single_line]
 
 
-def autoformat(node, fmt, macro_indent, indent=0):
+def autoformat(node, fmt, args, macro_indent, indent=0):
     previous = fmt.update_previous(node)
     if previous and previous.type == "macro" and text(previous).startswith("@else"):
         indent = macro_indent
@@ -190,12 +190,12 @@ def autoformat(node, fmt, macro_indent, indent=0):
     ]:
         indent += 2
     if node.type == "attribute":
-        lines = stringify(node, indent)
+        lines = stringify(node, indent, args)
         fmt.print_lines(lines, indent=0)
         return
     if children:
         for child in children:
-            autoformat(child, fmt, macro_indent, indent)
+            autoformat(child, fmt, args, macro_indent, indent)
         return
     if node.type in [",", ";"]:
         fmt.print_same_line(node)
@@ -203,7 +203,7 @@ def autoformat(node, fmt, macro_indent, indent=0):
     fmt.print(node, indent)
 
 
-def format_policy_file(filename):
+def format_policy_file(filename, args):
     assert filename.endswith(".cf")
     PY_LANGUAGE = Language(tscfengine.language())
     parser = Parser(PY_LANGUAGE)
@@ -216,7 +216,7 @@ def format_policy_file(filename):
 
     root_node = tree.root_node
     assert root_node.type == "source_file"
-    autoformat(root_node, fmt, macro_indent)
+    autoformat(root_node, fmt, args, macro_indent)
 
     new_data = fmt.buffer + "\n"
     if new_data != original_data.decode("utf-8"):
@@ -225,7 +225,7 @@ def format_policy_file(filename):
         print(f"Policy file '{filename}' was reformatted")
 
 
-def format_policy_fin_fout(fin, fout):
+def format_policy_fin_fout(fin, fout, args):
     PY_LANGUAGE = Language(tscfengine.language())
     parser = Parser(PY_LANGUAGE)
 
@@ -236,7 +236,7 @@ def format_policy_fin_fout(fin, fout):
 
     root_node = tree.root_node
     assert root_node.type == "source_file"
-    autoformat(root_node, fmt, macro_indent)
+    autoformat(root_node, fmt, args, macro_indent)
 
     new_data = fmt.buffer + "\n"
     fout.write(new_data)
