@@ -43,6 +43,10 @@ def _get_arg_parser():
     subp.add_parser("deploy", help="Deploy a built policy set")
     fmt = subp.add_parser("format", help="Autoformat .json and .cf files")
     fmt.add_argument("files", nargs="*", help="Files to format")
+    fmt.add_argument(
+        "--max-line-length", default=80, type=int, help="Maximum line length"
+    )
+    fmt.add_argument("--indent", default=2, type=int, help="Indentation increase")
     subp.add_parser(
         "lint",
         help="Look for syntax errors and other simple mistakes",
@@ -86,7 +90,7 @@ def run_command_with_args(args) -> int:
     if args.command == "deploy":
         return commands.deploy()
     if args.command == "format":
-        return commands.format(args.files)
+        return commands.format(args.files, args)
     if args.command == "lint":
         return commands.lint()
     if args.command == "report":
