@@ -43,9 +43,7 @@ def _get_arg_parser():
     subp.add_parser("deploy", help="Deploy a built policy set")
     fmt = subp.add_parser("format", help="Autoformat .json and .cf files")
     fmt.add_argument("files", nargs="*", help="Files to format")
-    fmt.add_argument(
-        "--line-length", default=80, type=int, help="Maximum line length"
-    )
+    fmt.add_argument("--line-length", default=80, type=int, help="Maximum line length")
     subp.add_parser(
         "lint",
         help="Look for syntax errors and other simple mistakes",
