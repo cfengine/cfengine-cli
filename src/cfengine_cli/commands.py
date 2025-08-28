@@ -47,46 +47,46 @@ def deploy() -> int:
     return r
 
 
-def _format_filename(filename):
+def _format_filename(filename, line_length):
     if filename.startswith("./."):
         return
     if filename.endswith(".json"):
         format_json_file(filename)
         return
     if filename.endswith(".cf"):
-        format_policy_file(filename)
+        format_policy_file(filename, line_length)
         return
     raise UserError(f"Unrecognized file format: {filename}")
 
 
-def _format_dirname(directory):
+def _format_dirname(directory, line_length):
     for filename in find(directory, extension=".json"):
-        _format_filename(filename)
+        _format_filename(filename, line_length)
     for filename in find(directory, extension=".cf"):
-        _format_filename(filename)
+        _format_filename(filename, line_length)
 
 
-def format(args) -> int:
-    if not args:
-        _format_dirname(".")
+def format(names, line_length) -> int:
+    if not names:
+        _format_dirname(".", line_length)
         return 0
-    if len(args) == 1 and args[0] == "-":
+    if len(names) == 1 and names[0] == "-":
         # Special case, format policy file from stdin to stdout
-        format_policy_fin_fout(sys.stdin, sys.stdout)
+        format_policy_fin_fout(sys.stdin, sys.stdout, line_length)
         return 0
 
-    for arg in args:
-        if arg == "-":
+    for name in names:
+        if name == "-":
             raise UserError(
                 "The - argument has a special meaning and cannot be combined with other paths"
             )
-        if not os.path.exists(arg):
-            raise UserError(f"{arg} does not exist")
-        if os.path.isfile(arg):
-            _format_filename(arg)
+        if not os.path.exists(name):
+            raise UserError(f"{name} does not exist")
+        if os.path.isfile(name):
+            _format_filename(name, line_length)
             continue
-        if os.path.isdir(arg):
-            _format_dirname(arg)
+        if os.path.isdir(name):
+            _format_dirname(name, line_length)
             continue
     return 0
 
