@@ -215,7 +215,7 @@ def _process_markdown_code_blocks(
     for language in languages:
         if language not in SUPPORTED_LANGUAGES:
             raise UserError(
-                f"Unsupported language '{language}'. The supported languages are: {", ".join(SUPPORTED_LANGUAGES)}"
+                f"Unsupported language '{language}'. The supported languages are: {', '.join(SUPPORTED_LANGUAGES)}"
             )
 
     parsed_markdowns = get_markdown_files(path, languages)
