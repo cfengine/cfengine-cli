@@ -420,20 +420,22 @@ class DepsReader:
                     dep = dep_title.lower()
                     url = match.group(2)
                 else:
-                    log.warning("didn't find dep in line [%s]", line)
+                    log.warning("didn't find dep in line [%s]" % (line,))
                     continue
                 if dep not in deps_dict:
                     log.warning(
-                        "unknown dependency in README: [%s] line [%s], will be EMPTY",
-                        dep,
-                        line,
+                        "unknown dependency in README: [%s] line [%s], will be EMPTY"
+                        % (
+                            dep,
+                            line,
+                        )
                     )
                     deps_dict[dep] = collections.defaultdict(lambda: "-")
                 note = None
                 if has_notes:
                     note = re.search(r"\| ([^|]*) \|$", line)
                     if not note:
-                        log.warning("didn't find note in line [%s]", line)
+                        log.warning("didn't find note in line [%s]" % (line,))
                         note = ""
                     else:
                         note = note.group(1)
