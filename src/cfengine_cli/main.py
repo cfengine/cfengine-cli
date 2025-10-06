@@ -108,12 +108,14 @@ def validate_args(args):
     if args.command == "dev" and args.dev_command is None:
         raise UserError("Missing subcommand - cfengine dev <subcommand>")
 
+
 def _main():
     args = get_args()
     if args.log_level:
         log.set_level(args.log_level)
     validate_args(args)
     return run_command_with_args(args)
+
 
 def main():
     if os.getenv("CFBACKTRACE") == "1":
@@ -155,7 +157,9 @@ def main():
         print("Error: " + message)
     except CFBSProgrammerError as e:
         print("Error: " + str(e))
-    print("       This is an unexpected error indicating a bug, please create a ticket at:")
+    print(
+        "       This is an unexpected error indicating a bug, please create a ticket at:"
+    )
     print("       https://northerntech.atlassian.net/")
     print(
         "       (Rerun with CFBACKTRACE=1 in front of your command to show the full backtrace)"
