@@ -1,11 +1,14 @@
 import argparse
 import os
 import sys
+import traceback
+import pathlib
 
 from cf_remote import log
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli import commands
 from cfengine_cli.utils import UserError
+from cfbs.utils import CFBSProgrammerError
 
 
 def _get_arg_parser():
@@ -105,23 +108,61 @@ def validate_args(args):
     if args.command == "dev" and args.dev_command is None:
         raise UserError("Missing subcommand - cfengine dev <subcommand>")
 
+def _main():
+    args = get_args()
+    if args.log_level:
+        log.set_level(args.log_level)
+    validate_args(args)
+    return run_command_with_args(args)
 
 def main():
+    if os.getenv("CFBACKTRACE") == "1":
+        r = _main()
+        return r
     try:
-        args = get_args()
-        if args.log_level:
-            log.set_level(args.log_level)
-        validate_args(args)
-
-        exit_code = run_command_with_args(args)
+        exit_code = _main()
         assert type(exit_code) is int
         sys.exit(exit_code)
-    except AssertionError as e:
-        print(f"Error: {str(e)} (programmer error, please file a bug)")
-        sys.exit(-1)
     except UserError as e:
         print(str(e))
         sys.exit(-1)
+    # AssertionError and CFBSProgrammerError are not expected, print extra info:
+    except AssertionError as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        frame = tb[-1]
+        this_file = pathlib.Path(__file__)
+        cfbs_prefix = os.path.abspath(this_file.parent.parent.resolve())
+        filename = os.path.abspath(frame.filename)
+        # Opportunistically cut off beginning of path if possible:
+        if filename.startswith(cfbs_prefix):
+            filename = filename[len(cfbs_prefix) :]
+            if filename.startswith("/"):
+                filename = filename[1:]
+        line = frame.lineno
+        # Avoid using frame.colno - it was not available in python 3.5,
+        # and even in the latest version, it is not declared in the
+        # docstring, so you will get linting warnings;
+        # https://github.com/python/cpython/blob/v3.13.5/Lib/traceback.py#L276-L288
+        # column = frame.colno
+        assertion = frame.line
+        explanation = str(e)
+        message = "Assertion failed - %s%s (%s:%s)" % (
+            assertion,
+            (" - " + explanation) if explanation else "",
+            filename,
+            line,
+        )
+        print("Error: " + message)
+    except CFBSProgrammerError as e:
+        print("Error: " + str(e))
+    print("       This is an unexpected error indicating a bug, please create a ticket at:")
+    print("       https://northerntech.atlassian.net/")
+    print(
+        "       (Rerun with CFBACKTRACE=1 in front of your command to show the full backtrace)"
+    )
+
+    # TODO: Handle other exceptions
+    return 1
 
 
 if __name__ == "__main__":
