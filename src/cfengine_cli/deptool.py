@@ -437,13 +437,13 @@ class DepsReader:
                         note = ""
                     else:
                         note = note.group(1)
+                    assert note is not None
                 if in_hub:
                     dep = re.sub("-hub$", "", dep)
-                assert note is not None
                 row = (
                     ["[%s](%s)" % (dep_title, url)]
                     + [deps_dict[dep][ref] for ref in refs]
-                    + ([note] if has_notes else [])
+                    + ([note] if note is not None else [])
                 )
                 assert column_widths is not None
                 line = (
