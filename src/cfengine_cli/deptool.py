@@ -1,7 +1,8 @@
 import argparse
 import collections
 import json
-import logging as log
+from cf_remote import log
+import logging
 import os
 import re
 import subprocess
@@ -110,19 +111,16 @@ class GitRepo:
         repo_url = "https://github.com/{}/{}.git".format(repo_owner, repo_name)
 
         # set up a logger to intercept command output to logging.INFO instead of displaying it
-        if log_info:
-            LOGGING_LEVEL = log.INFO
-        else:
-            LOGGING_LEVEL = log.WARNING
-        self.run_logger = log.getLogger("output_run_to_logging")
+        LOGGING_LEVEL = logging.INFO if log_info else logging.WARNING
+        self.run_logger = logging.getLogger("output_run_to_logging")
         # do not duplicate logs with the root logger:
         self.run_logger.propagate = False
         self.run_logger.setLevel(LOGGING_LEVEL)
-        handler = log.StreamHandler()
+        handler = logging.StreamHandler()
         # do not terminate logs with a newline, as the output already has newlines:
         handler.terminator = ""
         handler.setLevel(LOGGING_LEVEL)
-        log_format = log.Formatter("%(asctime)s %(levelname)s: %(message)s")
+        log_format = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
         handler.setFormatter(log_format)
         self.run_logger.addHandler(handler)
 
