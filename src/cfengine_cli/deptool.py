@@ -126,6 +126,7 @@ class GitRepo:
 
         if not os.path.exists(repo_path):
             self.run_command("clone", "--no-checkout", repo_url, repo_path)
+        self.run_command("fetch", "--all", "--tags")
         if checkout_ref is not None:
             self.checkout(checkout_ref)
 
@@ -166,7 +167,7 @@ class GitRepo:
 
         return result
 
-    def checkout(self, ref, remote="origin", new=False):
+    def checkout(self, ref, new=False):
         """Checkout given ref (branch or tag), optionally creating the ref as a branch.
         Note that it's an error to create-and-checkout branch which already exists.
         """
@@ -174,16 +175,9 @@ class GitRepo:
             # create new branch
             self.run_command("checkout", "-b", ref)
         else:
-            # first, ensure that we're aware of target ref
-            # TODO: Move this to one global fetch, it will be
-            #       generally faster and not break when remote
-            #       is something else (i.e. upstream, not origin).
-            #       git fetch --all --tags
-            self.run_command("fetch", remote, ref)
-            # switch to the ref
             self.run_command("checkout", ref)
             # ensure we're on the tip of ref
-            self.run_command("reset", "--hard", "FETCH_HEAD")
+            self.run_command("reset", "--hard", "HEAD")
         self.run_command("submodule", "update", "--init")
 
     def get_file(self, relpath):
@@ -322,6 +316,7 @@ class DepsReader:
 
         deps_versions = {}
         deps_list = self.deps_list(ref)
+        assert len(deps_list) > 1
         for dep in deps_list:
             if dep == "$EMBEDDED_DB":
                 continue
