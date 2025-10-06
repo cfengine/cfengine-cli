@@ -1,5 +1,7 @@
 # deptool
 
+**TODO: This README should be updated now that deptool is a part of CFEngine CLI, and merged into HACKING.md**
+
 `deptool.py` is a script which can be used to enumerate dependencies of CFEngine.
 It supports printing to stdout in the Markdown table format, and printing to file in the JSON format (see `--to-json`).
 It can also generate basic SBOMs in the CycloneDX JSON format (see [below](https://github.com/cfengine/buildscripts/tree/master/scripts#generating-cyclonedx-json-sboms) for usage instructions).
