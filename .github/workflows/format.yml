@@ -45,7 +45,7 @@ jobs:
           git config user.name 'GitHub'
           git config user.email '<noreply@github.com>'
           shopt -s globstar
-          git add cfengine_cli/*.py cfengine_cli/**/*.py tests/*.py tests/**/*.py
+          git add src/cfengine_cli/*.py src/cfengine_cli/**/*.py tests/*.py tests/**/*.py
           git commit -F commit_message.txt
       - id: commit-message-from-file
         name: Parse commit message from file into variable
