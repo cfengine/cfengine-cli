@@ -266,11 +266,7 @@ class DepsReader:
         # list(only_deps) = ["lcov", "pthreads-w32 libgnurx"]
         # to "flattern" it we first join using spaces and then split on spaces
         # in the middle we also do some clean-ups
-        only_deps = (
-            " ".join(only_deps)
-            .replace("libgcc ", "")
-            .split(" ")
-        )
+        only_deps = " ".join(only_deps).replace("libgcc ", "").split(" ")
         # now only_deps looks like this: ["lcov", "pthreads-w32", "libgnurx"]
         log.debug(pretty(only_deps))
         only_deps = sorted(only_deps)
