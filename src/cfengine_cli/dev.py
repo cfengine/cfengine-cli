@@ -34,9 +34,10 @@ def update_dependency_tables() -> int:
 
 
 def print_dependency_tables(args) -> int:
+    versions = args.versions
     answer = _expect_repo("buildscripts")
     if answer:
-        return print_release_dependency_tables(args)
+        return print_release_dependency_tables(versions)
     return 1
 
 

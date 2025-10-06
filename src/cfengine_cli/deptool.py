@@ -177,6 +177,10 @@ class GitRepo:
             self.run_command("checkout", "-b", ref)
         else:
             # first, ensure that we're aware of target ref
+            # TODO: Move this to one global fetch, it will be
+            #       generally faster and not break when remote
+            #       is something else (i.e. upstream, not origin).
+            #       git fetch --all --tags
             self.run_command("fetch", remote, ref)
             # switch to the ref
             self.run_command("checkout", ref)
@@ -321,6 +325,8 @@ class DepsReader:
         deps_versions = {}
         deps_list = self.deps_list(ref)
         for dep in deps_list:
+            if dep == "$EMBEDDED_DB":
+                continue
             deps_versions[dep] = self.get_current_version(dep)
         return deps_versions
 
@@ -800,7 +806,7 @@ def print_release_dependency_tables(versions) -> int:
         json_path=None,
         cdx_sbom_path_template=None,
         patch=False,
-        skip_unchanged=True,
+        skip_unchanged=False,
     )
     return 0
 
