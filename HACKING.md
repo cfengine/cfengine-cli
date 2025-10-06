@@ -138,6 +138,3 @@ cat tests/shell/*.sh | bash
   - It would be nice if we refactored `validate_config()` in `cfbs` so it would take a simple dictionary (JSON) instead of a special CFBSConfig object.
 - Missing commands:
   - `cfengine install` - Install CFEngine packages / binaries (Wrapping `cf-remote install`).
-  - `cfengine dev` - Subcommand for CFEngine developers / maintainers.
-    - `cfengine dev release-information` - Generate release information (Wrapping `cfbs generate-release-information`)
-    - `cfengine dev dependency-tables` - Update dependency tables in markdown files.

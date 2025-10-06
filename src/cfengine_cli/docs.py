@@ -331,7 +331,7 @@ def update_docs() -> int:
     - JSON code blocks are re-formatted by cfbs pretty (we plan to expand this to CFEngine code blocks)
 
     Run by the command:
-    cfengine dev docs-format
+    cfengine dev format-docs
     """
     print("Formatting python files with black...")
     _run_black()
@@ -357,7 +357,7 @@ def check_docs() -> int:
     Currently only JSON syntax checking.
 
     Run by the command:
-    cfengine dev docs-check"""
+    cfengine dev lint-docs"""
     _process_markdown_code_blocks(
         path=".",
         languages=["json", "cf3"],

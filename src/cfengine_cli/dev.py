@@ -2,7 +2,7 @@ import os
 from cfbs.commands import generate_release_information_command
 from cfengine_cli.utils import UserError
 from cfengine_cli.deptool import (
-    update_dependency_tables,
+    update_dependency_tables as _update_dependency_tables,
     print_release_dependency_tables,
 )
 from cfengine_cli.docs import update_docs, check_docs
@@ -26,35 +26,35 @@ def _expect_repo(repo) -> bool:
     return answer
 
 
-def deps_readme() -> int:
+def update_dependency_tables() -> int:
     answer = _expect_repo("buildscripts")
     if answer:
-        return update_dependency_tables()
+        return _update_dependency_tables()
     return 1
 
 
-def deps_release(args) -> int:
+def print_dependency_tables(args) -> int:
     answer = _expect_repo("buildscripts")
     if answer:
         return print_release_dependency_tables(args)
     return 1
 
 
-def docs_format() -> int:
+def format_docs() -> int:
     answer = _expect_repo("documentation")
     if answer:
         return update_docs()
     return 1
 
 
-def docs_check() -> int:
+def lint_docs() -> int:
     answer = _expect_repo("documentation")
     if answer:
         return check_docs()
     return 1
 
 
-def release_information() -> int:
+def generate_release_information() -> int:
     answer = _expect_repo("release-information")
     if answer:
         generate_release_information_command()
@@ -63,15 +63,15 @@ def release_information() -> int:
 
 
 def dispatch_dev_subcommand(subcommand, args) -> int:
-    if subcommand == "deps-readme":
-        return deps_readme()
-    if subcommand == "deps-release":
-        return deps_release(args)
-    if subcommand == "docs-format":
-        return docs_format()
-    if subcommand == "docs-check":
-        return docs_check()
-    if subcommand == "release-information":
-        return release_information()
+    if subcommand == "update-dependency-tables":
+        return update_dependency_tables()
+    if subcommand == "print-dependency-tables":
+        return print_dependency_tables(args)
+    if subcommand == "format-docs":
+        return format_docs()
+    if subcommand == "lint-docs":
+        return lint_docs()
+    if subcommand == "generate-release-information":
+        return generate_release_information()
 
     raise UserError("Invalid cfengine dev subcommand - " + subcommand)

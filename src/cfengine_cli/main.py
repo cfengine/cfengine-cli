@@ -60,10 +60,11 @@ def _get_arg_parser():
         "dev", help="Utilities intended for developers / maintainers of CFEngine"
     )
     dev_subparsers = dev_parser.add_subparsers(dest="dev_command")
-    dev_subparsers.add_parser("dependency-tables")
-    dev_subparsers.add_parser("docs-format")
-    dev_subparsers.add_parser("docs-check")
-    dev_subparsers.add_parser("release-information")
+    dev_subparsers.add_parser("update-dependency-tables")
+    dev_subparsers.add_parser("print-dependency-tables")
+    dev_subparsers.add_parser("format-docs")
+    dev_subparsers.add_parser("lint-docs")
+    dev_subparsers.add_parser("generate-release-information")
 
     return ap
 
