@@ -319,7 +319,7 @@ class DepsReader:
         assert len(deps_list) > 1
         for dep in deps_list:
             if dep == "$EMBEDDED_DB":
-                continue
+                dep = "lmdb"
             deps_versions[dep] = self.get_current_version(dep)
         return deps_versions
 
