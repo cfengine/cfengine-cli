@@ -346,7 +346,7 @@ def update_docs() -> int:
         output_check=False,
         autoformat=True,
         replace=True,
-        cleanup=True,
+        cleanup=False,
     )
     return 0
 

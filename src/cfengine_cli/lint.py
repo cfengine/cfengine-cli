@@ -122,6 +122,16 @@ def lint_policy_file(
     lines = original_data.decode().split("\n")
 
     root_node = tree.root_node
+    if root_node.type != "source_file":
+        print(f"Error: Failed to parse snippet ('{filename}') - Is this valid CFEngine policy?")
+        print("")
+        lines = original_data.decode().split("\n")
+        if not len(lines) <= 5:
+            lines = lines[:4] + ["..."]
+        for line in lines:
+            print("       " + line)
+        print("")
+        return 1
     assert root_node.type == "source_file"
     errors = 0
     if not root_node.children:
