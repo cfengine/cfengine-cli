@@ -98,7 +98,7 @@ def _walk(filename, lines, node) -> int:
 
 
 def lint_policy_file(
-    filename, original_filename=None, original_line=None, snippet=None
+    filename, original_filename=None, original_line=None, snippet=None, prefix=None
 ):
     assert original_filename is None or type(original_filename) is str
     assert original_line is None or type(original_line) is int
@@ -123,7 +123,14 @@ def lint_policy_file(
 
     root_node = tree.root_node
     if root_node.type != "source_file":
-        print(f"Error: Failed to parse snippet ('{filename}') - Is this valid CFEngine policy?")
+        if snippet:
+            assert original_filename and original_line
+            print(
+                f"Error: Failed to parse policy snippet {snippet} at '{original_filename}:{original_line}'"
+            )
+        else:
+            print(f"       Empty policy file '{filename}'")
+        print("       Is this valid CFEngine policy?")
         print("")
         lines = original_data.decode().split("\n")
         if not len(lines) <= 5:
@@ -144,17 +151,19 @@ def lint_policy_file(
             print(f"Error: Empty policy file '{filename}'")
         errors += 1
     errors += _walk(filename, lines, root_node)
+    if prefix:
+        print(prefix, end="")
     if errors == 0:
         if snippet:
             assert original_filename and original_line
-            print(f"PASS: Snippet {snippet} at '{original_filename}:{original_line}'")
+            print(f"PASS: Snippet {snippet} at '{original_filename}:{original_line}' (cf3)")
         else:
             print(f"PASS: {filename}")
         return 0
 
     if snippet:
         assert original_filename and original_line
-        print(f"FAIL: Snippet {snippet} at '{original_filename}:{original_line}'")
+        print(f"FAIL: Snippet {snippet} at '{original_filename}:{original_line}' (cf3)")
     else:
         print(f"FAIL: {filename} ({errors} error{'s' if errors > 0 else ''})")
     return errors
