@@ -109,7 +109,9 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
         raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
 
-def lint_json_file(snippet_abs_path, origin_path, snippet_number, first_line, prefix=None):
+def lint_json_file(
+    snippet_abs_path, origin_path, snippet_number, first_line, prefix=None
+):
     with open(snippet_abs_path, "r") as f:
         json.loads(f.read())
     if prefix:
@@ -117,8 +119,15 @@ def lint_json_file(snippet_abs_path, origin_path, snippet_number, first_line, pr
     print(f"PASS: Snippet {snippet_number} at '{origin_path}:{first_line}' (json)")
     return 0
 
+
 def fn_check_syntax(
-    origin_path, snippet_path, language, first_line, _last_line, snippet_number, prefix=None
+    origin_path,
+    snippet_path,
+    language,
+    first_line,
+    _last_line,
+    snippet_number,
+    prefix=None,
 ):
     snippet_abs_path = os.path.abspath(snippet_path)
 
@@ -136,7 +145,9 @@ def fn_check_syntax(
                 raise UserError(f"Error when checking '{origin_path}'")
         case "json":
             try:
-                lint_json_file(snippet_abs_path, origin_path, snippet_number, first_line, prefix)
+                lint_json_file(
+                    snippet_abs_path, origin_path, snippet_number, first_line, prefix
+                )
             except json.decoder.JSONDecodeError as e:
                 raise UserError(f"Error when checking '{snippet_abs_path}': {str(e)}")
             except Exception as e:
@@ -231,7 +242,7 @@ def _process_markdown_code_blocks(
     origin_paths_len = len(origin_paths)
 
     for origin_paths_i, origin_path in enumerate(origin_paths):
-        percentage = int(100 * (origin_paths_i + 1)/origin_paths_len)
+        percentage = int(100 * (origin_paths_i + 1) / origin_paths_len)
         prefix = f"[{origin_paths_i + 1}/{origin_paths_len} ({percentage}%)] "
         offset = 0
         for i, code_block in enumerate(
@@ -269,7 +280,7 @@ def _process_markdown_code_blocks(
                         code_block["first_line"],
                         code_block["last_line"],
                         snippet_number,
-                        prefix
+                        prefix,
                     )
                 except Exception as e:
                     if cleanup:
