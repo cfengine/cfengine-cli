@@ -1,0 +1,5 @@
+reformatted /home/runner/work/cfengine-cli/cfengine-cli/src/cfengine_cli/lint.py
+reformatted /home/runner/work/cfengine-cli/cfengine-cli/src/cfengine_cli/docs.py
+
+All done! ✨ 🍰 ✨
+2 files reformatted, 16 files left unchanged.
