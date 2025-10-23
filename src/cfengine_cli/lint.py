@@ -156,7 +156,9 @@ def lint_policy_file(
     if errors == 0:
         if snippet:
             assert original_filename and original_line
-            print(f"PASS: Snippet {snippet} at '{original_filename}:{original_line}' (cf3)")
+            print(
+                f"PASS: Snippet {snippet} at '{original_filename}:{original_line}' (cf3)"
+            )
         else:
             print(f"PASS: {filename}")
         return 0
