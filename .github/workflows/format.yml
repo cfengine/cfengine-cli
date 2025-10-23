@@ -39,14 +39,6 @@ jobs:
           echo '```' >> commit_message.txt
           cat black_output.txt >> commit_message.txt
           echo '```' >> commit_message.txt
-      - name: Commit changes
-        if: hashFiles('git_diff_exists') != ''
-        run: |
-          git config user.name 'GitHub'
-          git config user.email '<noreply@github.com>'
-          shopt -s globstar
-          git add src/cfengine_cli/*.py src/cfengine_cli/**/*.py tests/*.py tests/**/*.py
-          git commit -S -F commit_message.txt
       - id: commit-message-from-file
         name: Parse commit message from file into variable
         if: hashFiles('git_diff_exists') != ''
@@ -59,6 +51,8 @@ jobs:
         uses: cfengine/create-pull-request@158a28c1bf5c08c846b8e7d26d13becbd4136eda # v7.0.7a
         with:
           title: Reformatted python code using Black formatter
+          commit-message: Reformatted python code using Black formatter
+          sign-commits: true
           body: ${{ steps.commit-message-from-file.outputs.body }}
           reviewers: |
             olehermanse
