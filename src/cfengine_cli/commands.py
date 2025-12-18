@@ -1,5 +1,8 @@
 import sys
 import os
+import re
+import json
+from cfengine_cli.profile import profile_cfengine, generate_callstack
 from cfengine_cli.dev import dispatch_dev_subcommand
 from cfengine_cli.lint import lint_cfbs_json, lint_json, lint_policy_file
 from cfengine_cli.shell import user_command
@@ -128,3 +131,19 @@ def run() -> int:
 
 def dev(subcommand, args) -> int:
     return dispatch_dev_subcommand(subcommand, args)
+
+
+def profile(args) -> int:
+    data = None
+    with open(args.profiling_input, "r") as f:
+        m = re.search(r"\[[.\s\S]*\]", f.read())
+        if m is not None:
+            data = json.loads(m.group(0))
+
+    if data is not None and any([args.bundles, args.functions, args.promises]):
+        profile_cfengine(data, args)
+
+    if args.flamegraph:
+        generate_callstack(data, args.flamegraph)
+
+    return 0

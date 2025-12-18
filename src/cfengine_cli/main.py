@@ -59,6 +59,20 @@ def _get_arg_parser():
         "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
     )
 
+    profile_parser = subp.add_parser(
+        "profile", help="Parse CFEngine profiling output (cf-agent -Kp)"
+    )
+    profile_parser.add_argument(
+        "profiling_input", help="Path to the profiling input file"
+    )
+    profile_parser.add_argument("--top", type=int, default=10)
+    profile_parser.add_argument("--bundles", action="store_true")
+    profile_parser.add_argument("--promises", action="store_true")
+    profile_parser.add_argument("--functions", action="store_true")
+    profile_parser.add_argument(
+        "--flamegraph", type=str, help="Generate input file for ./flamegraph.pl"
+    )
+
     dev_parser = subp.add_parser(
         "dev", help="Utilities intended for developers / maintainers of CFEngine"
     )
@@ -101,6 +115,8 @@ def run_command_with_args(args) -> int:
         return commands.run()
     if args.command == "dev":
         return commands.dev(args.dev_command, args)
+    if args.command == "profile":
+        return commands.profile(args)
     raise UserError(f"Unknown command: '{args.command}'")
 
 
