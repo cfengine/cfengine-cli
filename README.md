@@ -32,7 +32,7 @@ cfengine help
 ### Print CFEngine CLI version
 
 ```bash
-cfengine run
+cfengine version
 ```
 
 ### Automatically format source code
