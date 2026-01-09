@@ -3,6 +3,7 @@ import os
 import sys
 import traceback
 import pathlib
+import subprocess
 
 from cf_remote import log
 from cfengine_cli.version import cfengine_cli_version_string
@@ -144,7 +145,9 @@ def main():
     except UserError as e:
         print(str(e))
         sys.exit(-1)
-    # AssertionError and CFBSProgrammerError are not expected, print extra info:
+    # Exceptions below are not expected, print extra info:
+    except subprocess.CalledProcessError as e:
+        print(f"subprocess command failed: {' '.join(e.cmd)}")
     except AssertionError as e:
         tb = traceback.extract_tb(e.__traceback__)
         frame = tb[-1]
