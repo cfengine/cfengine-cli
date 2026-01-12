@@ -80,7 +80,11 @@ def _get_arg_parser():
     dev_subparsers = dev_parser.add_subparsers(dest="dev_command")
     dev_subparsers.add_parser("update-dependency-tables")
     pdt = dev_subparsers.add_parser("print-dependency-tables")
-    pdt.add_argument("versions", nargs="*", help="Versions to compare")
+    pdt.add_argument(
+        "versions",
+        nargs="+",
+        help="Versions to compare (minimum 1 required)",
+    )
     dev_subparsers.add_parser("format-docs")
     dev_subparsers.add_parser("lint-docs")
     dev_subparsers.add_parser("generate-release-information")
