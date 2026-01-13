@@ -1,11 +1,20 @@
 import os
-from cfbs.commands import generate_release_information_command
+from cfengine_cli.masterfiles.generate_release_information import (
+    generate_release_information_impl,
+)
 from cfengine_cli.utils import UserError
 from cfengine_cli.deptool import (
     update_dependency_tables as _update_dependency_tables,
     print_release_dependency_tables,
 )
 from cfengine_cli.docs import update_docs, check_docs
+
+
+def generate_release_information_command(
+    omit_download=False, check=False, min_version=None
+):
+    generate_release_information_impl(omit_download, check, min_version)
+    return 0
 
 
 def _continue_prompt() -> bool:
