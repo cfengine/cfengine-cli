@@ -535,7 +535,7 @@ class DepsReader:
         deps_data, _ = self.deps_dict(refs)
 
         # all dependencies, sorted by ref-existence, then name, in Python 3.7+
-        all_deps = deps_data.keys()
+        all_deps = sorted(deps_data.keys())
 
         compared_deps_data = collections.OrderedDict()
 
