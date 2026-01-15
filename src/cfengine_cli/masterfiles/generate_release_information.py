@@ -1,7 +1,9 @@
-from cfbs.masterfiles.download import download_all_versions
-from cfbs.masterfiles.generate_vcf_download import generate_vcf_download
-from cfbs.masterfiles.generate_vcf_git_checkout import generate_vcf_git_checkout
-from cfbs.masterfiles.check_download_matches_git import check_download_matches_git
+from cfengine_cli.masterfiles.download import download_all_versions
+from cfengine_cli.masterfiles.generate_vcf_download import generate_vcf_download
+from cfengine_cli.masterfiles.generate_vcf_git_checkout import generate_vcf_git_checkout
+from cfengine_cli.masterfiles.check_download_matches_git import (
+    check_download_matches_git,
+)
 from cfbs.utils import immediate_subdirectories, version_is_at_least
 
 DOWNLOAD_PATH = "downloaded_masterfiles"
