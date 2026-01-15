@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 from cfbs.utils import write_json
-from cfbs.masterfiles.analyze import (
+from cfengine_cli.masterfiles.analyze import (
     finalize_vcf,
     initialize_vcf,
     versions_checksums_files,
