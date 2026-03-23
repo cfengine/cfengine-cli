@@ -21,6 +21,44 @@ from cfbs.utils import find
 
 DEPRECATED_PROMISE_TYPES = ["defaults", "guest_environments"]
 ALLOWED_BUNDLE_TYPES = ["agent", "common", "monitor", "server", "edit_line", "edit_xml"]
+BUILTIN_PROMISE_TYPES = {
+    "access",
+    "build_xpath",
+    "classes",
+    "commands",
+    "databases",
+    "defaults",
+    "delete_attribute",
+    "delete_lines",
+    "delete_text",
+    "delete_tree",
+    "field_edits",
+    "files",
+    "guest_environments",
+    "insert_lines",
+    "insert_text",
+    "insert_tree",
+    "measurements",
+    "meta",
+    "methods",
+    "packages",
+    "processes",
+    "replace_patterns",
+    "reports",
+    "roles",
+    "services",
+    "set_attribute",
+    "set_text",
+    "storage",
+    "users",
+    "vars",
+}
+
+custom_promise_types = set()
+
+# Globally set as there might be more future cases where we want to
+# classify rules that only apply in strict cases
+strict = True
 
 
 def lint_cfbs_json(filename) -> int:
@@ -117,6 +155,15 @@ def _single_node_checks(filename, lines, node):
                 f"Deprecation: Promise type '{promise_type}' is deprecated at {filename}:{line}:{column}"
             )
             return 1
+        if strict and (
+            (promise_type not in BUILTIN_PROMISE_TYPES.union(custom_promise_types))
+        ):
+            _highlight_range(node, lines)
+            print(
+                f"Error: Undefined promise type '{promise_type}' at {filename}:{line}:{column}"
+            )
+            return 1
+
     if node.type == "bundle_block_name":
         if _text(node) != _text(node).lower():
             _highlight_range(node, lines)
@@ -138,6 +185,7 @@ def _single_node_checks(filename, lines, node):
                 f"Error: Bundle type must be one of ({', '.join(ALLOWED_BUNDLE_TYPES)}), not '{_text(node)}' at {filename}:{line}:{column}"
             )
             return 1
+
     return 0
 
 
@@ -161,6 +209,26 @@ def _walk(filename, lines, node) -> int:
     return errors
 
 
+def _parse_custom(filename, lines, root_node):
+    promise_blocks = _find_node_type(filename, lines, root_node, "promise_block_name")
+    for node in promise_blocks:
+        custom_promise_types.add(_text(node))
+    return 0
+
+
+def _parse_policy_file(filename):
+    assert os.path.isfile(filename)
+    PY_LANGUAGE = Language(tscfengine.language())
+    parser = Parser(PY_LANGUAGE)
+
+    with open(filename, "rb") as f:
+        original_data = f.read()
+    tree = parser.parse(original_data)
+    lines = original_data.decode().split("\n")
+
+    return tree, lines, original_data
+
+
 def lint_policy_file(
     filename, original_filename=None, original_line=None, snippet=None, prefix=None
 ):
@@ -177,14 +245,8 @@ def lint_policy_file(
         assert snippet and snippet > 0
     assert os.path.isfile(filename)
     assert filename.endswith((".cf", ".cfengine3", ".cf3", ".cf.sub"))
-    PY_LANGUAGE = Language(tscfengine.language())
-    parser = Parser(PY_LANGUAGE)
 
-    with open(filename, "rb") as f:
-        original_data = f.read()
-    tree = parser.parse(original_data)
-    lines = original_data.decode().split("\n")
-
+    tree, lines, original_data = _parse_policy_file(filename)
     root_node = tree.root_node
     if root_node.type != "source_file":
         if snippet:
@@ -237,6 +299,7 @@ def lint_policy_file(
 
 def lint_folder(folder):
     errors = 0
+    policy_files = []
     while folder.endswith(("/.", "/")):
         folder = folder[0:-1]
     for filename in itertools.chain(
@@ -246,7 +309,21 @@ def lint_folder(folder):
             continue
         if filename.startswith(".") and not filename.startswith("./"):
             continue
-        errors += lint_single_file(filename)
+
+        if filename.endswith((".cf", ".cfengine3", ".cf3", ".cf.sub")):
+            policy_files.append(filename)
+        else:
+            errors += lint_single_file(filename)
+
+    # First pass: Gather custom types/bundles/+++
+    for filename in policy_files:
+        tree, lines, _ = _parse_policy_file(filename)
+        if tree.root_node.type == "source_file":
+            _parse_custom(filename, lines, tree.root_node)
+
+    # Second pass: lint all policy files
+    for filename in policy_files:
+        errors += lint_policy_file(filename)
     return errors
 
 
@@ -265,3 +342,12 @@ def lint_single_arg(arg):
         return lint_folder(arg)
     assert os.path.isfile(arg)
     return lint_single_file(arg)
+
+
+def set_strict(is_strict):
+    """
+    Used to set the global variable 'strict' inside 'lint.py'.
+    Used for ignoring/handling specific linting rules.
+    """
+    global strict
+    strict = is_strict
