@@ -18,43 +18,15 @@ from tree_sitter import Language, Parser
 from cfbs.validate import validate_config
 from cfbs.cfbs_config import CFBSConfig
 from cfbs.utils import find
-
-DEPRECATED_PROMISE_TYPES = ["defaults", "guest_environments"]
-ALLOWED_BUNDLE_TYPES = ["agent", "common", "monitor", "server", "edit_line", "edit_xml"]
-BUILTIN_PROMISE_TYPES = {
-    "access",
-    "build_xpath",
-    "classes",
-    "commands",
-    "databases",
-    "defaults",
-    "delete_attribute",
-    "delete_lines",
-    "delete_text",
-    "delete_tree",
-    "field_edits",
-    "files",
-    "guest_environments",
-    "insert_lines",
-    "insert_text",
-    "insert_tree",
-    "measurements",
-    "meta",
-    "methods",
-    "packages",
-    "processes",
-    "replace_patterns",
-    "reports",
-    "roles",
-    "services",
-    "set_attribute",
-    "set_text",
-    "storage",
-    "users",
-    "vars",
-}
+from cfengine_cli.builtin_types import (
+    DEPRECATED_PROMISE_TYPES,
+    ALLOWED_BUNDLE_TYPES,
+    BUILTIN_PROMISE_TYPES,
+    BUILTIN_FUNCTIONS,
+)
 
 custom_promise_types = set()
+custom_callables = set()
 
 # Globally set as there might be more future cases where we want to
 # classify rules that only apply in strict cases
@@ -185,7 +157,15 @@ def _single_node_checks(filename, lines, node):
                 f"Error: Bundle type must be one of ({', '.join(ALLOWED_BUNDLE_TYPES)}), not '{_text(node)}' at {filename}:{line}:{column}"
             )
             return 1
-
+    if node.type == "calling_identifier":
+        if strict and (
+            _text(node) not in BUILTIN_FUNCTIONS.union(custom_callables)
+        ):
+            _highlight_range(node, lines)
+            print(
+                f"Error: Call to unknown function / bundle / body '{_text(node)}' at at {filename}:{line}:{column}"
+            )
+            return 1
     return 0
 
 
@@ -211,8 +191,13 @@ def _walk(filename, lines, node) -> int:
 
 def _parse_custom(filename, lines, root_node):
     promise_blocks = _find_node_type(filename, lines, root_node, "promise_block_name")
-    for node in promise_blocks:
-        custom_promise_types.add(_text(node))
+    custom_promise_types.update(_text(x) for x in promise_blocks)
+
+    bundle_blocks = _find_node_type(filename, lines, root_node, "bundle_block_name")
+    custom_callables.update(_text(x) for x in bundle_blocks)
+
+    body_blocks = _find_node_type(filename, lines, root_node, "body_block_name")
+    custom_callables.update(_text(x) for x in body_blocks)
     return 0
 
 
