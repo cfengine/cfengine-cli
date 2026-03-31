@@ -77,6 +77,33 @@ cfengine build
 
 (This is equivalent to running `cfbs build`).
 
+### Spawn and install cfengine from a config
+
+**this feature is still a work in progress**
+
+Given a yaml config:
+
+```yaml
+templates:
+  ubuntu:
+    provider: vagrant
+    vagrant:
+      box: ubuntu/focal64
+
+groups:
+  myhub:
+    role: hub
+    source:
+      count: 1
+      mode: spawn
+      spawn: ubuntu
+```
+
+up will spawn the necessary VMs and install cfengine using cf-remote
+```
+cfengine up config.yaml
+```
+
 ## Supported platforms and versions
 
 This tool will only support a limited number of platforms, it is not intended to run everywhere CFEngine runs.

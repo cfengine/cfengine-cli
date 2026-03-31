@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ "$1" == "box" && "$2" == "list" ]]; then
+    echo "generic/centos7 (virtualbox, 4.3.12, (amd64))"
+    echo "ubuntu/focal64  (virtualbox, 20240821.0.1)"
+    exit 0
+fi
+
+echo "Mock Vagrant: Unknown command '$*'" >&2
+exit 1
+

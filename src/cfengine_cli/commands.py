@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import json
+import yaml
 from cfengine_cli.profile import profile_cfengine, generate_callstack
 from cfengine_cli.dev import dispatch_dev_subcommand
 from cfengine_cli.lint import lint_folder, lint_single_arg
@@ -14,6 +15,7 @@ from cfengine_cli.format import (
     format_policy_fin_fout,
 )
 from cfengine_cli.utils import UserError
+from cfengine_cli.up import validate_config
 from cfbs.utils import find
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
@@ -147,4 +149,21 @@ def profile(args) -> int:
     if args.flamegraph:
         generate_callstack(data, args.flamegraph)
 
+    return 0
+
+
+def up(args) -> int:
+    content = None
+    try:
+        with open(args.config, "r") as f:
+            content = yaml.safe_load(f)
+    except yaml.YAMLError:
+        raise UserError("'%s' is not a valid yaml config" % args.config)
+    except FileNotFoundError:
+        raise UserError("'%s' doesn't exist" % args.config)
+
+    validate_config(content)
+    if args.validate:
+        return 0
+    print("Starting VMs...")
     return 0
