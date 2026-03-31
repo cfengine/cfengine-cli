@@ -1,0 +1,10 @@
+{
+  "aws": {
+    "key": "TBD",
+    "secret": "TBD",
+    "key_pair": "TBD",
+    "security_groups": ["TDB"],
+    "region": "eu-west-2"
+  },
+  "gcp": { "project_id": "TBD", "service_account_id": "TBD", "key_path": "TBD" }
+}
