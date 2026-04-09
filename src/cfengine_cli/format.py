@@ -207,6 +207,25 @@ def stringify(node, indent, line_length):
     return [single_line]
 
 
+INDENTED_TYPES = {
+    "bundle_section",
+    "class_guarded_promises",
+    "class_guarded_body_attributes",
+    "class_guarded_promise_block_attributes",
+    "promise",
+    "half_promise",
+    "attribute",
+}
+
+CLASS_GUARD_TYPES = {
+    "class_guarded_promises",
+    "class_guarded_body_attributes",
+    "class_guarded_promise_block_attributes",
+}
+
+BLOCK_TYPES = {"bundle_block", "promise_block", "body_block"}
+
+
 def can_single_line_promise(node, indent, line_length):
     """Check if a promise node can be formatted on a single line."""
     if node.type != "promise":
@@ -226,6 +245,100 @@ def can_single_line_promise(node, indent, line_length):
     return indent + len(line) <= line_length
 
 
+def format_block_header(node, fmt):
+    """Format the header of a bundle/body block and return its body children."""
+    header_parts = []
+    header_comments = []
+    for x in node.children[0:-1]:
+        if x.type == "comment":
+            header_comments.append(text(x))
+        elif x.type == "parameter_list":
+            parts = []
+            for p in x.children:
+                if p.type == "comment":
+                    header_comments.append(text(p))
+                else:
+                    parts.append(text(p))
+            header_parts[-1] = header_parts[-1] + stringify_parameter_list(parts)
+        else:
+            header_parts.append(text(x))
+    line = " ".join(header_parts)
+    if not fmt.empty:
+        prev_sib = node.prev_named_sibling
+        if not (prev_sib and prev_sib.type == "comment"):
+            fmt.print("", 0)
+    fmt.print(line, 0)
+    for i, comment in enumerate(header_comments):
+        if comment.strip() == "#":
+            prev_is_comment = i > 0 and header_comments[i - 1].strip() != "#"
+            next_is_comment = (
+                i + 1 < len(header_comments) and header_comments[i + 1].strip() != "#"
+            )
+            if not (prev_is_comment and next_is_comment):
+                continue
+        fmt.print(comment, 0)
+    return node.children[-1].children
+
+
+def needs_blank_line_before(child, indent, line_length):
+    """Check if a blank line should be inserted before this child node."""
+    prev = child.prev_named_sibling
+    if not prev:
+        return False
+
+    if child.type == "bundle_section":
+        return prev.type == "bundle_section"
+
+    if child.type == "promise" and prev.type in {"promise", "half_promise"}:
+        promise_indent = indent + 2
+        both_single = (
+            prev.type == "promise"
+            and can_single_line_promise(prev, promise_indent, line_length)
+            and can_single_line_promise(child, promise_indent, line_length)
+        )
+        return not both_single
+
+    if child.type in CLASS_GUARD_TYPES:
+        return prev.type in {"promise", "half_promise", "class_guarded_promises"}
+
+    if child.type == "comment":
+        if prev.type in {"promise", "half_promise"} | CLASS_GUARD_TYPES:
+            parent = child.parent
+            return parent and parent.type in {"bundle_section"} | {
+                "class_guarded_promises"
+            }
+        return False
+
+    return False
+
+
+def get_comment_indent(node, indent):
+    """Determine the indentation level for a comment node."""
+    next_sib = node.next_named_sibling
+    while next_sib and next_sib.type == "comment":
+        next_sib = next_sib.next_named_sibling
+
+    if next_sib is None:
+        prev_sib = node.prev_named_sibling
+        while prev_sib and prev_sib.type == "comment":
+            prev_sib = prev_sib.prev_named_sibling
+        if prev_sib and prev_sib.type in INDENTED_TYPES:
+            return indent + 2
+    elif next_sib.type in INDENTED_TYPES:
+        return indent + 2
+
+    return indent
+
+
+def is_empty_comment(node):
+    """Check if a comment is just '#' with no content."""
+    if text(node).strip() != "#":
+        return False
+    prev = node.prev_named_sibling
+    nxt = node.next_named_sibling
+    return not (prev and prev.type == "comment" and nxt and nxt.type == "comment")
+
+
 def autoformat(node, fmt, line_length, macro_indent, indent=0):
     previous = fmt.update_previous(node)
     if previous and previous.type == "macro" and text(previous).startswith("@else"):
@@ -238,159 +351,33 @@ def autoformat(node, fmt, line_length, macro_indent, indent=0):
             indent = macro_indent
         return
     children = node.children
-    if node.type in ["bundle_block", "promise_block", "body_block"]:
-        header_parts = []
-        header_comments = []
-        for x in node.children[0:-1]:
-            if x.type == "comment":
-                header_comments.append(text(x))
-            elif x.type == "parameter_list":
-                parts = []
-                for p in x.children:
-                    if p.type == "comment":
-                        header_comments.append(text(p))
-                    else:
-                        parts.append(text(p))
-                # Append directly to previous part (no space before parens)
-                header_parts[-1] = header_parts[-1] + stringify_parameter_list(parts)
-            else:
-                header_parts.append(text(x))
-        line = " ".join(header_parts)
-        if not fmt.empty:
-            prev_sib = node.prev_named_sibling
-            if not (prev_sib and prev_sib.type == "comment"):
-                fmt.print("", 0)
-        fmt.print(line, 0)
-        for i, comment in enumerate(header_comments):
-            if comment.strip() == "#":
-                prev_is_comment = i > 0 and header_comments[i - 1].strip() != "#"
-                next_is_comment = (
-                    i + 1 < len(header_comments)
-                    and header_comments[i + 1].strip() != "#"
-                )
-                if not (prev_is_comment and next_is_comment):
-                    continue
-            fmt.print(comment, 0)
-        children = node.children[-1].children
-    if node.type in [
-        "bundle_section",
-        "class_guarded_promises",
-        "class_guarded_body_attributes",
-        "class_guarded_promise_block_attributes",
-        "promise",
-        "half_promise",
-        "attribute",
-    ]:
+    if node.type in BLOCK_TYPES:
+        children = format_block_header(node, fmt)
+    if node.type in INDENTED_TYPES:
         indent += 2
     if node.type == "attribute":
         lines = stringify(node, indent, line_length)
         fmt.print_lines(lines, indent=0)
         return
-    if node.type == "promise":
-        # Single-line promise: if exactly 1 attribute, no half_promise continuation,
-        # not inside a class guard, and the whole line fits in line_length
-        attr_children = [c for c in children if c.type == "attribute"]
-        next_sib = node.next_named_sibling
-        has_continuation = next_sib and next_sib.type == "half_promise"
-        if len(attr_children) == 1 and not has_continuation:
-            promiser_node = next((c for c in children if c.type == "promiser"), None)
-            if promiser_node:
-                line = (
-                    text(promiser_node)
-                    + " "
-                    + stringify_single_line_node(attr_children[0])
-                    + ";"
-                )
-                if indent + len(line) <= line_length:
-                    fmt.print(line, indent)
-                    return
+    if node.type == "promise" and can_single_line_promise(node, indent, line_length):
+        promiser_node = next(c for c in children if c.type == "promiser")
+        attr_node = next(c for c in children if c.type == "attribute")
+        line = text(promiser_node) + " " + stringify_single_line_node(attr_node) + ";"
+        fmt.print(line, indent)
+        return
     if children:
         for child in children:
-            # Blank line between bundle sections
-            if child.type == "bundle_section":
-                prev = child.prev_named_sibling
-                if prev and prev.type == "bundle_section":
-                    fmt.print("", 0)
-            # Blank line between promises in a section
-            elif child.type == "promise":
-                prev = child.prev_named_sibling
-                if prev and prev.type in ["promise", "half_promise"]:
-                    # Skip blank line between consecutive single-line promises
-                    promise_indent = indent + 2
-                    both_single = (
-                        prev.type == "promise"
-                        and can_single_line_promise(prev, promise_indent, line_length)
-                        and can_single_line_promise(child, promise_indent, line_length)
-                    )
-                    if not both_single:
-                        fmt.print("", 0)
-            elif child.type in [
-                "class_guarded_promises",
-                "class_guarded_body_attributes",
-                "class_guarded_promise_block_attributes",
-            ]:
-                prev = child.prev_named_sibling
-                if prev and prev.type in [
-                    "promise",
-                    "half_promise",
-                    "class_guarded_promises",
-                ]:
-                    fmt.print("", 0)
-            elif child.type == "comment":
-                prev = child.prev_named_sibling
-                if prev and prev.type in [
-                    "promise",
-                    "half_promise",
-                    "class_guarded_promises",
-                    "class_guarded_body_attributes",
-                    "class_guarded_promise_block_attributes",
-                ]:
-                    parent = child.parent
-                    if parent and parent.type in [
-                        "bundle_section",
-                        "class_guarded_promises",
-                    ]:
-                        fmt.print("", 0)
+            if needs_blank_line_before(child, indent, line_length):
+                fmt.print("", 0)
             autoformat(child, fmt, line_length, macro_indent, indent)
         return
-    if node.type in [",", ";"]:
+    if node.type in {",", ";"}:
         fmt.print_same_line(node)
         return
     if node.type == "comment":
-        if text(node).strip() == "#":
-            prev = node.prev_named_sibling
-            nxt = node.next_named_sibling
-            if not (prev and prev.type == "comment" and nxt and nxt.type == "comment"):
-                return
-        comment_indent = indent
-        next_sib = node.next_named_sibling
-        while next_sib and next_sib.type == "comment":
-            next_sib = next_sib.next_named_sibling
-        if next_sib is None:
-            prev_sib = node.prev_named_sibling
-            while prev_sib and prev_sib.type == "comment":
-                prev_sib = prev_sib.prev_named_sibling
-            if prev_sib and prev_sib.type in [
-                "bundle_section",
-                "class_guarded_promises",
-                "class_guarded_body_attributes",
-                "class_guarded_promise_block_attributes",
-                "promise",
-                "half_promise",
-                "attribute",
-            ]:
-                comment_indent = indent + 2
-        elif next_sib.type in [
-            "bundle_section",
-            "class_guarded_promises",
-            "class_guarded_body_attributes",
-            "class_guarded_promise_block_attributes",
-            "promise",
-            "half_promise",
-            "attribute",
-        ]:
-            comment_indent = indent + 2
-        fmt.print(node, comment_indent)
+        if is_empty_comment(node):
+            return
+        fmt.print(node, get_comment_indent(node, indent))
         return
     fmt.print(node, indent)
 
