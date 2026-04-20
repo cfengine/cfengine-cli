@@ -1,0 +1,72 @@
+templates:
+  cfengine3.27:
+    version: 3.27.0
+    edition: enterprise
+    bootstrap: hub1
+    demo: false
+
+  cfengine-master:
+    remote_download: true
+    hub_package: "http://buildcache.cfengine.com/packages/testing-pr/jenkins-master-nightly-pipeline-333/PACKAGES_HUB_x86_64_linux_debian_11/cfengine-nova-hub_3.28.0a.1433c0c2f~133.debian11_amd64.deb"
+    client_package: "http://buildcache.cfengine.com/packages/testing-pr/jenkins-master-nightly-pipeline-333/PACKAGES_x86_64_linux_debian_11/cfengine-nova_3.28.0a.1433c0c2f~133.debian11_amd64.deb"
+    bootstrap: hub2
+
+groups:
+  - hub1:
+      role: hub
+      cfengine: cfengine3.27
+      source:
+        mode: spawn
+        spawn:
+          provider: vagrant
+          vagrant:
+            box: ubuntu/focal64
+            memory: 512
+            cpus: 1
+            sync_folder: null
+            provision: null
+        count: 1
+
+  - hub2:
+      role: hub
+      cfengine: cfengine-master
+      source:
+        mode: save
+        hosts: ["8.8.8.8"]
+
+  - client2:
+      role: client
+      cfengine: cfengine3.27
+      source:
+        mode: spawn
+        spawn:
+          provider: aws
+          aws:
+            image: debian-13
+            size: xlarge
+        count: 3
+          
+  - client3:
+      role: client
+      cfengine: cfengine-master
+      source:
+        mode: spawn
+        spawn:
+          provider: gcp
+          gcp:
+            image: debian-13
+            network: null
+            public_ip: true
+            size: n1-standard-1
+        count: 2
+
+  - client4:
+      role: client
+      source:
+        mode: spawn
+        spawn:
+          provider: vagrant
+          vagrant:
+            box: generic/centos7
+        count: 1
+
