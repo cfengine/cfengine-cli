@@ -117,6 +117,26 @@ def _get_arg_parser():
         dest="minimum_version",
     )
 
+    parser = dev_subparsers.add_parser("generate-changelog")
+    parser.add_argument(
+        "-o",
+        "--output",
+        action="store_false",
+        default=True,
+        help="Write changelog to stdout instead of prepending to CHANGELOG.md",
+    )
+    parser.add_argument(
+        "--show-version",
+        action="store_true",
+        dest="show_version",
+        help="Print the version from .CFVERSION and exit",
+    )
+    parser.add_argument(
+        "git_args",
+        nargs="*",
+        metavar="GIT_ARG",
+        help="Commit range and/or extra git options, e.g. 3.27.0..origin/3.27.x",
+    )
     return ap
 
 
