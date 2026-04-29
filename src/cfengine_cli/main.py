@@ -126,6 +126,41 @@ def _get_arg_parser():
     up_parser.add_argument(
         "--validate", action="store_true", help="Validate the given config"
     )
+    parser = dev_subparsers.add_parser(
+        "generate-changelog",
+        description="""Changelog generator for CFEngine repositories.
+
+Auto-detects which repos to include based on the current working directory (core, masterfiles, enterprise)
+
+Enterprise' changelog also reflects changes in mission-portal, nova and buildscripts (dependency-updates)
+Core and Masterfiles only reflect themselves""",
+        epilog="""Examples:
+  - cfengine dev generate-changelog
+    on 3.27.x this will check changelog for latest known (e.g. 3.27.1) and update the changelog for 3.27.1 -> 3.27.2
+
+  - cfengine dev generate-changelog -o 3.26.0..3.27.0
+    on any branch will print changelog from version 2.26.0 -> 3.27.0 to stdout""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        action="store_true",
+        default=False,
+        help="Write changelog to stdout instead of prepending to CHANGELOG.md",
+    )
+    parser.add_argument(
+        "--show-version",
+        action="store_true",
+        dest="show_version",
+        help="Print the version from .CFVERSION and exit",
+    )
+    parser.add_argument(
+        "git_args",
+        nargs="*",
+        metavar="GIT_ARG",
+        help="Commit range [other optional args], e.g. 3.27.0..origin/3.27.x",
+    )
     return ap
 
 
