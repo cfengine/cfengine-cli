@@ -45,3 +45,32 @@ bundle agent check
         "$(sys.inputdir)/failsafe_output.txt", "$(this.promise_filename)"
       );
 }
+
+bundle agent win_services
+{
+  vars:
+    "autostart_services"
+      slist => {
+        "Alerter",
+        "W32Time",
+        # Windows Time
+      };
+
+    some_class::
+      "autostart_services"
+        slist => {
+          "MpsSvc",
+          # Windows Firewall
+          "W32Time",
+          # Windows Time
+        };
+
+    some_class::
+      "autostart_services"
+        slist => {
+          "MpsSvc",
+          # Windows Firewall
+          "W32Time",
+          # Windows Time
+        };
+}
