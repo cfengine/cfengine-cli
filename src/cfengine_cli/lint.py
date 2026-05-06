@@ -1042,8 +1042,9 @@ def _find_filenames_in_arg_folder(arg: str) -> list[str]:
     for root, dirs, files in os.walk(arg, followlinks=True):
         # Remove hidden files:
         files = [f for f in files if not f[0] == "."]
-        # Skip .x.cf files (policy files with intentional errors):
-        files = [f for f in files if not f.endswith(".x.cf")]
+        # Skip .x.cf files (policy files with intentional errors)
+        # and .output.cf files (formatter test outputs):
+        files = [f for f in files if not f.endswith((".x.cf", ".output.cf"))]
         # Skip test-related JSON files during directory traversal:
         files = [
             f
