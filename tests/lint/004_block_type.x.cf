@@ -1,0 +1,11 @@
+bundle notavalidtype my_bundle
+{
+  reports:
+    "Hello";
+}
+
+promise server my_promise_type
+{
+  path => "/bin/true";
+  interpreter => "/bin/bash";
+}

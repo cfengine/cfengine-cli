@@ -1,0 +1,11 @@
+
+bundle notavalidtype my_bundle
+       ^-----------^
+Error: Bundle type must be one of (agent, common, edit_line, edit_xml, monitor, server), not 'notavalidtype' at tests/lint/004_block_type.x.cf:1:8
+
+
+promise server my_promise_type
+        ^----^
+Error: Promise type must be 'agent', not 'server' at tests/lint/004_block_type.x.cf:7:9
+FAIL: tests/lint/004_block_type.x.cf (2 errors)
+Failure, 2 errors in total.

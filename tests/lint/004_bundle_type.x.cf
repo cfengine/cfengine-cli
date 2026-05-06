@@ -1,5 +1,0 @@
-bundle notavalidtype my_bundle
-{
-  reports:
-    "Hello";
-}
