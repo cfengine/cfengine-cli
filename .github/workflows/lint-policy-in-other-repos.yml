@@ -24,6 +24,11 @@ jobs:
         with:
           repository: cfengine/masterfiles
           path: masterfiles
+      - name: Checkout documentation
+        uses: actions/checkout@v4
+        with:
+          repository: cfengine/documentation
+          path: documentation
       - name: Checkout modules
         uses: actions/checkout@v4
         with:
@@ -44,4 +49,7 @@ jobs:
         run: |
           uv run cfengine lint --strict no ../masterfiles
           uv run cfengine lint --strict no ../modules
-        # TODO: Add documentation and core when ready
+          uv run cfengine lint --strict no ../documentation
+          # TODO: Add core when ready
+          # TODO: Do all of them together, with strict, when ready;
+          #       uv run cfengine lint ../core ../masterfiles ../documentation ../modules
