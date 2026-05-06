@@ -47,6 +47,18 @@ def _contains_macro(nodes: Node | list[Node]) -> bool:
     return _contains_macro(nodes.children)
 
 
+def _contains_list_with_comment(nodes: Node | list[Node]) -> bool:
+    """Check if a node (or list) contains a list with a comment child.
+
+    A `#` comment extends to end of line, so a list containing one cannot
+    be rendered on a single line — every such list must be split."""
+    if isinstance(nodes, list):
+        return any(_contains_list_with_comment(node) for node in nodes)
+    if nodes.type == "list" and any(c.type == "comment" for c in nodes.children):
+        return True
+    return _contains_list_with_comment(nodes.children)
+
+
 def format_json_file(filename: str, check: bool) -> int:
     """Reformat a JSON file in place using cfbs pretty-printer.
 
@@ -254,7 +266,8 @@ def maybe_split_generic_list(
     nodes: list[Node], indent: int, line_length: int, trailing_comma: bool = True
 ) -> list[str]:
     """Try a single-line rendering; fall back to split_generic_list if too long."""
-    if not _contains_macro(nodes):
+    has_comment = any(n.type == "comment" for n in nodes)
+    if not _contains_macro(nodes) and not has_comment:
         string = " " * indent + stringify_single_line_nodes(nodes)
         if len(string) < line_length:
             return [string]
@@ -299,7 +312,7 @@ def maybe_split_rval(
     node: Node, indent: int, offset: int, line_length: int
 ) -> list[str]:
     """Return single-line rval if it fits at offset, otherwise split it."""
-    if _contains_macro(node):
+    if _contains_macro(node) or _contains_list_with_comment(node):
         return split_rval(node, indent, line_length)
     line = stringify_single_line_node(node)
     if len(line) + offset < line_length:
@@ -371,8 +384,11 @@ def _attempt_split_attribute(node: Node, indent: int, line_length: int) -> list[
 def _stringify(node: Node, indent: int, line_length: int) -> list[str]:
     """Return a node as pre-indented line(s), splitting if it exceeds line_length."""
     # Attributes containing macros must always be split — macros cannot
-    # appear inline on a single line.
-    if node.type == "attribute" and _contains_macro(node):
+    # appear inline on a single line. Same for lists with comments inside,
+    # since `#` extends to end of line.
+    if node.type == "attribute" and (
+        _contains_macro(node) or _contains_list_with_comment(node)
+    ):
         return _attempt_split_attribute(node, indent, line_length - 1)
     single_line = " " * indent + stringify_single_line_node(node)
     # Reserve 1 char for trailing ; or , after attributes
@@ -517,6 +533,8 @@ def _can_single_line_promise(node: Node, indent: int, line_length: int) -> bool:
     assert node.type == "promise"
     children = node.children
     if _contains_macro(children):
+        return False
+    if _contains_list_with_comment(children):
         return False
     attrs = [c for c in children if c.type == "attribute"]
     next_sib = node.next_named_sibling
