@@ -12,11 +12,11 @@ bundle agent helper(arg)
 bundle agent main
 {
   files:
-    "/tmp/test"
-      copy_from => mycopy(readfile("/etc/source", "100"));
+    "/tmp/test" copy_from => mycopy(readfile("/etc/source", "100"));
+
   methods:
-    "test"
-      usebundle => helper(format("hello %s", "world"));
+    "test" usebundle => helper(format("hello %s", "world"));
+
   vars:
     "x" string => format("nested: %s", getuid("root"));
 }
