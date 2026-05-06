@@ -15,6 +15,7 @@ lint: venv
 	uv tool run flake8 src/ --ignore=E203,W503,E722,E731 --max-complexity=100 --max-line-length=160
 	uv tool run pyflakes src/
 	uv tool run pyright src/
+	uv run cfengine lint --strict=no ./
 
 install:
 	pipx install --force --editable .
