@@ -583,7 +583,7 @@ def _lint_promise_guard(
     """Check that a promise type guard (e.g. `vars:`) for deprecation or unknown type."""
     assert _text(node) and len(_text(node)) > 1 and _text(node)[-1] == ":"
     promise_type = _text(node)[0:-1]
-    if promise_type in syntax_data.DEPRECATED_PROMISE_TYPES:
+    if state.strict and promise_type in syntax_data.DEPRECATED_PROMISE_TYPES:
         raise ValidationError(
             f"Deprecation: Promise type '{promise_type}' is deprecated {location}",
             node,
