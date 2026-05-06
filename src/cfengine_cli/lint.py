@@ -622,6 +622,14 @@ def _lint_block_name(node: Node, state: State, location: str, syntax_data: Synta
         raise ValidationError(
             f"Convention: Bundle name should be lowercase {location}", node
         )
+    if (
+        state.strict
+        and node.type == "body_block_name"
+        and _text(node) != _text(node).lower()
+    ):
+        raise ValidationError(
+            f"Convention: Body name should be lowercase {location}", node
+        )
     if node.type == "promise_block_name" and _text(node) != _text(node).lower():
         raise ValidationError(
             f"Convention: Promise type should be lowercase {location}", node
