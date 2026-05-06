@@ -39,7 +39,6 @@ from dataclasses import dataclass, field
 from tree_sitter import Language, Node, Parser, Tree
 from cfbs.validate import validate_config
 from cfbs.cfbs_config import CFBSConfig
-from cfbs.utils import find
 from cfengine_cli.lint_csv import check_csv_file
 from cfengine_cli.lint_yml import check_yml_file
 from cfengine_cli.utils import UserError
@@ -1014,58 +1013,6 @@ def _lint(policy_file: PolicyFile, state: State, syntax_data: SyntaxData) -> int
         print(state.prefix, end="")
     print(message)
     return errors
-
-
-def _find_policy_files(args: Iterable[str]) -> Iterable[str]:
-    """Takes an iterator of paths to files / folders
-
-    Returns an iterator of CFEngine policy file paths (strings).
-    """
-    for arg in args:
-        if os.path.isdir(arg):
-            while arg.endswith(("/.", "/")):
-                arg = arg[0:-1]
-            for result in find(arg, extension=".cf"):
-                yield result
-        elif arg.endswith(".cf"):
-            yield arg
-
-
-def _find_json_files(args: Iterable[str]) -> Iterable[str]:
-    """Takes an iterator of paths to files / folders
-
-    Returns an iterator of JSON file paths (strings).
-    """
-    for arg in args:
-        if os.path.isdir(arg):
-            for result in find(arg, extension=".json"):
-                yield result
-        elif arg.endswith(".json"):
-            yield arg
-
-
-def filter_filenames(filenames: Iterable[str], args: list[str]) -> Iterable[str]:
-    """Filter filenames to avoid linting cfbs generated files and hidden files.
-
-    TODO: We should better respect the user's args if they do:
-          cfengine lint ./out/masterfies/
-          cfengine lint ./somepath/.somehidden/policy.cf
-    """
-
-    for filename in filenames:
-        if filename in args:
-            # The filename was actually one of the args, include it regardless:
-            yield filename
-            continue
-        # Skip cfbs generated files by default:
-        if "/out/" in filename or "/." in filename:
-            continue
-        if filename.startswith("out/"):
-            continue
-        # Skip
-        if filename.startswith(".") and not filename.startswith("./"):
-            continue
-        yield filename
 
 
 def _lint_check_args(args: list[str]):
