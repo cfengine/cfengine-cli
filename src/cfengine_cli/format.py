@@ -682,7 +682,9 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
         while prev_sib and prev_sib.type == "comment" and _is_empty_comment(prev_sib):
             prev_sib = prev_sib.prev_named_sibling
         is_macro_wrapped = (
-            prev_sib and prev_sib.type == "macro" and text(prev_sib).startswith("@if")
+            prev_sib
+            and prev_sib.type == "macro"
+            and text(prev_sib).startswith(("@if", "@else"))
         )
         if not (prev_sib and prev_sib.type == "comment") and not is_macro_wrapped:
             fmt.blank_line()
