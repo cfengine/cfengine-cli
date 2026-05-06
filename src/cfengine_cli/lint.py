@@ -609,6 +609,11 @@ def _lint_block_type(node: Node, state: State, location: str, syntax_data: Synta
             f"Error: Bundle type must be one of ({', '.join(syntax_data.BUILTIN_BUNDLE_TYPES)}), not '{_text(node)}' {location}",
             node,
         )
+    if node.type == "promise_block_type" and _text(node) != "agent":
+        raise ValidationError(
+            f"Error: Promise type must be 'agent', not '{_text(node)}' {location}",
+            node,
+        )
 
 
 def _lint_block_name(node: Node, state: State, location: str, syntax_data: SyntaxData):
