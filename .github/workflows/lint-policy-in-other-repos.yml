@@ -1,0 +1,47 @@
+# This workflow checks that linting works on real policy in other repos
+# and ensures we fix errors in policy before merging new linting rules
+# to CFEngine CLI
+
+name: Lint policy in other repos
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout cfengine-cli
+        uses: actions/checkout@v4
+        with:
+          path: cfengine-cli
+      - name: Checkout masterfiles
+        uses: actions/checkout@v4
+        with:
+          repository: cfengine/masterfiles
+          path: masterfiles
+      - name: Checkout modules
+        uses: actions/checkout@v4
+        with:
+          repository: cfengine/modules
+          path: modules
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        working-directory: cfengine-cli
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          make install
+      - name: Run cfengine lint
+        working-directory: cfengine-cli
+        run: |
+          uv run cfengine lint --strict no ../masterfiles
+          uv run cfengine lint --strict no ../modules
+        # TODO: Add documentation and core when ready
