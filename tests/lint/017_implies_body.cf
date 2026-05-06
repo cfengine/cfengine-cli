@@ -7,6 +7,5 @@ body copy_from mycopy(from, server)
 bundle agent main
 {
   files:
-    "/tmp/test"
-      copy_from => mycopy("/src", "host1");
+    "/tmp/test" copy_from => mycopy("/src", "host1");
 }

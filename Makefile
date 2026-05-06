@@ -9,6 +9,7 @@ venv:
 format: venv
 	uv tool run black . --target-version py310
 	prettier . --write
+	uv run cfengine format ./
 
 lint: venv
 	uv tool run black --check . --fast
@@ -16,6 +17,7 @@ lint: venv
 	uv tool run pyflakes src/
 	uv tool run pyright src/
 	uv run cfengine lint --strict=no ./
+	uv run cfengine format --check
 
 install:
 	pipx install --force --editable .

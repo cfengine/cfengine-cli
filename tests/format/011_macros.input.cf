@@ -180,3 +180,16 @@ slist => {
 @endif
 };
 }
+@if minimum_version(3.24)
+bundle agent test(a, b)
+{
+reports:
+"$(a) and $(b)";
+}
+@else
+bundle agent test(a)
+{
+reports:
+"$(a)";
+}
+@endif
