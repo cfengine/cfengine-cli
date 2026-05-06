@@ -776,15 +776,17 @@ def _lint_attribute_name(
     """Check an attribute name for deprecations and validity according to the
     surrounding promise type."""
     assert node.type == "attribute_name"
-    if state.strict and state.promise_type == "vars" and _text(node) == "str":
+    attribute_name = _text(node)
+    assert attribute_name == state.attribute_name
+    if state.strict and state.promise_type == "vars" and attribute_name == "str":
         raise ValidationError(
             f"Deprecation: Use 'string' instead of 'str' {location}", node
         )
-    if state.strict and _text(node) == "ifvarclass":
+    if state.strict and attribute_name == "ifvarclass":
         raise ValidationError(
             f"Deprecation: Use 'if' instead of 'ifvarclass' {location}", node
         )
-    if state.promise_type and state.attribute_name:
+    if state.promise_type and attribute_name:
         promise_type_data = syntax_data.BUILTIN_PROMISE_TYPES.get(
             state.promise_type, {}
         )
@@ -792,17 +794,17 @@ def _lint_attribute_name(
             # Custom promise type - we cannot validate attribute name here.
             return
         promise_type_attrs = promise_type_data.get("attributes", {})
-        if state.attribute_name not in promise_type_attrs:
+        if attribute_name not in promise_type_attrs:
             raise ValidationError(
-                f"Error: Invalid attribute '{state.attribute_name}' for promise type '{state.promise_type}' {location}",
+                f"Error: Invalid attribute '{attribute_name}' for promise type '{state.promise_type}' {location}",
                 node,
             )
-    if state.block_keyword == "promise" and state.attribute_name not in (
+    if state.block_keyword == "promise" and attribute_name not in (
         None,
         *PROMISE_BLOCK_ATTRIBUTES,
     ):
         raise ValidationError(
-            f"Error: Invalid attribute name '{state.attribute_name}' in '{state.block_name}' custom promise type definition {location}",
+            f"Error: Invalid attribute name '{attribute_name}' in '{state.block_name}' custom promise type definition {location}",
             node,
         )
 
