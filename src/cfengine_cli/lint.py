@@ -50,6 +50,7 @@ VARS_TYPES = {
     "rlist",
     "slist",
     "string",
+    "str",  # deprecated shorthand for string
 }
 PROMISE_BLOCK_ATTRIBUTES = ("path", "interpreter")
 
@@ -775,6 +776,10 @@ def _lint_attribute_name(
     """Check an attribute name for deprecations and validity according to the
     surrounding promise type."""
     assert node.type == "attribute_name"
+    if state.strict and state.promise_type == "vars" and _text(node) == "str":
+        raise ValidationError(
+            f"Deprecation: Use 'string' instead of 'str' {location}", node
+        )
     if state.strict and _text(node) == "ifvarclass":
         raise ValidationError(
             f"Deprecation: Use 'if' instead of 'ifvarclass' {location}", node
