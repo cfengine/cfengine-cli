@@ -17,6 +17,9 @@ printf "" > "$tmpdir/empty.csv"
 # Empty policy file
 printf "" > "$tmpdir/empty.cf"
 
+# Empty YAML file
+printf "" > "$tmpdir/empty.yml"
+
 # CSV with LF-only line endings
 printf 'a,b,c\n1,2,3\n' > "$tmpdir/bad.csv"
 
@@ -25,6 +28,9 @@ printf 'abc\n' > "$tmpdir/bad.json"
 
 # Policy file with just some characters
 printf 'abc\n' > "$tmpdir/bad.cf"
+
+# YAML with unclosed flow sequence
+printf 'items: [1, 2, 3\n' > "$tmpdir/bad.yaml"
 
 # Run lint on the folder - expect non-zero exit
 if cfengine lint "$tmpdir" > "$output_file" 2>&1; then
@@ -38,9 +44,11 @@ cat "$output_file"
 grep -q "FAIL:.*empty.json" "$output_file"
 grep -q "FAIL:.*empty.csv" "$output_file"
 grep -q "FAIL:.*empty.cf" "$output_file"
+grep -q "FAIL:.*empty.yml" "$output_file"
 grep -q "FAIL:.*bad.csv" "$output_file"
 grep -q "FAIL:.*bad.json" "$output_file"
 grep -q "FAIL:.*bad.cf" "$output_file"
+grep -q "FAIL:.*bad.yaml" "$output_file"
 
-# Verify total error count is 6
-grep -q "Failure, 6 errors in total" "$output_file"
+# Verify total error count is 8
+grep -q "Failure, 8 errors in total" "$output_file"
