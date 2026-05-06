@@ -1,5 +1,7 @@
 bundle agent main
 {
+  defaults:
+    "x" string => "value";
   reports:
     "Hello, CFEngine"
       ifvarclass => "cfengine";
