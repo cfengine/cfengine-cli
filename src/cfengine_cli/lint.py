@@ -5,6 +5,7 @@ Currently implemented for:
 - *.cf (policy files)
 - cfbs.json (CFEngine Build project files)
 - *.json (basic JSON syntax checking)
+- *.csv (basic CSV syntax + RFC 4180 CRLF record terminator check)
 
 This is performed in 3 steps:
 1. Parsing - Read the .cf files and convert them into syntax trees
@@ -38,9 +39,10 @@ from tree_sitter import Language, Node, Parser, Tree
 from cfbs.validate import validate_config
 from cfbs.cfbs_config import CFBSConfig
 from cfbs.utils import find
+from cfengine_cli.lint_csv import check_csv_file
 from cfengine_cli.utils import UserError
 
-LINT_EXTENSIONS = (".cf", ".cf.sub", ".json")
+LINT_EXTENSIONS = (".cf", ".cf.sub", ".json", ".csv")
 DEFAULT_NAMESPACE = "default"
 VARS_TYPES = {
     "data",
@@ -1191,6 +1193,9 @@ def _lint_main(
         if filename.endswith(".json"):
             errors += _lint_json_selector(filename)
             continue
+        if filename.endswith(".csv"):
+            errors += _lint_csv(filename)
+            continue
         assert filename.endswith((".cf", ".cf.sub"))
         policy_file = PolicyFile(filename, snippet)
         r = _check_syntax(policy_file, state)
@@ -1326,6 +1331,19 @@ def _lint_json_selector(file: str) -> int:
         return _lint_cfbs_json(file)
     assert file.endswith(".json")
     return _lint_json_plain(file)
+
+
+def _lint_csv(filename: str) -> int:
+    """Lint a CSV file: check that csv parses, and that record terminators
+    are CRLF (per RFC 4180)."""
+    assert os.path.isfile(filename)
+    problem = check_csv_file(filename)
+    r = 0
+    if problem is not None:
+        print(f"{filename}: {problem}")
+        r = 1
+    print(_pass_fail_filename(filename, r))
+    return r
 
 
 # ---------------------------------------------------------------------------
