@@ -1,0 +1,11 @@
+bundle common my_bundle
+{
+  vars:
+    "x" string => "value";
+}
+
+promise agent my_promise_type
+{
+  path => "/bin/true";
+  interpreter => "/bin/bash";
+}
