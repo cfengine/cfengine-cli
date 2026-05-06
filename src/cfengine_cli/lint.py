@@ -6,6 +6,7 @@ Currently implemented for:
 - cfbs.json (CFEngine Build project files)
 - *.json (basic JSON syntax checking)
 - *.csv (basic CSV syntax + RFC 4180 CRLF record terminator check)
+- *.yml / *.yaml (basic YAML syntax checking)
 
 This is performed in 3 steps:
 1. Parsing - Read the .cf files and convert them into syntax trees
@@ -40,9 +41,10 @@ from cfbs.validate import validate_config
 from cfbs.cfbs_config import CFBSConfig
 from cfbs.utils import find
 from cfengine_cli.lint_csv import check_csv_file
+from cfengine_cli.lint_yml import check_yml_file
 from cfengine_cli.utils import UserError
 
-LINT_EXTENSIONS = (".cf", ".cf.sub", ".json", ".csv")
+LINT_EXTENSIONS = (".cf", ".cf.sub", ".json", ".csv", ".yml", ".yaml")
 DEFAULT_NAMESPACE = "default"
 VARS_TYPES = {
     "data",
@@ -1196,6 +1198,9 @@ def _lint_main(
         if filename.endswith(".csv"):
             errors += _lint_csv(filename)
             continue
+        if filename.endswith((".yml", ".yaml")):
+            errors += _lint_yml(filename)
+            continue
         assert filename.endswith((".cf", ".cf.sub"))
         policy_file = PolicyFile(filename, snippet)
         r = _check_syntax(policy_file, state)
@@ -1338,6 +1343,19 @@ def _lint_csv(filename: str) -> int:
     are CRLF (per RFC 4180)."""
     assert os.path.isfile(filename)
     problem = check_csv_file(filename)
+    r = 0
+    if problem is not None:
+        print(f"{filename}: {problem}")
+        r = 1
+    print(_pass_fail_filename(filename, r))
+    return r
+
+
+def _lint_yml(filename: str) -> int:
+    """Lint a YAML file: check that it parses and contains at least one
+    non-null document."""
+    assert os.path.isfile(filename)
+    problem = check_yml_file(filename)
     r = 0
     if problem is not None:
         print(f"{filename}: {problem}")
