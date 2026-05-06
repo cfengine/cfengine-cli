@@ -1,5 +1,0 @@
-bundle agent my_bundle
-{
-  reports:
-    "Hello";
-}

@@ -1,0 +1,16 @@
+
+bundle agent MyBundle
+             ^------^
+Convention: Bundle name should be lowercase at tests/lint/003_name_lowercase.x.cf:1:14
+
+
+body perms MyBody
+           ^----^
+Convention: Body name should be lowercase at tests/lint/003_name_lowercase.x.cf:7:12
+
+
+promise agent MyPromiseType
+              ^-----------^
+Convention: Promise type should be lowercase at tests/lint/003_name_lowercase.x.cf:12:15
+FAIL: tests/lint/003_name_lowercase.x.cf (3 errors)
+Failure, 3 errors in total.

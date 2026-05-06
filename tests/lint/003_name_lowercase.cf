@@ -1,0 +1,16 @@
+bundle agent my_bundle
+{
+  reports:
+    "Hello";
+}
+
+body perms my_body
+{
+  owners => { "root" };
+}
+
+promise agent my_promise_type
+{
+  path => "/bin/true";
+  interpreter => "/bin/bash";
+}
