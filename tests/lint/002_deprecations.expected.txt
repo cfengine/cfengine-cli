@@ -1,0 +1,17 @@
+
+{
+  defaults:
+  ^-------^
+Deprecation: Promise type 'defaults' is deprecated at tests/lint/002_deprecations.x.cf:3:3
+
+  vars:
+    "x" str => "value";
+        ^-^
+Deprecation: Use 'string' instead of 'str' at tests/lint/002_deprecations.x.cf:6:9
+
+    "Hello, CFEngine"
+      ifvarclass => "cfengine";
+      ^--------^
+Deprecation: Use 'if' instead of 'ifvarclass' at tests/lint/002_deprecations.x.cf:9:7
+FAIL: tests/lint/002_deprecations.x.cf (3 errors)
+Failure, 3 errors in total.

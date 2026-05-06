@@ -1,7 +1,0 @@
-
-{
-  reports
-  ^-----^
-Error: Syntax error at tests/lint/006_syntax_error.x.cf:3:3
-FAIL: tests/lint/006_syntax_error.x.cf (1 error)
-Failure, 1 error in total.
