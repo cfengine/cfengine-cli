@@ -614,7 +614,11 @@ def _lint_block_name(node: Node, state: State, location: str, syntax_data: Synta
     """Check that a block name follows conventions and doesn't shadow a built-in."""
     assert node.type in ("bundle_block_name", "body_block_name", "promise_block_name")
 
-    if node.type == "bundle_block_name" and _text(node) != _text(node).lower():
+    if (
+        state.strict
+        and node.type == "bundle_block_name"
+        and _text(node) != _text(node).lower()
+    ):
         raise ValidationError(
             f"Convention: Bundle name should be lowercase {location}", node
         )
@@ -763,7 +767,7 @@ def _lint_attribute_name(
     """Check an attribute name for deprecations and validity according to the
     surrounding promise type."""
     assert node.type == "attribute_name"
-    if _text(node) == "ifvarclass":
+    if state.strict and _text(node) == "ifvarclass":
         raise ValidationError(
             f"Deprecation: Use 'if' instead of 'ifvarclass' {location}", node
         )
