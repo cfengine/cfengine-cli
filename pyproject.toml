@@ -53,6 +53,6 @@ venv = ".venv"
 
 [dependency-groups]
 dev = [
-    "flake8>=7.1.2",
+    "flake8>=7.3.0",
     "pytest>=8.3.4",
 ]
