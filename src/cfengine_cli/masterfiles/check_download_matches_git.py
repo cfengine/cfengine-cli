@@ -68,7 +68,7 @@ def check_download_matches_git(versions):
             extraneous_count += len(only_dl)
             differing_count += len(value_diff)
 
-    nonmatching_versions.sort(key=lambda v: version_as_comparable_list(v), reverse=True)
+    nonmatching_versions.sort(key=version_as_comparable_list, reverse=True)
 
     # fully sort differences.json:
     working_dict = diffs_dict["differences"]

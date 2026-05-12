@@ -811,8 +811,6 @@ def _autoformat(
             if prev_sib and prev_sib.type in BLOCK_TYPES and not fmt.empty:
                 fmt.blank_line()
             fmt.macro_indent = indent
-        elif text(node).startswith("@else"):
-            indent = fmt.macro_indent
         fmt.print(node, 0)
         return
 
