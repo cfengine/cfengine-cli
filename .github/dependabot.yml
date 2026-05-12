@@ -3,15 +3,18 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/"
     schedule:
       interval: "weekly"
-    prefix: "pip"
+    reviewers:
+      - "larsewi"
+      - "olehermanse"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     reviewers:
+      - "larsewi"
       - "olehermanse"
     prefix: "GitHub Actions"
