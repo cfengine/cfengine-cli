@@ -14,7 +14,7 @@ dependencies = [
     "cfbs>=5.5.0",
     "tree-sitter-cfengine>=1.1.12",
     "tree-sitter>=0.25",
-    "markdown-it-py>=3.0.0",
+    "markdown-it-py>=4.2.0",
     "PyYAML>=6.0.3",
 ]
 classifiers = [
