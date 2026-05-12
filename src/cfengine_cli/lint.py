@@ -1269,7 +1269,7 @@ def _lint_json_plain(filename: str) -> int:
     r = 0
     try:
         data = json.loads(data)
-    except:
+    except json.JSONDecodeError:
         r = 1
 
     print(_pass_fail_filename(filename, r))
