@@ -812,7 +812,7 @@ def _autoformat(
                 fmt.blank_line()
             fmt.macro_indent = indent
         elif text(node).startswith("@else"):
-            indent = fmt.macro_indent
+            pass
         fmt.print(node, 0)
         return
 
