@@ -52,7 +52,7 @@ def finalize_vcf(versions_dict, checksums_dict, files_dict):
             # sort each version list, descending
             working_dict[c][f] = sorted(
                 working_dict[c][f],
-                key=lambda v: version_as_comparable_list(v),
+                key=version_as_comparable_list,
                 reverse=True,
             )
         # sort filepaths, alphabetically
@@ -68,7 +68,7 @@ def finalize_vcf(versions_dict, checksums_dict, files_dict):
             # sort each version list, descending
             working_dict[f][c] = sorted(
                 working_dict[f][c],
-                key=lambda v: version_as_comparable_list(v),
+                key=version_as_comparable_list,
                 reverse=True,
             )
         # sort checksums
