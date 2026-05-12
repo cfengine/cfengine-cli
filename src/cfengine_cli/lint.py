@@ -1268,7 +1268,7 @@ def _lint_json_plain(filename: str) -> int:
         data = f.read()
     r = 0
     try:
-        data = json.loads(data)
+        json.loads(data)
     except:
         r = 1
 
