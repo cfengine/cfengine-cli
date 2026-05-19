@@ -13,7 +13,7 @@ dependencies = [
     "cf-remote>=0.7.3",
     "cfbs>=5.5.0",
     "tree-sitter-cfengine>=1.1.12",
-    "tree-sitter>=0.25",
+    "tree-sitter>=0.25.2",
     "markdown-it-py>=3.0.0",
     "PyYAML>=6.0.3",
 ]
