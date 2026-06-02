@@ -117,6 +117,15 @@ def _get_arg_parser():
         dest="minimum_version",
     )
 
+    up_parser = subp.add_parser(
+        "up", help="Spawn and install with cf-remote from a yaml config"
+    )
+    up_parser.add_argument(
+        "config", default="config.yaml", nargs="?", help="Path to yaml config"
+    )
+    up_parser.add_argument(
+        "--validate", action="store_true", help="Validate the given config"
+    )
     return ap
 
 
@@ -150,6 +159,8 @@ def run_command_with_args(args) -> int:
         return commands.dev(args.dev_command, args)
     if args.command == "profile":
         return commands.profile(args)
+    if args.command == "up":
+        return commands.up(args)
     raise UserError(f"Unknown command: '{args.command}'")
 
 

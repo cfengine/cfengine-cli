@@ -27,3 +27,4 @@ check: venv format lint
 	uv run bash tests/run-lint-tests.sh
 	uv run bash tests/run-format-tests.sh
 	uv run bash tests/run-shell-tests.sh
+	uv run bash tests/run-up-validate-tests.sh
