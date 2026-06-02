@@ -16,7 +16,7 @@ dependencies = [
     "tree-sitter>=0.25",
     "markdown-it-py>=3.0.0",
     "pyyaml>=6.0.3",
-    "pydantic>=2.12.5",
+    "pydantic>=2.13.4",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
