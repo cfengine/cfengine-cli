@@ -4,12 +4,12 @@ from cfengine_cli.utils import UserError
 from cf_remote.paths import path_append
 
 
-def cfengine_dir(subdir=None):
+def cfengine_cache_dir(subdir=None):
     """
-    Returns the directory used by the Python tools for temporary files,
-    global config, downloads, etc.
+    Returns the directory used by the Python tools for temporary
+    files, downloads, etc.
 
-    Defaults to ~/.cfengine/, but can be overridden via the CFENGINE_DIR
+    Defaults to ~/.cache/cfengine/, but can be overridden via the CFENGINE_DIR
     environment variable.
     """
     override_dir = os.getenv("CFENGINE_DIR")
@@ -27,7 +27,32 @@ def cfengine_dir(subdir=None):
 
         return path_append(override_dir, subdir)
 
-    return path_append("~/.cfengine/", subdir)
+    return path_append("~/.cache/cfengine/", subdir)
+
+
+def cfengine_config_dir(subdir=None):
+    """
+    Returns the directory used by the Python tools for config/persistent files.
+
+    Defaults to ~/.config/cfengine/, but can be overridden via the CFENGINE_DIR
+    environment variable.
+    """
+    override_dir = os.getenv("CFENGINE_DIR")
+
+    if override_dir:
+        override_dir = os.path.normpath(override_dir)
+        parent = os.path.dirname(override_dir)
+
+        if not os.path.exists(parent):
+            raise UserError(
+                "'{}' doesn't exist. Make sure this path is correct and exists.".format(
+                    parent
+                )
+            )
+
+        return path_append(override_dir, subdir)
+
+    return path_append("~/.config/cfengine/", subdir)
 
 
 def bin(component: str) -> str:
