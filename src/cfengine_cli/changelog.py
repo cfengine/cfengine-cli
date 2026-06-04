@@ -34,9 +34,9 @@ REVERT_RE = r'^Revert "Updated dependency \'([^\']+)\' from version (\S+) to (\S
 REAPPLY_RE = r'^Reapply "Updated dependency \'([^\']+)\' from version (\S+) to (\S+)"'
 
 
-def fetch_git_output(args):
+def fetch_git_output(path, args):
     return subprocess.run(
-        args,
+        ["git", "-C", f"{path}"] + args,
         stdout=subprocess.PIPE,
         check=True,
     ).stdout.splitlines(keepends=True)
@@ -49,10 +49,8 @@ def collect_version_updates(repos, git_args):
     dep_history: dict[str, list[tuple[str, str]]] = {}
     for repo in repos:
         for raw in fetch_git_output(
+            os.path.join(os.getcwd(), repo),
             [
-                "git",
-                "-C",
-                f"{os.path.join(os.getcwd(), repo)}",
                 "log",
                 "--no-merges",
                 "--reverse",
@@ -104,16 +102,14 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
     subject = "".join(
         line.decode()
         for line in fetch_git_output(
+            os.path.join(os.getcwd(), repo),
             [
-                "git",
-                "-C",
-                f"{os.path.join(os.getcwd(), repo)}",
                 "log",
                 "--format=%B",
                 "-n",
                 "1",
                 sha,
-            ]
+            ],
         )
     )
 
@@ -126,13 +122,13 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
     body = parts[1].strip() if len(parts) > 1 else ""
 
     TOKEN_PATTERNS = [
-        r"^Changelog:",
-        r"^Signed-off-by:",
-        r"^Co-authored-by:",
-        r"^Ticket:",
-        r"^\(cherry picked from commit [0-9a-f]+\)",
-        r"^Cancel-Changelog:\s*[0-9a-f]+",
-        r"^This reverts commit [0-9a-f]+",
+        r"Changelog:",
+        r"Signed-off-by:",
+        r"Co-authored-by:",
+        r"Ticket:",
+        r"\(cherry picked from commit [0-9a-f]+\)",
+        r"Cancel-Changelog:\s*[0-9a-f]+",
+        r"This reverts commit [0-9a-f]+",
     ]
     token_re = re.compile("|".join(TOKEN_PATTERNS), re.IGNORECASE)
 
@@ -146,27 +142,27 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
             if current_token:
                 trailers[current_token] = "\n".join(collected_lines).strip()
 
-            if re.match(r"^Changelog:", stripped, re.IGNORECASE):
+            if re.match(r"Changelog:", stripped, re.IGNORECASE):
                 current_token = "Changelog"
-                first_val = re.sub(r"^Changelog:\s*", "", stripped, flags=re.IGNORECASE)
+                first_val = re.sub(r"Changelog:\s*", "", stripped, flags=re.IGNORECASE)
                 collected_lines = [first_val] if first_val else []
 
             elif m := re.match(
-                r"^\(cherry picked from commit ([0-9a-f]+)\)", stripped, re.IGNORECASE
+                r"\(cherry picked from commit ([0-9a-f]+)\)", stripped, re.IGNORECASE
             ):
                 trailers["CherryPick"] = m and m.group(1)
                 current_token = None
                 collected_lines = []
 
             elif m := re.match(
-                r"^Cancel-Changelog:\s*([0-9a-f]+)", stripped, re.IGNORECASE
+                r"Cancel-Changelog:\s*([0-9a-f]+)", stripped, re.IGNORECASE
             ):
                 trailers["Cancel"] = m and m.group(1)
                 current_token = None
                 collected_lines = []
 
             elif m := re.match(
-                r"^This reverts commit ([0-9a-f]+)", stripped, re.IGNORECASE
+                r"This reverts commit ([0-9a-f]+)", stripped, re.IGNORECASE
             ):
                 trailers["Cancel"] = m and m.group(1)
                 current_token = None
@@ -204,11 +200,11 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
 
     if "Changelog" in trailers:
         changelog_val = trailers["Changelog"]
-        if re.match(r"^Title[ .]*$", changelog_val, re.IGNORECASE):
+        if re.match(r"Title[ .]*", changelog_val, re.IGNORECASE):
             add_entry(sha, title)
-        elif re.match(r"^(Commit|Body)[ .]*$", changelog_val, re.IGNORECASE):
+        elif re.match(r"(Commit|Body)[ .]*", changelog_val, re.IGNORECASE):
             add_entry(sha, clean_commit_body)
-        elif re.match(r"^None[ .]*$", changelog_val, re.IGNORECASE):
+        elif re.match(r"None[ .]*", changelog_val, re.IGNORECASE):
             pass
         else:
             add_entry(sha, changelog_val)
@@ -224,10 +220,8 @@ def parse_git_log(repos, git_args):
 
     for repo in repos:
         for raw_sha in fetch_git_output(
+            os.path.join(os.getcwd(), repo),
             [
-                "git",
-                "-C",
-                f"{os.path.join(os.getcwd(), repo)}",
                 "rev-list",
                 "--no-merges",
                 "--reverse",
