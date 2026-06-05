@@ -1,16 +1,16 @@
 templates:
 
 groups:
-  - hub1:
-      role: hub
-      cfengine:
-        version: 3.27.0
+  hub1:
+    role: hub
+    cfengine:
+      version: 3.27.0
 
-      source:
-        mode: spawn
-        spawn:
-          provider: vagrant
-          vagrant:
-            box: foobar
+    source:
+      mode: spawn
+      spawn:
+        provider: vagrant
+        vagrant:
+          box: foobar
 
-        count: 1
+      count: 1
