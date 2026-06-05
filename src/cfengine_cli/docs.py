@@ -105,7 +105,7 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
         code_snippet = "\n".join(content.split("\n")[first_line + 1 : last_line - 1])
 
         with open(snippet_path, "w") as f:
-            f.write(code_snippet)
+            f.write(code_snippet + "\n")
     except IOError:
         raise UserError(f"Couldn't open '{origin_path}' or '{snippet_path}'")
 
@@ -194,12 +194,14 @@ def fn_replace(origin_path, snippet_path, _language, first_line, last_line, inde
     return offset  # TODO: offset can be undefined here
 
 
-def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line):
+def fn_autoformat(
+    _origin_path, snippet_path, language, _first_line, _last_line
+) -> bool:
     assert language in ("cf", "json")
     match language:
         case "json":
             try:
-                pretty_file(snippet_path)
+                return pretty_file(snippet_path)
             except FileNotFoundError:
                 raise UserError(
                     f"Couldn't find the file '{snippet_path}'. Run --extract to extract the inline code."
@@ -213,6 +215,7 @@ def fn_autoformat(_origin_path, snippet_path, language, _first_line, _last_line)
         case "cf":
             # Note: Dead code - Not used for CFEngine policy yet
             format_policy_file(snippet_path, 80, False)
+            return False
 
 
 def _translate_language(x):
@@ -250,13 +253,13 @@ def _process_markdown_code_blocks(
 
     origin_paths = sorted(parsed_markdowns["files"].keys())
     origin_paths_len = len(origin_paths)
+    formatted = False
 
     if origin_paths_len == 0:
         print("No markdown files found.")
         return
 
     if syntax_check:
-        # We currently only print the filenames during linting, not formatting
         print(
             f"Processing code blocks (snippets) inside {origin_paths_len} markdown files:"
         )
@@ -325,13 +328,17 @@ def _process_markdown_code_blocks(
                 fn_check_output()
 
             if autoformat and "noautoformat" not in flags:
-                fn_autoformat(
+                if fn_autoformat(
                     origin_path,
                     snippet_path,
                     language,
                     first_line,
                     last_line,
-                )
+                ):
+                    if not formatted:
+                        print(f"Formatting code blocks in '{path}'...")
+                    print(f"File '{os.path.abspath(origin_path)}' was reformatted")
+                    formatted = True
 
             if replace and "noreplace" not in flags:
                 offset = fn_replace(
@@ -347,9 +354,8 @@ def _process_markdown_code_blocks(
 
 
 def _run_formatter(tool, args, cwd, install_hint):
-    print(f"Formatting with {tool}...")
     try:
-        subprocess.run(
+        result = subprocess.run(
             [tool, *args],
             capture_output=True,
             text=True,
@@ -358,13 +364,24 @@ def _run_formatter(tool, args, cwd, install_hint):
         )
     except:
         raise UserError(f"Encountered an error running {tool}\nInstall: {install_hint}")
+    return result
 
 
-def _run_black(path):
-    _run_formatter("black", [path], ".", "pipx install black")
+def _run_black(path) -> bool:
+    result = _run_formatter("black", [path], ".", "pipx install black")
+
+    formatted = False
+    for line in result.stderr.splitlines():
+        if line.startswith("reformatted "):
+            if not formatted:
+                print("Formatting with black...")
+            print(f"File '{os.path.abspath(line.split()[1])}' was reformatted")
+            formatted = True
+
+    return formatted
 
 
-def _run_prettier(path):
+def _run_prettier(path) -> bool:
     assert os.path.exists(path)
 
     args = [path]
@@ -379,16 +396,27 @@ def _run_prettier(path):
         if any(find(path, extension=".md")):
             args.append("**.md")
         if not args:
-            return
+            return False
     # Warning: Beware of shell expansion if you try to run this in your terminal.
     # Wrong: prettier --write **.markdown **.md
     # Right: prettier --write '**.markdown' '**.md'
-    _run_formatter(
+    result = _run_formatter(
         "prettier",
-        ["--embedded-language-formatting", "off", "--write", *args],
+        ["--embedded-language-formatting", "off", "--write", "--list-different", *args],
         directory,
         "npm install --global prettier",
     )
+    formatted = False
+
+    for line in result.stdout.splitlines():
+        if line.strip():
+            if not formatted:
+                print("Formatting with prettier...")
+            print(
+                f"File '{os.path.abspath(os.path.join(directory, line))}' was reformatted"
+            )
+            formatted = True
+    return formatted
 
 
 def _update_docs_single_arg(path):
@@ -397,11 +425,13 @@ def _update_docs_single_arg(path):
     if not os.path.isfile(path) and not os.path.isdir(path):
         raise UserError(f"Argument '{path}' is not a file or a folder")
 
+    formatted = False
     if os.path.isdir(path) or path.endswith(".py"):
-        _run_black(path)
+        if _run_black(path):
+            formatted = True
     if os.path.isdir(path) or path.endswith((".md", ".markdown")):
-        _run_prettier(path)
-        print(f"Formatting code blocks in '{path}'...")
+        if _run_prettier(path):
+            formatted = True
         _process_markdown_code_blocks(
             path=path,
             languages=["json"],  # TODO: Add cfengine3 here
@@ -412,6 +442,8 @@ def _update_docs_single_arg(path):
             replace=True,
             cleanup=True,
         )
+
+    return formatted
 
 
 def update_docs(paths) -> int:
