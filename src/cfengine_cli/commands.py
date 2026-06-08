@@ -74,6 +74,7 @@ def _format_dirname(directory: str, line_length: int, check: bool) -> int:
                 name.endswith(".x.cf")
                 or name.endswith(".input.cf")
                 or name.endswith(".output.cf")
+                or name.endswith(".expected.cf")
             ):
                 continue  # Test files skipped during directory traversal
             if name.endswith(

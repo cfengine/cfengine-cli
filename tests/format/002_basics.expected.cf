@@ -12,8 +12,11 @@ body common control
 promise agent example
 {
   interpreter => "/usr/bin/python3";
+
   linux::
+    interpreter => "/usr/bin/python3";
     path => "/var/cfengine/inputs/modules/promises/git.py";
+
   windows::
     path => "C:\Program files\Cfengine\inputs\modules\promises\git.py";
 }

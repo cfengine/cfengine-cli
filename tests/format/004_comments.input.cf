@@ -64,3 +64,72 @@ bundle agent win_services
           # Windows Time
         };
 }
+
+body package_method apt
+{
+any::
+# ii  acpi      0.09-3ubuntu1
+package_changes => "bulk";
+package_list_command => "/usr/bin/dpkg -l";
+package_list_name_regex => "ii\s+([^\s]+).*";
+package_list_version_regex => "ii\s+[^\s]+\s+([^\s]+).*";
+# package_list_arch_regex => "none";
+package_installed_regex => ".*";
+# all reported are installed:
+# package_name_convention => "$(name)_$(version)_$(arch)";
+package_name_convention => "$(name)";
+# Use these only if not using a separate version/arch string:
+# package_version_regex => "";
+# package_name_regex => "";
+# package_arch_regex => "";
+package_add_command => "/usr/bin/apt-get --yes install";
+package_delete_command => "/usr/bin/apt-get --yes remove";
+package_update_command => "/usr/bin/apt-get --yes dist-upgrade";
+# package_verify_command => "/bin/rpm -V";
+}
+
+body package_method ca
+{
+# foo
+package_changes => "bulk";
+}
+
+body package_method ac
+{
+package_changes => "bulk";
+# bar
+}
+
+body package_method cac
+{
+# foo
+package_changes => "bulk";
+# bar
+}
+
+body package_method ga
+{
+linux::
+package_changes => "bulk";
+}
+
+body package_method cgcac
+{
+# foo
+linux::
+# bar
+package_changes => "bulk";
+# baz
+}
+
+body package_method cgcacgcac
+{
+# foo
+linux::
+# bar
+package_changes => "bulk";
+# baz
+!linux::
+# bar
+package_changes => "bulk";
+}
