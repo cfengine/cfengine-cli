@@ -3,8 +3,10 @@
 body common control
 {
   inputs => { "/var/cfengine/inputs/some_file.cf" };
+
   linux::
     inputs => { "/var/cfengine/inputs/other_file.cf" };
+
   ubuntu::
     inputs => {};
 }

@@ -536,6 +536,9 @@ def _can_single_line_promise(node: Node, indent: int, line_length: int) -> bool:
         return False
     if _contains_list_with_comment(children):
         return False
+    if any(c.type == "comment" for c in children):
+        # Comments between promiser and attribute force multi-line layout
+        return False
     attrs = [c for c in children if c.type == "attribute"]
     next_sib = node.next_named_sibling
     while next_sib and next_sib.type == "macro":
@@ -647,8 +650,20 @@ def _format_remaining_children(
     line_length: int,
 ) -> None:
     """Format promise children, skipping promiser/arrow/stakeholder parts."""
+    # When the promise was multi-lined because of comments between the
+    # promiser and the attribute, preserve the attribute's original spacing
+    # rather than running it through the spacing-normalizing stringifier.
+    # Only applies when the comments and attribute aren't separated by a
+    # macro — half-promise patterns still use the normal renderer.
+    verbatim_attr = any(c.type == "comment" for c in children) and not any(
+        c.type == "macro" for c in children
+    )
     for child in children:
         if child.type in PROMISER_PARTS:
+            continue
+        if verbatim_attr and child.type == "attribute":
+            fmt.print(text(child), indent + 2)
+            fmt.update_previous(child)
             continue
         _autoformat(child, fmt, line_length, indent)
 
@@ -736,27 +751,39 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
     if child.type == "class_guarded_promise_block_attributes":
         return prev.type in {"attribute", "class_guarded_promise_block_attributes"}
 
+    if child.type == "class_guarded_body_attributes":
+        return prev.type in {"attribute", "class_guarded_body_attributes"}
+
     if child.type in CLASS_GUARD_TYPES:
         return prev.type in {"promise", "half_promise", "class_guarded_promises"}
 
     if child.type == "comment":
-        if prev.type not in {"promise", "half_promise"} | CLASS_GUARD_TYPES:
+        if _is_empty_comment(child):
             return False
-        parent = child.parent
-        if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
+        # Top-level comment after a complete block — visually separates them
+        if prev.type in BLOCK_TYPES:
             return True
-        # Inside a body/promise block, a comment between two class guards
-        # only gets a blank-line separator when the preceding class guard
-        # already has interior comments (i.e. the visual block is rich
-        # enough that running it together with the next would look dense).
+        parent = child.parent
+        # Trailing comment at the end of a bundle body lands deeply
+        # indented (aligned with the deepest attribute); insert a blank
+        # line so it doesn't run into the preceding section.
+        if (
+            prev.type == "bundle_section"
+            and parent
+            and parent.type == "bundle_block_body"
+            and _skip_comments(child.next_named_sibling, "next") is None
+        ):
+            return True
+        if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
+            return prev.type in {"promise", "half_promise"} | CLASS_GUARD_TYPES
         if parent and parent.type in {"body_block_body", "promise_block_body"}:
-            if _skip_comments(child.next_named_sibling, "next") is None:
+            next_sib = _skip_comments(child.next_named_sibling, "next")
+            if next_sib is None:
                 return False
-            if prev.type in CLASS_GUARD_TYPES and any(
-                c.type == "comment" for c in prev.children
-            ):
-                return True
-            return False
+            # Leading comment for a class-guarded section preceded by
+            # content above it.
+            if next_sib.type in CLASS_GUARD_TYPES:
+                return prev.type in CLASS_GUARD_TYPES | {"attribute"}
         return False
 
     return False
@@ -790,19 +817,35 @@ def _skip_comments(sibling: Node | None, direction: str = "next") -> Node | None
 def _comment_indent(node: Node, indent: int) -> int:
     """Compute indentation for a leaf comment based on its nearest non-comment neighbor."""
     nearest = _skip_comments(node.next_named_sibling, "next")
-    # A trailing comment whose previous sibling is a class-guarded group
-    # lines up with that group's contents (one extra indent level), as if
-    # it were the last comment inside the class guard.
+    # A trailing comment with no next sibling aligns with the deepest
+    # content at the end of the previous sibling subtree, so that comments
+    # appended after a class-guarded block visually belong to that block.
     if nearest is None:
-        nearest = _skip_comments(node.prev_named_sibling, "prev")
-        if nearest and nearest.type in CLASS_GUARD_TYPES:
-            return indent + 4
+        prev = _skip_comments(node.prev_named_sibling, "prev")
+        if prev and prev.type in INDENTED_TYPES:
+            return _trailing_comment_indent(prev, indent)
+        nearest = prev
     if nearest and nearest.type in INDENTED_TYPES:
         return indent + 2
     # No indented sibling found — if we're directly inside a block body,
     # indent so the comment lines up with where promises/attributes would.
     if nearest is None and node.parent and node.parent.type in BLOCK_BODY_TYPES:
         return indent + 2
+    return indent
+
+
+def _trailing_comment_indent(prev: Node, indent: int) -> int:
+    """Walk down the end of a sibling subtree to compute the deepest indent."""
+    while prev.type in INDENTED_TYPES:
+        indent += 2
+        deeper = None
+        for child in reversed(prev.children):
+            if child.type in INDENTED_TYPES:
+                deeper = child
+                break
+        if deeper is None:
+            break
+        prev = deeper
     return indent
 
 
