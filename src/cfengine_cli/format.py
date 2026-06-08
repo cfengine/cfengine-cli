@@ -733,6 +733,9 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
             )
             return not both_single
 
+    if child.type == "class_guarded_promise_block_attributes":
+        return prev.type in {"attribute", "class_guarded_promise_block_attributes"}
+
     if child.type in CLASS_GUARD_TYPES:
         return prev.type in {"promise", "half_promise", "class_guarded_promises"}
 
@@ -740,9 +743,21 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
         if prev.type not in {"promise", "half_promise"} | CLASS_GUARD_TYPES:
             return False
         parent = child.parent
-        return bool(
-            parent and parent.type in {"bundle_section", "class_guarded_promises"}
-        )
+        if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
+            return True
+        # Inside a body/promise block, a comment between two class guards
+        # only gets a blank-line separator when the preceding class guard
+        # already has interior comments (i.e. the visual block is rich
+        # enough that running it together with the next would look dense).
+        if parent and parent.type in {"body_block_body", "promise_block_body"}:
+            if _skip_comments(child.next_named_sibling, "next") is None:
+                return False
+            if prev.type in CLASS_GUARD_TYPES and any(
+                c.type == "comment" for c in prev.children
+            ):
+                return True
+            return False
+        return False
 
     return False
 
@@ -775,8 +790,13 @@ def _skip_comments(sibling: Node | None, direction: str = "next") -> Node | None
 def _comment_indent(node: Node, indent: int) -> int:
     """Compute indentation for a leaf comment based on its nearest non-comment neighbor."""
     nearest = _skip_comments(node.next_named_sibling, "next")
+    # A trailing comment whose previous sibling is a class-guarded group
+    # lines up with that group's contents (one extra indent level), as if
+    # it were the last comment inside the class guard.
     if nearest is None:
         nearest = _skip_comments(node.prev_named_sibling, "prev")
+        if nearest and nearest.type in CLASS_GUARD_TYPES:
+            return indent + 4
     if nearest and nearest.type in INDENTED_TYPES:
         return indent + 2
     # No indented sibling found — if we're directly inside a block body,
