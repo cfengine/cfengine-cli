@@ -21,7 +21,8 @@ ls -al tests/up-validate/*.yaml
 
 rm -rf tmp
 mkdir -p tmp/bin
-mkdir -p tmp/home/.cfengine/cf-remote
+mkdir -p tmp/home/.config/cfengine/cf-remote
+mkdir -p tmp/home/.cache/cfengine/cf-remote
 
 # Mocking vagrant
 cp tests/up-validate/mocks/vagrant tmp/bin/.
@@ -29,7 +30,7 @@ CURRENT_PWD=$(pwd)
 export PATH="$CURRENT_PWD/tmp/bin:$PATH"
 
 # Mocking cloud_config.json
-cp tests/up-validate/mocks/cloud_config.json tmp/home/.cfengine/cf-remote/.
+cp tests/up-validate/mocks/cloud_config.json tmp/home/.config/cfengine/cf-remote/.
 MOCK_HOME="$CURRENT_PWD/tmp/home"
 
 shopt -s extglob
@@ -45,4 +46,3 @@ done
 
 
 echo "All cfengine up --validate tests successful!"
-
