@@ -71,3 +71,33 @@ edit_field => quotedvar("$(del_modules)","delete");
 
 # Trailing comments are fun!
 }
+
+bundle agent trailing_example_1
+{
+reports:
+# Trailing
+}
+
+bundle agent trailing_example_2
+{
+reports:
+"Hello, world!";
+
+# Trailing
+}
+
+bundle agent trailing_example_3
+{
+vars:
+foobar::
+"foobar"
+if => "something",
+string => "value";
+
+classes:
+"foo"
+comment => "blah",
+if => "bar";
+
+# Trailing
+}
