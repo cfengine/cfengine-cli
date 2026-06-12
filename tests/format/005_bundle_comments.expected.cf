@@ -62,14 +62,14 @@ bundle edit_line fixapache
     "APACHE_MODULES=.*"
       # Comment can be here
       # and multiple lines
-      edit_field => quotedvar("$(add_modules)","append");
+      edit_field => quotedvar("$(add_modules)", "append");
 
     # Comment before class guard:
     linux::
       "APACHE_MODULES=.*"
         # Comment can be here
         # and multiple lines
-        edit_field => quotedvar("$(del_modules)","delete");
+        edit_field => quotedvar("$(del_modules)", "delete");
 
         # Trailing comments are fun!
 }

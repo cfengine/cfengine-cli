@@ -650,20 +650,8 @@ def _format_remaining_children(
     line_length: int,
 ) -> None:
     """Format promise children, skipping promiser/arrow/stakeholder parts."""
-    # When the promise was multi-lined because of comments between the
-    # promiser and the attribute, preserve the attribute's original spacing
-    # rather than running it through the spacing-normalizing stringifier.
-    # Only applies when the comments and attribute aren't separated by a
-    # macro — half-promise patterns still use the normal renderer.
-    verbatim_attr = any(c.type == "comment" for c in children) and not any(
-        c.type == "macro" for c in children
-    )
     for child in children:
         if child.type in PROMISER_PARTS:
-            continue
-        if verbatim_attr and child.type == "attribute":
-            fmt.print(text(child), indent + 2)
-            fmt.update_previous(child)
             continue
         _autoformat(child, fmt, line_length, indent)
 
