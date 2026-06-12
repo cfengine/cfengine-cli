@@ -241,6 +241,7 @@ def split_generic_list(
             elements.append(text(element))
             continue
         line = " " * indent + stringify_single_line_node(element)
+        # Strict < reserves 1 char for the comma appended after this check
         if len(line) < line_length:
             elements.append(line)
         else:
@@ -269,7 +270,7 @@ def maybe_split_generic_list(
     has_comment = any(n.type == "comment" for n in nodes)
     if not _contains_macro(nodes) and not has_comment:
         string = " " * indent + stringify_single_line_nodes(nodes)
-        if len(string) < line_length:
+        if len(string) <= line_length:
             return [string]
     return split_generic_list(nodes, indent, line_length, trailing_comma)
 
@@ -315,7 +316,7 @@ def maybe_split_rval(
     if _contains_macro(node) or _contains_list_with_comment(node):
         return split_rval(node, indent, line_length)
     line = stringify_single_line_node(node)
-    if len(line) + offset < line_length:
+    if len(line) + offset <= line_length:
         return [line]
     return split_rval(node, indent, line_length)
 
@@ -393,7 +394,7 @@ def _stringify(node: Node, indent: int, line_length: int) -> list[str]:
     single_line = " " * indent + stringify_single_line_node(node)
     # Reserve 1 char for trailing ; or , after attributes
     effective_length = line_length - 1 if node.type == "attribute" else line_length
-    if len(single_line) < effective_length:
+    if len(single_line) <= effective_length:
         return [single_line]
     if node.type == "attribute":
         return _attempt_split_attribute(node, indent, line_length - 1)
@@ -498,6 +499,7 @@ def _format_stakeholder_elements(
             elements.append(" " * indent + text(node))
         else:
             line = " " * indent + stringify_single_line_node(node)
+            # Strict < reserves 1 char for the comma appended after this check
             if len(line) < line_length:
                 elements.append(line)
             else:
