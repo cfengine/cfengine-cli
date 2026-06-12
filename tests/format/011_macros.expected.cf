@@ -22,7 +22,6 @@ bundle agent other
     "v" string => "old_value";
 @endif
 }
-
 @if minimum_version(3.18)
 bundle agent new_bundle
 {
@@ -30,7 +29,6 @@ bundle agent new_bundle
     "Only available in 3.18+";
 }
 @endif
-
 bundle agent half_promises
 {
   vars:
@@ -40,7 +38,6 @@ bundle agent half_promises
 @else
       string => "old_value";
 @endif
-
     "another"
 @if minimum_version(3.18)
       string => "new";
@@ -190,7 +187,6 @@ bundle agent bundle_e
 @endif
       };
 }
-
 @if minimum_version(3.24)
 bundle agent test(a, b)
 {

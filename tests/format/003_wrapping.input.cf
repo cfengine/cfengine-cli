@@ -2,7 +2,7 @@ bundle agent strings
 {
 vars:
 # Single-line promises are allowed, as long as there is only 1 attribute,
-# and the whole promise fits in less than 80 chars.
+# and the whole promise fits in 80 chars or less.
 "some_variable_name" string => "some_long_variable_value_but_not_past_80";
 # Split attribute to separate line if we go over 80:
 "some_variable_name" string => "some_other_variable_value_which_would go_past_80";

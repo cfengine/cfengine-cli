@@ -241,6 +241,7 @@ def split_generic_list(
             elements.append(text(element))
             continue
         line = " " * indent + stringify_single_line_node(element)
+        # Strict < reserves 1 char for the comma appended after this check
         if len(line) < line_length:
             elements.append(line)
         else:
@@ -269,7 +270,7 @@ def maybe_split_generic_list(
     has_comment = any(n.type == "comment" for n in nodes)
     if not _contains_macro(nodes) and not has_comment:
         string = " " * indent + stringify_single_line_nodes(nodes)
-        if len(string) < line_length:
+        if len(string) <= line_length:
             return [string]
     return split_generic_list(nodes, indent, line_length, trailing_comma)
 
@@ -315,7 +316,7 @@ def maybe_split_rval(
     if _contains_macro(node) or _contains_list_with_comment(node):
         return split_rval(node, indent, line_length)
     line = stringify_single_line_node(node)
-    if len(line) + offset < line_length:
+    if len(line) + offset <= line_length:
         return [line]
     return split_rval(node, indent, line_length)
 
@@ -393,7 +394,7 @@ def _stringify(node: Node, indent: int, line_length: int) -> list[str]:
     single_line = " " * indent + stringify_single_line_node(node)
     # Reserve 1 char for trailing ; or , after attributes
     effective_length = line_length - 1 if node.type == "attribute" else line_length
-    if len(single_line) < effective_length:
+    if len(single_line) <= effective_length:
         return [single_line]
     if node.type == "attribute":
         return _attempt_split_attribute(node, indent, line_length - 1)
@@ -498,6 +499,7 @@ def _format_stakeholder_elements(
             elements.append(" " * indent + text(node))
         else:
             line = " " * indent + stringify_single_line_node(node)
+            # Strict < reserves 1 char for the comma appended after this check
             if len(line) < line_length:
                 elements.append(line)
             else:
@@ -535,6 +537,9 @@ def _can_single_line_promise(node: Node, indent: int, line_length: int) -> bool:
     if _contains_macro(children):
         return False
     if _contains_list_with_comment(children):
+        return False
+    if any(c.type == "comment" for c in children):
+        # Comments between promiser and attribute force multi-line layout
         return False
     attrs = [c for c in children if c.type == "attribute"]
     next_sib = node.next_named_sibling
@@ -681,12 +686,9 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
         # Skip over preceding empty comments since they will be removed
         while prev_sib and prev_sib.type == "comment" and _is_empty_comment(prev_sib):
             prev_sib = prev_sib.prev_named_sibling
-        is_macro_wrapped = (
-            prev_sib
-            and prev_sib.type == "macro"
-            and text(prev_sib).startswith(("@if", "@else"))
-        )
-        if not (prev_sib and prev_sib.type == "comment") and not is_macro_wrapped:
+        # Macros are always tightly surrounded — never a blank line after one
+        follows_macro = prev_sib is not None and prev_sib.type == "macro"
+        if not (prev_sib and prev_sib.type == "comment") and not follows_macro:
             fmt.blank_line()
     fmt.print(line, 0)
     for i, comment in enumerate(header_comments):
@@ -712,23 +714,19 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
     if not prev:
         return False
 
+    # Macros are always tightly surrounded — never a blank line after one
+    if prev.type == "macro":
+        return False
+
     if child.type == "bundle_section":
         return prev.type == "bundle_section"
 
     if child.type == "promise":
-        # An @if macro already provides visual separation
-        if prev.type == "macro" and text(prev).startswith("@if"):
-            return False
-        # Skip past macros to find the content-bearing previous sibling,
-        # so we detect promise groups separated by macro-split halves.
-        prev_content = prev
-        while prev_content and prev_content.type == "macro":
-            prev_content = prev_content.prev_named_sibling
-        if prev_content and prev_content.type in {"promise", "half_promise"}:
+        if prev.type in {"promise", "half_promise"}:
             promise_indent = indent + 2
             both_single = (
-                prev_content.type == "promise"
-                and _can_single_line_promise(prev_content, promise_indent, line_length)
+                prev.type == "promise"
+                and _can_single_line_promise(prev, promise_indent, line_length)
                 and _can_single_line_promise(child, promise_indent, line_length)
             )
             return not both_single
@@ -736,27 +734,39 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
     if child.type == "class_guarded_promise_block_attributes":
         return prev.type in {"attribute", "class_guarded_promise_block_attributes"}
 
+    if child.type == "class_guarded_body_attributes":
+        return prev.type in {"attribute", "class_guarded_body_attributes"}
+
     if child.type in CLASS_GUARD_TYPES:
         return prev.type in {"promise", "half_promise", "class_guarded_promises"}
 
     if child.type == "comment":
-        if prev.type not in {"promise", "half_promise"} | CLASS_GUARD_TYPES:
+        if _is_empty_comment(child):
             return False
-        parent = child.parent
-        if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
+        # Top-level comment after a complete block — visually separates them
+        if prev.type in BLOCK_TYPES:
             return True
-        # Inside a body/promise block, a comment between two class guards
-        # only gets a blank-line separator when the preceding class guard
-        # already has interior comments (i.e. the visual block is rich
-        # enough that running it together with the next would look dense).
+        parent = child.parent
+        # Trailing comment at the end of a bundle body lands deeply
+        # indented (aligned with the deepest attribute); insert a blank
+        # line so it doesn't run into the preceding section.
+        if (
+            prev.type == "bundle_section"
+            and parent
+            and parent.type == "bundle_block_body"
+            and _skip_comments(child.next_named_sibling, "next") is None
+        ):
+            return True
+        if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
+            return prev.type in {"promise", "half_promise"} | CLASS_GUARD_TYPES
         if parent and parent.type in {"body_block_body", "promise_block_body"}:
-            if _skip_comments(child.next_named_sibling, "next") is None:
+            next_sib = _skip_comments(child.next_named_sibling, "next")
+            if next_sib is None:
                 return False
-            if prev.type in CLASS_GUARD_TYPES and any(
-                c.type == "comment" for c in prev.children
-            ):
-                return True
-            return False
+            # Leading comment for a class-guarded section preceded by
+            # content above it.
+            if next_sib.type in CLASS_GUARD_TYPES:
+                return prev.type in CLASS_GUARD_TYPES | {"attribute"}
         return False
 
     return False
@@ -790,19 +800,35 @@ def _skip_comments(sibling: Node | None, direction: str = "next") -> Node | None
 def _comment_indent(node: Node, indent: int) -> int:
     """Compute indentation for a leaf comment based on its nearest non-comment neighbor."""
     nearest = _skip_comments(node.next_named_sibling, "next")
-    # A trailing comment whose previous sibling is a class-guarded group
-    # lines up with that group's contents (one extra indent level), as if
-    # it were the last comment inside the class guard.
+    # A trailing comment with no next sibling aligns with the deepest
+    # content at the end of the previous sibling subtree, so that comments
+    # appended after a class-guarded block visually belong to that block.
     if nearest is None:
-        nearest = _skip_comments(node.prev_named_sibling, "prev")
-        if nearest and nearest.type in CLASS_GUARD_TYPES:
-            return indent + 4
+        prev = _skip_comments(node.prev_named_sibling, "prev")
+        if prev and prev.type in INDENTED_TYPES:
+            return _trailing_comment_indent(prev, indent)
+        nearest = prev
     if nearest and nearest.type in INDENTED_TYPES:
         return indent + 2
     # No indented sibling found — if we're directly inside a block body,
     # indent so the comment lines up with where promises/attributes would.
     if nearest is None and node.parent and node.parent.type in BLOCK_BODY_TYPES:
         return indent + 2
+    return indent
+
+
+def _trailing_comment_indent(prev: Node, indent: int) -> int:
+    """Walk down the end of a sibling subtree to compute the deepest indent."""
+    while prev.type in INDENTED_TYPES:
+        indent += 2
+        deeper = None
+        for child in reversed(prev.children):
+            if child.type in INDENTED_TYPES:
+                deeper = child
+                break
+        if deeper is None:
+            break
+        prev = deeper
     return indent
 
 
@@ -826,10 +852,6 @@ def _autoformat(
             indent = fmt.macro_indent
     if node.type == "macro":
         if text(node).startswith("@if"):
-            # Add blank line before @if at top level if preceded by a block
-            prev_sib = node.prev_named_sibling
-            if prev_sib and prev_sib.type in BLOCK_TYPES and not fmt.empty:
-                fmt.blank_line()
             fmt.macro_indent = indent
         fmt.print(node, 0)
         return

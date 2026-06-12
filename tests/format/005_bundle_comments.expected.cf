@@ -52,3 +52,55 @@ bundle agent g
 {
   # comment
 }
+
+# For the library
+bundle edit_line fixapache
+{
+  # Comment before promise type
+  field_edits:
+    # Comment before promiser
+    "APACHE_MODULES=.*"
+      # Comment can be here
+      # and multiple lines
+      edit_field => quotedvar("$(add_modules)", "append");
+
+    # Comment before class guard:
+    linux::
+      "APACHE_MODULES=.*"
+        # Comment can be here
+        # and multiple lines
+        edit_field => quotedvar("$(del_modules)", "delete");
+
+        # Trailing comments are fun!
+}
+
+bundle agent trailing_example_1
+{
+  reports:
+
+  # Trailing
+}
+
+bundle agent trailing_example_2
+{
+  reports:
+    "Hello, world!";
+
+    # Trailing
+}
+
+bundle agent trailing_example_3
+{
+  vars:
+    foobar::
+      "foobar"
+        if => "something",
+        string => "value";
+
+  classes:
+    "foo"
+      comment => "blah",
+      if => "bar";
+
+      # Trailing
+}

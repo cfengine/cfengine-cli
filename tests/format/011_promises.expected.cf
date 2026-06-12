@@ -67,6 +67,7 @@ body common control
     "services/main.cf",
   };
   version => "CFEngine Promises.cf 3.27.0";
+
   # From 3.7 onwards there is a new package promise implementation using package
   # modules in which you MUST provide package modules used to generate
   # software inventory reports. You can also provide global default package module
@@ -76,6 +77,7 @@ body common control
       $(package_module_knowledge.platform_default),
       @(default:package_module_knowledge.additional_inventory),
     };
+
   # We only define package_inventory on redhat like systems that have a
   # python version that works with the package module.
   (redhat|centos|suse|sles|opensuse|amazon_linux).cfe_python_for_package_modules_supported.!disable_inventory_package_refresh::
@@ -83,43 +85,55 @@ body common control
       $(package_module_knowledge.platform_default),
       @(default:package_module_knowledge.additional_inventory),
     };
+
   aix.!disable_inventory_package_refresh::
     package_inventory => {
       $(package_module_knowledge.platform_default),
       @(default:package_module_knowledge.additional_inventory),
     };
+
   freebsd.!disable_inventory_package_refresh::
     package_inventory => {
       $(package_module_knowledge.platform_default),
       @(default:package_module_knowledge.additional_inventory),
     };
+
   aix::
     package_module => $(package_module_knowledge.platform_default);
+
   (debian|redhat|suse|sles|opensuse|amazon_linux|freebsd)::
     package_module => $(package_module_knowledge.platform_default);
+
   windows::
     package_inventory => {
       $(package_module_knowledge.platform_default),
       @(default:package_module_knowledge.additional_inventory),
     };
     package_module => $(package_module_knowledge.platform_default);
+
   termux::
     package_module => $(package_module_knowledge.platform_default);
+
   alpinelinux::
     package_module => $(package_module_knowledge.platform_default);
+
   any::
     ignore_missing_bundles => "$(def.control_common_ignore_missing_bundles)";
     ignore_missing_inputs => "$(def.control_common_ignore_missing_inputs)";
     # The number of minutes after which last-seen entries are purged from cf_lastseen.lmdb
     lastseenexpireafter => "$(def.control_common_lastseenexpireafter)";
+
   control_common_tls_min_version_defined::
     tls_min_version => "$(default:def.control_common_tls_min_version)";
+
   # See also: allowtlsversion in body server control
   control_common_tls_ciphers_defined::
     tls_ciphers => "$(default:def.control_common_tls_ciphers)";
+
   # See also: allowciphers in body server control
   control_common_system_log_level_defined::
     system_log_level => "$(default:def.control_common_system_log_level)";
+
   control_common_protocol_version_defined::
     protocol_version => "$(default:def.control_common_protocol_version)";
 }
