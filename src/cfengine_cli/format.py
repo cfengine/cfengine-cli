@@ -696,12 +696,9 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
         # Skip over preceding empty comments since they will be removed
         while prev_sib and prev_sib.type == "comment" and _is_empty_comment(prev_sib):
             prev_sib = prev_sib.prev_named_sibling
-        is_macro_wrapped = (
-            prev_sib
-            and prev_sib.type == "macro"
-            and text(prev_sib).startswith(("@if", "@else"))
-        )
-        if not (prev_sib and prev_sib.type == "comment") and not is_macro_wrapped:
+        # Macros are always tightly surrounded — never a blank line after one
+        follows_macro = prev_sib is not None and prev_sib.type == "macro"
+        if not (prev_sib and prev_sib.type == "comment") and not follows_macro:
             fmt.blank_line()
     fmt.print(line, 0)
     for i, comment in enumerate(header_comments):
@@ -727,23 +724,19 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
     if not prev:
         return False
 
+    # Macros are always tightly surrounded — never a blank line after one
+    if prev.type == "macro":
+        return False
+
     if child.type == "bundle_section":
         return prev.type == "bundle_section"
 
     if child.type == "promise":
-        # An @if macro already provides visual separation
-        if prev.type == "macro" and text(prev).startswith("@if"):
-            return False
-        # Skip past macros to find the content-bearing previous sibling,
-        # so we detect promise groups separated by macro-split halves.
-        prev_content = prev
-        while prev_content and prev_content.type == "macro":
-            prev_content = prev_content.prev_named_sibling
-        if prev_content and prev_content.type in {"promise", "half_promise"}:
+        if prev.type in {"promise", "half_promise"}:
             promise_indent = indent + 2
             both_single = (
-                prev_content.type == "promise"
-                and _can_single_line_promise(prev_content, promise_indent, line_length)
+                prev.type == "promise"
+                and _can_single_line_promise(prev, promise_indent, line_length)
                 and _can_single_line_promise(child, promise_indent, line_length)
             )
             return not both_single
@@ -869,10 +862,6 @@ def _autoformat(
             indent = fmt.macro_indent
     if node.type == "macro":
         if text(node).startswith("@if"):
-            # Add blank line before @if at top level if preceded by a block
-            prev_sib = node.prev_named_sibling
-            if prev_sib and prev_sib.type in BLOCK_TYPES and not fmt.empty:
-                fmt.blank_line()
             fmt.macro_indent = indent
         fmt.print(node, 0)
         return
