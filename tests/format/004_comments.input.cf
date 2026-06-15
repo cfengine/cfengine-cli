@@ -133,3 +133,13 @@ package_changes => "bulk";
 # bar
 package_changes => "bulk";
 }
+
+#
+# Example here:
+#
+
+bundle agent stigs
+{
+  vars:
+    "foo" string => "bar";
+}

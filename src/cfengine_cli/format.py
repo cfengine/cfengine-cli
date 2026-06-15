@@ -743,6 +743,12 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
     if child.type == "comment":
         if _is_empty_comment(child):
             return False
+        # Empty comments preceding this one will be dropped — look past them
+        # so we treat the comment as following the real prior content.
+        while prev and prev.type == "comment" and _is_empty_comment(prev):
+            prev = prev.prev_named_sibling
+        if prev is None:
+            return False
         # Top-level comment after a complete block — visually separates them
         if prev.type in BLOCK_TYPES:
             return True

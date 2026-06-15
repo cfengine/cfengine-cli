@@ -144,3 +144,10 @@ body package_method cgcacgcac
     # bar
     package_changes => "bulk";
 }
+
+# Example here:
+bundle agent stigs
+{
+  vars:
+    "foo" string => "bar";
+}
