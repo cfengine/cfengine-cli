@@ -505,6 +505,7 @@ bundle common services_autorun
     services_autorun|services_autorun_inputs|services_autorun_bundles::
       "inputs" slist => { "$(sys.local_libdir)/autorun.cf" };
       "bundles" slist => { "autorun" };
+
   # run loaded bundles
   reports:
     DEBUG|DEBUG_services_autorun::
