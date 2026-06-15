@@ -747,14 +747,13 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
         if prev.type in BLOCK_TYPES:
             return True
         parent = child.parent
-        # Trailing comment at the end of a bundle body lands deeply
-        # indented (aligned with the deepest attribute); insert a blank
-        # line so it doesn't run into the preceding section.
+        # Comment at bundle_block_body level after a bundle_section —
+        # either a trailing comment for the previous section or a leading
+        # comment for the next one. Either way, visually separate it.
         if (
             prev.type == "bundle_section"
             and parent
             and parent.type == "bundle_block_body"
-            and _skip_comments(child.next_named_sibling, "next") is None
         ):
             return True
         if parent and parent.type in {"bundle_section", "class_guarded_promises"}:

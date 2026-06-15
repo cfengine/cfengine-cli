@@ -101,3 +101,23 @@ if => "bar";
 
 # Trailing
 }
+
+bundle agent before_promise_types
+{
+# Reports promises:
+reports:
+"Hello, world!";
+# Classes:
+classes:
+"myclass" if => "foo";
+# Variables:
+# Multi line
+vars:
+"myvar"
+string => "bar",
+if => "foo";
+# More reports:
+reports:
+"Lorem ipsum";
+# Trailing comment
+}
