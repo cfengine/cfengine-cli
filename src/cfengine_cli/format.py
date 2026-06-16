@@ -711,6 +711,10 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
 def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool:
     """Check if a blank separator line should precede this child node."""
     prev = child.prev_named_sibling
+    # Empty comments preceding this child will be dropped — look past them
+    # so we evaluate against the real prior content.
+    while prev and prev.type == "comment" and _is_empty_comment(prev):
+        prev = prev.prev_named_sibling
     if not prev:
         return False
 
@@ -742,12 +746,6 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
 
     if child.type == "comment":
         if _is_empty_comment(child):
-            return False
-        # Empty comments preceding this one will be dropped — look past them
-        # so we treat the comment as following the real prior content.
-        while prev and prev.type == "comment" and _is_empty_comment(prev):
-            prev = prev.prev_named_sibling
-        if prev is None:
             return False
         # Top-level comment after a complete block — visually separates them
         if prev.type in BLOCK_TYPES:
@@ -783,12 +781,27 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
 
 
 def _is_empty_comment(node: Node) -> bool:
-    """Check if a bare '#' comment should be dropped (not between other comments)."""
+    """Check if a bare '#' comment should be dropped.
+
+    A run of bare '#' between two non-empty comments collapses to a
+    single '#' — the first in the run is kept, the rest are dropped.
+    Bare '#' not flanked by real comments is always dropped."""
     if text(node).strip() != "#":
         return False
     prev = node.prev_named_sibling
+    # Not the first in a run of '#' — a kept '#' precedes us, drop.
+    if prev and prev.type == "comment" and text(prev).strip() == "#":
+        return True
+    # First in a run — kept only if a non-empty comment sits on each side
+    # (forward search walks past the rest of the run to find one).
+    if not (prev and prev.type == "comment"):
+        return True
     nxt = node.next_named_sibling
-    return not (prev and prev.type == "comment" and nxt and nxt.type == "comment")
+    while nxt and nxt.type == "comment" and text(nxt).strip() == "#":
+        nxt = nxt.next_named_sibling
+    if not (nxt and nxt.type == "comment"):
+        return True
+    return False
 
 
 def _skip_comments(sibling: Node | None, direction: str = "next") -> Node | None:

@@ -1,3 +1,6 @@
+# explanation
+#
+# one more line
 bundle agent main
 {
   # comment
@@ -21,4 +24,22 @@ bundle agent c
 {
   reports:
     "hello";
+}
+
+bundle agent d
+{
+  reports:
+    "hello";
+
+    any::
+      "world";
+}
+
+bundle agent e
+{
+  reports:
+    "hello";
+
+    any::
+      "world";
 }
