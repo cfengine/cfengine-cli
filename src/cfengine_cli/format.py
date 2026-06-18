@@ -822,6 +822,10 @@ def _comment_indent(node: Node, indent: int) -> int:
     # content at the end of the previous sibling subtree, so that comments
     # appended after a class-guarded block visually belong to that block.
     if nearest is None:
+        # A comment between a promiser and its terminating ';' is a promise
+        # continuation — indent it past the promiser.
+        if node.parent and node.parent.type in {"promise", "half_promise"}:
+            return indent + 2
         prev = _skip_comments(node.prev_named_sibling, "prev")
         if prev and prev.type in INDENTED_TYPES:
             return _trailing_comment_indent(prev, indent)
@@ -904,6 +908,10 @@ def _autoformat(
     # Leaf nodes
     if node.type in {",", ";"}:
         if previous and previous.type == "macro":
+            fmt.print(node, indent + 2)
+        elif previous and previous.type == "comment":
+            # A '#' comment runs to end of line, so a following ';'/',' can't
+            # share that line — put it on its own continuation line.
             fmt.print(node, indent + 2)
         else:
             fmt.print_same_line(node)
