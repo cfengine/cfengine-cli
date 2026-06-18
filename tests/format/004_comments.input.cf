@@ -143,3 +143,14 @@ bundle agent stigs
   vars:
     "foo" string => "bar";
 }
+bundle agent example_comment_before_semicolon
+{
+  files:
+    "affected object"
+    # ...details....
+    ;
+  processes:
+    "affected object"
+    # ...details....
+    ;
+}
