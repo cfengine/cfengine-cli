@@ -279,6 +279,7 @@ def _process_markdown_code_blocks(
             for cb in parsed_markdowns["files"][origin_path]["code-blocks"][i:]:
                 cb["first_line"] += offset
                 cb["last_line"] += offset
+            offset = 0
 
             language = _translate_language(code_block["language"])
             snippet_number = i + 1
