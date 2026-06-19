@@ -420,7 +420,7 @@ def _run_prettier(path) -> bool:
     return formatted
 
 
-def _update_docs_single_arg(path):
+def _format_docs_single_arg(path):
     if not os.path.exists(path):
         raise UserError(f"The specified file/folder '{path}' does not exist")
     if not os.path.isfile(path) and not os.path.isdir(path):
@@ -449,7 +449,7 @@ def _update_docs_single_arg(path):
     return formatted
 
 
-def update_docs(paths) -> int:
+def format_docs(paths) -> int:
     """
     Iterate through entire docs repo, or specified subfolders / files, autoformatting as much as possible:
     - python code with black
@@ -461,14 +461,14 @@ def update_docs(paths) -> int:
     cfengine dev format-docs
     """
     if not paths:
-        _update_docs_single_arg(".")
+        _format_docs_single_arg(".")
         return 0
     for path in paths:
-        _update_docs_single_arg(path)
+        _format_docs_single_arg(path)
     return 0
 
 
-def check_docs() -> int:
+def lint_docs() -> int:
     """
     Run checks / tests on docs.
 

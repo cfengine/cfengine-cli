@@ -8,7 +8,7 @@ from cfengine_cli.deptool import (
     update_dependency_tables as _update_dependency_tables,
     print_release_dependency_tables,
 )
-from cfengine_cli.docs import update_docs, check_docs
+from cfengine_cli import docs
 from cfengine_cli.syntax_tree import syntax_tree
 
 
@@ -49,13 +49,13 @@ def print_dependency_tables(args) -> int:
 
 def format_docs(files) -> int:
     _expect_repo("documentation")
-    ret = update_docs(files)
+    ret = docs.format_docs(files)
     return ret
 
 
 def lint_docs() -> int:
     _expect_repo("documentation")
-    ret = check_docs()
+    ret = docs.lint_docs()
     return ret
 
 
