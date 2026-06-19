@@ -474,6 +474,7 @@ def check_docs() -> int:
     cfengine dev lint-docs"""
     r = lint_args(["."], strict=False)
     if r != 0:
+        print(f"Failure - {r} errors while running cfengine lint .")
         return r
     _process_markdown_code_blocks(
         path=".",
@@ -485,4 +486,5 @@ def check_docs() -> int:
         replace=False,
         cleanup=True,
     )
+    print("Success - all files look correct")
     return 0
