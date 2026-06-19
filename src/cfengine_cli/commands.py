@@ -1,4 +1,3 @@
-import sys
 import os
 import re
 import json
@@ -9,11 +8,7 @@ from cfengine_cli.lint import lint_args, PolicySyntaxError
 from cfengine_cli.shell import user_command
 from cfengine_cli.paths import bin
 from cfengine_cli.version import cfengine_cli_version_string
-from cfengine_cli.format import (
-    format_policy_file,
-    format_json_file,
-    format_policy_fin_fout,
-)
+from cfengine_cli.format import format_paths
 from cfengine_cli.utils import UserError
 from cfengine_cli.up import validate_config
 from cfbs.commands import build_command
@@ -51,74 +46,12 @@ def deploy() -> int:
     return r
 
 
-def _format_filename(filename: str, line_length: int, check: bool) -> int:
-    """Format a single file.
-
-    Raises PolicySyntaxError for .cf files with syntax errors."""
-    if filename.endswith(".json"):
-        return format_json_file(filename, check)
-    if filename.endswith(".cf"):
-        return format_policy_file(filename, line_length, check)
-    raise UserError(f"Unrecognized file format: {filename}")
-
-
-def _format_dirname(directory: str, line_length: int, check: bool) -> int:
-    ret = 0
-    for root, dirs, files in os.walk(directory):
-        # Don't recurse into hidden folders
-        dirs[:] = [d for d in dirs if not d.startswith(".")]
-        for name in sorted(files):
-            if name.startswith("."):
-                continue  # Hidden files are ignored by default
-            if (
-                name.endswith(".x.cf")
-                or name.endswith(".input.cf")
-                or name.endswith(".output.cf")
-                or name.endswith(".expected.cf")
-            ):
-                continue  # Test files skipped during directory traversal
-            if name.endswith(
-                (".input.json", ".jqinput.json", ".x.json", ".expected.json")
-            ):
-                continue  # Test files skipped during directory traversal
-            filepath = os.path.join(root, name)
-            if name.endswith(".json") or name.endswith(".cf"):
-                ret |= _format_filename(filepath, line_length, check)
-    return ret
-
-
 def format(names, line_length, check) -> int:
     try:
-        return _format_inner(names, line_length, check)
+        return format_paths(names, line_length, check)
     except PolicySyntaxError as e:
         print(f"Error: {e}")
         return 1
-
-
-def _format_inner(names, line_length, check) -> int:
-    if not names:
-        return _format_dirname(".", line_length, check)
-    if len(names) == 1 and names[0] == "-":
-        # Special case, format policy file from stdin to stdout
-        return format_policy_fin_fout(sys.stdin, sys.stdout, line_length, check)
-
-    ret = 0
-    for name in names:
-        if name == "-":
-            raise UserError(
-                "The - argument has a special meaning and cannot be combined with other paths"
-            )
-        if not os.path.exists(name):
-            raise UserError(f"{name} does not exist")
-        if os.path.isfile(name):
-            ret |= _format_filename(name, line_length, check)
-            continue
-        if os.path.isdir(name):
-            ret |= _format_dirname(name, line_length, check)
-            continue
-    if check:
-        return ret
-    return 0
 
 
 def _lint(files, strict) -> int:

@@ -3,11 +3,14 @@ from __future__ import annotations
 from typing import IO
 
 import json
+import os
+import sys
 
 import tree_sitter_cfengine as tscfengine
 from tree_sitter import Language, Parser, Node
 from cfbs.pretty import pretty_file, pretty_check_file
 from cfengine_cli.lint import check_policy_syntax
+from cfengine_cli.utils import UserError
 
 # Node types that increase indentation by 2 when entered
 INDENTED_TYPES = {
@@ -984,4 +987,67 @@ def format_policy_fin_fout(
 
     new_data = fmt.buffer + "\n"
     fout.write(new_data)
+    return 0
+
+
+def _format_filename(filename: str, line_length: int, check: bool) -> int:
+    """Format a single file.
+
+    Raises PolicySyntaxError for .cf files with syntax errors."""
+    if filename.endswith(".json"):
+        return format_json_file(filename, check)
+    if filename.endswith(".cf"):
+        return format_policy_file(filename, line_length, check)
+    raise UserError(f"Unrecognized file format: {filename}")
+
+
+def _format_dirname(directory: str, line_length: int, check: bool) -> int:
+    ret = 0
+    for root, dirs, files in os.walk(directory):
+        # Don't recurse into hidden folders
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for name in sorted(files):
+            if name.startswith("."):
+                continue  # Hidden files are ignored by default
+            if (
+                name.endswith(".x.cf")
+                or name.endswith(".input.cf")
+                or name.endswith(".output.cf")
+                or name.endswith(".expected.cf")
+            ):
+                continue  # Test files skipped during directory traversal
+            if name.endswith(
+                (".input.json", ".jqinput.json", ".x.json", ".expected.json")
+            ):
+                continue  # Test files skipped during directory traversal
+            filepath = os.path.join(root, name)
+            if name.endswith(".json") or name.endswith(".cf"):
+                ret |= _format_filename(filepath, line_length, check)
+    return ret
+
+
+def format_paths(names, line_length, check) -> int:
+    """Format the given files / directories (the `cfengine format` logic)."""
+    if not names:
+        return _format_dirname(".", line_length, check)
+    if len(names) == 1 and names[0] == "-":
+        # Special case, format policy file from stdin to stdout
+        return format_policy_fin_fout(sys.stdin, sys.stdout, line_length, check)
+
+    ret = 0
+    for name in names:
+        if name == "-":
+            raise UserError(
+                "The - argument has a special meaning and cannot be combined with other paths"
+            )
+        if not os.path.exists(name):
+            raise UserError(f"{name} does not exist")
+        if os.path.isfile(name):
+            ret |= _format_filename(name, line_length, check)
+            continue
+        if os.path.isdir(name):
+            ret |= _format_dirname(name, line_length, check)
+            continue
+    if check:
+        return ret
     return 0
