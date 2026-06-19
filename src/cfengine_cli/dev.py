@@ -47,9 +47,9 @@ def print_dependency_tables(args) -> int:
     return print_release_dependency_tables(args.versions)
 
 
-def format_docs(files) -> int:
+def format_docs() -> int:
     _expect_repo("documentation")
-    ret = docs.format_docs(files)
+    ret = docs.format_docs()
     return ret
 
 
@@ -73,7 +73,7 @@ def dispatch_dev_subcommand(subcommand, args) -> int:
     if subcommand == "print-dependency-tables":
         return print_dependency_tables(args)
     if subcommand == "format-docs":
-        return format_docs(args.files)
+        return format_docs()
     if subcommand == "lint-docs":
         return lint_docs()
     if subcommand == "syntax-tree":

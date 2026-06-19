@@ -449,9 +449,9 @@ def _format_docs_single_arg(path):
     return formatted
 
 
-def format_docs(paths) -> int:
+def format_docs() -> int:
     """
-    Iterate through entire docs repo, or specified subfolders / files, autoformatting as much as possible:
+    Iterate through entire docs repo (CWD) autoformatting as much as possible:
     - python code with black
     - markdown files with prettier
     - code blocks inside markdown files are formatted for the formats supported by prettier
@@ -460,11 +460,7 @@ def format_docs(paths) -> int:
     Run by the command:
     cfengine dev format-docs
     """
-    if not paths:
-        _format_docs_single_arg(".")
-        return 0
-    for path in paths:
-        _format_docs_single_arg(path)
+    _format_docs_single_arg(".")
     return 0
 
 
