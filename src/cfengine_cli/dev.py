@@ -9,6 +9,7 @@ from cfengine_cli.deptool import (
     print_release_dependency_tables,
 )
 from cfengine_cli.docs import update_docs, check_docs
+from cfengine_cli.format import format_paths
 from cfengine_cli.syntax_tree import syntax_tree
 
 
@@ -49,7 +50,11 @@ def print_dependency_tables(args) -> int:
 
 def format_docs(files) -> int:
     _expect_repo("documentation")
-    return update_docs(files)
+    ret = update_docs(files)
+    # Also run the same logic as `cfengine format` so .cf / .json files
+    # are formatted without having to run that command manually.
+    ret |= format_paths(files, line_length=80, check=False)
+    return ret
 
 
 def lint_docs() -> int:
