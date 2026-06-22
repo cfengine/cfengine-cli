@@ -236,12 +236,20 @@ def split_generic_list(
     """Split list elements into one-per-line strings, each pre-indented."""
     has_macros = _contains_macro(middle)
     elements: list[str] = []
+    # Indices of the lines that end a top-level value element. For a nested
+    # element, like a function call inside an slist, this is only the final line,
+    # outside the function call, so we do not add trailing commas into function
+    # call argument lists.
+    value_end_indices: list[int] = []
     for element in middle:
         if elements and element.type == ",":
             elements[-1] = elements[-1] + ","
             continue
         if element.type == "macro":
             elements.append(text(element))
+            continue
+        if element.type == "comment":
+            elements.append(" " * indent + text(element))
             continue
         line = " " * indent + stringify_single_line_node(element)
         # Strict < reserves 1 char for the comma appended after this check
@@ -251,14 +259,18 @@ def split_generic_list(
             lines = split_generic_value(element, indent, line_length)
             elements.append(" " * indent + lines[0])
             elements.extend(lines[1:])
+        value_end_indices.append(len(elements) - 1)
 
-    # Adjust trailing commas: with macros, fix every non-macro element
-    # (one per branch); without, fix only the last non-comment element.
+    # Set trailing commas
     if has_macros:
-        for i, e in enumerate(elements):
-            if not e.lstrip().startswith(("@", "#")):
-                elements[i] = _set_trailing_comma(e, trailing_comma)
+        # With macros: Use the indices we counted earlier to ensure there
+        # are trailing commas at the right places (before macro, inside macro,
+        # after macros), but NOT inside the nested function calls which may
+        # be multi line
+        for i in value_end_indices:
+            elements[i] = _set_trailing_comma(elements[i], trailing_comma)
     else:
+        # No macros: Just ensure the last non-comment element has a trailing comma
         for i in reversed(range(len(elements))):
             if not elements[i].lstrip().startswith("#"):
                 elements[i] = _set_trailing_comma(elements[i], trailing_comma)
