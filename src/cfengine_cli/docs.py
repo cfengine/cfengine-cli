@@ -16,7 +16,7 @@ import markdown_it
 from cfbs.pretty import pretty_file
 from cfbs.utils import find
 
-from cfengine_cli.format import format_policy_file
+from cfengine_cli.format import format_policy_file, format_paths
 from cfengine_cli.lint import lint_args, lint_policy_file_snippet
 from cfengine_cli.utils import UserError
 
@@ -420,12 +420,11 @@ def _run_prettier(path) -> bool:
     return formatted
 
 
-def _update_docs_single_arg(path):
+def _format_docs_single_arg(path):
     if not os.path.exists(path):
         raise UserError(f"The specified file/folder '{path}' does not exist")
     if not os.path.isfile(path) and not os.path.isdir(path):
         raise UserError(f"Argument '{path}' is not a file or a folder")
-
     formatted = False
     if os.path.isdir(path) or path.endswith(".py"):
         if _run_black(path):
@@ -443,13 +442,16 @@ def _update_docs_single_arg(path):
             replace=True,
             cleanup=True,
         )
-
+    if os.path.isdir(path) or path.endswith(".cf"):
+        r = format_paths([path], line_length=80, check=False)
+        if r != 0:
+            formatted = True
     return formatted
 
 
-def update_docs(paths) -> int:
+def format_docs() -> int:
     """
-    Iterate through entire docs repo, or specified subfolders / files, autoformatting as much as possible:
+    Iterate through entire docs repo (CWD) autoformatting as much as possible:
     - python code with black
     - markdown files with prettier
     - code blocks inside markdown files are formatted for the formats supported by prettier
@@ -458,23 +460,27 @@ def update_docs(paths) -> int:
     Run by the command:
     cfengine dev format-docs
     """
-    if not paths:
-        _update_docs_single_arg(".")
-        return 0
-    for path in paths:
-        _update_docs_single_arg(path)
+    _format_docs_single_arg(".")
     return 0
 
 
-def check_docs() -> int:
+def lint_docs() -> int:
     """
     Run checks / tests on docs.
 
     Run by the command:
     cfengine dev lint-docs"""
+
+    # cfengine lint
     r = lint_args(["."], strict=False)
     if r != 0:
+        print(f"Failure - {r} errors while running cfengine lint .")
         return r
+
+    # cfengine format --check
+    r = format_paths(["."], line_length=80, check=True)
+
+    # Extract code blocks from markdown files and run checks on them:
     _process_markdown_code_blocks(
         path=".",
         languages=["json", "cf3"],
@@ -485,4 +491,5 @@ def check_docs() -> int:
         replace=False,
         cleanup=True,
     )
+    print("Success - all files look correct")
     return 0

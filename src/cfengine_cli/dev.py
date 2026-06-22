@@ -8,8 +8,7 @@ from cfengine_cli.deptool import (
     update_dependency_tables as _update_dependency_tables,
     print_release_dependency_tables,
 )
-from cfengine_cli.docs import update_docs, check_docs
-from cfengine_cli.format import format_paths
+from cfengine_cli import docs
 from cfengine_cli.syntax_tree import syntax_tree
 
 
@@ -48,21 +47,15 @@ def print_dependency_tables(args) -> int:
     return print_release_dependency_tables(args.versions)
 
 
-def format_docs(files) -> int:
+def format_docs() -> int:
     _expect_repo("documentation")
-    ret = update_docs(files)
-    # Also run the same logic as `cfengine format` so .cf / .json files
-    # are formatted without having to run that command manually.
-    ret |= format_paths(files, line_length=80, check=False)
+    ret = docs.format_docs()
     return ret
 
 
-def lint_docs(files) -> int:
+def lint_docs() -> int:
     _expect_repo("documentation")
-    ret = check_docs()
-    # Also run the same logic as `cfengine format --check` so .cf / .json
-    # files are checked without having to run that command manually.
-    ret |= format_paths(files, line_length=80, check=True)
+    ret = docs.lint_docs()
     return ret
 
 
@@ -80,9 +73,9 @@ def dispatch_dev_subcommand(subcommand, args) -> int:
     if subcommand == "print-dependency-tables":
         return print_dependency_tables(args)
     if subcommand == "format-docs":
-        return format_docs(args.files)
+        return format_docs()
     if subcommand == "lint-docs":
-        return lint_docs(args.files)
+        return lint_docs()
     if subcommand == "syntax-tree":
         return syntax_tree(args.file)
     if subcommand == "generate-release-information":
