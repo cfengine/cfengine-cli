@@ -99,10 +99,26 @@ groups:
       spawn: ubuntu
 ```
 
-up will spawn the necessary VMs and install cfengine using cf-remote
+`up` will spawn the necessary VMs and install cfengine using cf-remote.
 
-```
+```bash
 cfengine up config.yaml
+```
+
+To validate the config, one can run:
+
+```bash
+cfengine up --validate config.yaml
+```
+
+Every time `up` is run, it will do all the necessary (spawn, destroy, install, uninstall) to reconciliate the current state with the input configuration.
+After a successful run, the applied configuration is saved.
+On subsequent runs, CFEngine compares the previously applied configuration with the current configuration and applies only the necessary changes.
+
+To ignore the previously saved configuration and apply the current configuration as-is, run:
+
+```bash
+cfengine up --reset config.yaml
 ```
 
 ## Supported platforms and versions
