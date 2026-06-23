@@ -120,6 +120,7 @@ body common control
   any::
     ignore_missing_bundles => "$(def.control_common_ignore_missing_bundles)";
     ignore_missing_inputs => "$(def.control_common_ignore_missing_inputs)";
+
     # The number of minutes after which last-seen entries are purged from cf_lastseen.lmdb
     lastseenexpireafter => "$(def.control_common_lastseenexpireafter)";
 
