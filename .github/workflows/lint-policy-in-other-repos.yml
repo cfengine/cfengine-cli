@@ -44,12 +44,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install uv
           make install
-      - name: Run cfengine lint
+      - name: Check other repos with cfengine format and cfengine lint
         working-directory: cfengine-cli
         run: |
-          uv run cfengine lint --strict no ../masterfiles
-          uv run cfengine lint --strict no ../modules
-          uv run cfengine lint --strict no ../documentation
+          # Linting should work with no errors on all the other repos:
+          uv run cfengine lint --strict no ../masterfiles ../documentation ../modules
+          # Formatting should work with no errors on all the other repos:
+          uv run cfengine format ../masterfiles ../documentation ../modules
+          # Linting should still work after formatting:
+          uv run cfengine lint --strict no ../masterfiles ../documentation ../modules
           # TODO: Add core when ready
           # TODO: Do all of them together, with strict, when ready;
           #       uv run cfengine lint ../core ../masterfiles ../documentation ../modules

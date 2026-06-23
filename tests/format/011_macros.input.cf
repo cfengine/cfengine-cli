@@ -193,3 +193,59 @@ reports:
 "$(a)";
 }
 @endif
+
+bundle agent test_macro_call_param
+{
+classes:
+"a" -> { "CFE-3927" }
+and => {
+# The variable must be defined
+isvariable("default:def.control_agent_environment_vars"),
+# The length of the variable must be greater than 0 (can't be an empty list)
+isgreaterthan(length("default:def.control_agent_environment_vars"), 0),
+# Each element of the list must be of the form KEY=VALUE
+every(".+=.+", "default:def.control_agent_environment_vars"),
+# In 3.18 and greater we can validate the type of variable in use
+@if minimum_version(3.18.0)
+regcmp("(policy slist|data array)",type("default:def.control_agent_environment_vars", "true")),
+@endif
+};
+"b" -> { "CFE-3927" }
+and => {
+# The variable must be defined
+isvariable("default:def.control_agent_environment_vars"),isgreaterthan(length("default:def.control_agent_environment_vars"), 0),
+@if minimum_version(3.18.0)
+regcmp( "(policy slist|data array)", type("default:def.control_agent_environment_vars", "true") ),
+@endif
+every(".+=.+", "default:def.control_agent_environment_vars"),
+};
+"c" -> { "CFE-3927" }
+and => {
+# The variable must be defined
+isvariable("default:def.control_agent_environment_vars"), isgreaterthan(length("default:def.control_agent_environment_vars"), 0),
+@if minimum_version(3.18.0)
+regcmp("(policy slist|data array)",type("default:def.control_agent_environment_vars", "true")),every(".+=.+", "default:def.control_agent_environment_vars"),
+@endif
+};
+"d" -> { "CFE-3927" }
+and => {
+@if minimum_version(3.18.0)
+every(".+=.+", "default:def.control_agent_environment_vars"),
+@endif
+isvariable("default:def.control_agent_environment_vars"),isgreaterthan(length("default:def.control_agent_environment_vars"), 0),regcmp("(policy slist|data array)",type("default:def.control_agent_environment_vars", "true")),
+};
+"e" -> { "CFE-3927" }
+and => {
+@if minimum_version(3.18.0)
+"a",
+@endif
+"b","c","d",isgreaterthan(length("default:def.control_agent_environment_vars"),0),regcmp("(policy slist|data array)",type("default:def.control_agent_environment_vars", "true")),
+};
+"f" -> { "CFE-3927" }
+and => {
+isgreaterthan(length("default:def.control_agent_environment_vars"), 0),regcmp("(policy slist|data array)",type("default:def.control_agent_environment_vars", "true")),"a","b","c",
+@if minimum_version(3.18.0)
+"d",
+@endif
+};
+}
