@@ -20,6 +20,8 @@ bundle agent main
     "n" string => "e\\f";
     "o" string => 'mix "q" it\'s `tick`';
     "p" string => `a\\b "c" it's`;
+    "q" string => "foo\
+bar";
 
   reports:
     "a single-quoted promiser";
