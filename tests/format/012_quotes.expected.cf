@@ -15,6 +15,11 @@ bundle agent main
     "i" string => `it's "quoted"`;
     "j" string => 'say "hi"';
     "k" string => `he said "hi" it's`;
+    "l" string => "a\\b";
+    "m" string => "c\\\\d";
+    "n" string => "e\\f";
+    "o" string => 'mix "q" it\'s `tick`';
+    "p" string => `a\\b "c" it's`;
 
   reports:
     "a single-quoted promiser";

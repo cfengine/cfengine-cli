@@ -95,40 +95,37 @@ def text(node: Node) -> str:
     return node.text.decode("utf-8")
 
 
-def _decode_literal(inner: str, delim: str) -> str:
+def _decode_literal(inner: str) -> str:
     """Return the logical character content of a quoted_string's inner text.
 
-    Backtick strings are taken literally - CFEngine processes no escapes
-    inside them. Single- and double-quoted strings recognize only the escapes
-    for a backslash, a double quote and a single quote (plus a backslash-
-    newline line continuation); any other backslash is kept literally, matching
-    CFEngine's lexer.
+    CFEngine processes the same escapes for all three quote styles: an escaped
+    backslash, double quote, or single quote is unescaped, and any other
+    backslash is kept as-is. (A backtick string still cannot contain a literal
+    backtick, since the delimiter itself can't be escaped.)
     """
-    if delim == "`":
-        return inner
     out = []
     i = 0
     while i < len(inner):
         c = inner[i]
-        if c == "\\" and i + 1 < len(inner):
-            nxt = inner[i + 1]
-            if nxt in ("\\", '"', "'"):
-                out.append(nxt)
-                i += 2
-                continue
-            if nxt == "\n":  # line continuation: drop both characters
-                i += 2
-                continue
+        if c == "\\" and i + 1 < len(inner) and inner[i + 1] in ("\\", '"', "'"):
+            out.append(inner[i + 1])
+            i += 2
+            continue
         out.append(c)
         i += 1
     return "".join(out)
 
 
 def _encode_literal(content: str, delim: str) -> str:
-    """Wrap logical content in delim, escaping as that quote style requires."""
-    if delim == "`":
-        return "`" + content + "`"
-    escaped = content.replace("\\", "\\\\").replace(delim, "\\" + delim)
+    """Wrap content in delim, escaping as that quote style requires.
+
+    Backslashes are always escaped. Double- and single-quoted strings also
+    escape their own delimiter; a backtick can't be escaped, so the caller must
+    only choose backticks when the content contains no backtick.
+    """
+    escaped = content.replace("\\", "\\\\")
+    if delim != "`":
+        escaped = escaped.replace(delim, "\\" + delim)
     return delim + escaped + delim
 
 
@@ -140,14 +137,13 @@ def _normalize_quotes(literal: str) -> str:
     need no escaping: no double quote -> double quotes; a double quote but no
     single quote -> single quotes; both -> backticks.
     """
-    if (
-        len(literal) < 2
-        or literal[0] != literal[-1]
-        or literal[0] not in ("'", '"', "`")
-    ):
-        return literal
+    assert (
+        len(literal) >= 2
+        and literal[0] == literal[-1]
+        and literal[0] in ("'", '"', "`")
+    ), f"expected a quoted string literal, got {literal!r}"
     delim = literal[0]
-    content = _decode_literal(literal[1:-1], delim)
+    content = _decode_literal(literal[1:-1])
     has_double = '"' in content
     has_single = "'" in content
     if not has_double:
@@ -157,8 +153,9 @@ def _normalize_quotes(literal: str) -> str:
     else:
         target = "`"
     if target == "`" and "`" in content:
-        # Needs all three quote styles at once; a backtick string cannot
-        # contain a backtick, so leave the literal as written.
+        # A string containing a double quote, a single quote, and a backtick
+        # can't use any style without escaping, and a backtick can't be
+        # escaped, so leave the literal as the author wrote it.
         return literal
     if target == delim:
         return literal
