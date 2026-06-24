@@ -1,0 +1,22 @@
+# Quote-style normalization: double quotes are preferred, then single
+# quotes, then backticks - whichever needs no escaping for the quote
+# characters the string contains.
+bundle agent main
+{
+vars:
+"a" string => 'hello';
+"b" string => "world";
+"c" string => 'say "hi"';
+"d" string => 'it\'s here';
+"e" slist => { 'one', 'two' };
+"f" string => `hello`;
+"g" string => `say "hi"`;
+"h" string => `it's here`;
+"i" string => `it's "quoted"`;
+"j" string => "say \"hi\"";
+"k" string => 'he said "hi" it\'s';
+
+reports:
+'a single-quoted promiser';
+`a backtick promiser`;
+}

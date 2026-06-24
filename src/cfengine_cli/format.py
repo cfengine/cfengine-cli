@@ -95,6 +95,76 @@ def text(node: Node) -> str:
     return node.text.decode("utf-8")
 
 
+def _decode_literal(inner: str, delim: str) -> str:
+    """Return the logical character content of a quoted_string's inner text.
+
+    Backtick strings are taken literally - CFEngine processes no escapes
+    inside them. Single- and double-quoted strings recognize only the escapes
+    for a backslash, a double quote and a single quote (plus a backslash-
+    newline line continuation); any other backslash is kept literally, matching
+    CFEngine's lexer.
+    """
+    if delim == "`":
+        return inner
+    out = []
+    i = 0
+    while i < len(inner):
+        c = inner[i]
+        if c == "\\" and i + 1 < len(inner):
+            nxt = inner[i + 1]
+            if nxt in ("\\", '"', "'"):
+                out.append(nxt)
+                i += 2
+                continue
+            if nxt == "\n":  # line continuation: drop both characters
+                i += 2
+                continue
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def _encode_literal(content: str, delim: str) -> str:
+    """Wrap logical content in delim, escaping as that quote style requires."""
+    if delim == "`":
+        return "`" + content + "`"
+    escaped = content.replace("\\", "\\\\").replace(delim, "\\" + delim)
+    return delim + escaped + delim
+
+
+def _normalize_quotes(literal: str) -> str:
+    """Normalize a CFEngine string literal to the preferred quote style.
+
+    Double quotes are preferred, then single quotes, then backticks. The style
+    is chosen from the string's content so the quote characters it contains
+    need no escaping: no double quote -> double quotes; a double quote but no
+    single quote -> single quotes; both -> backticks.
+    """
+    if (
+        len(literal) < 2
+        or literal[0] != literal[-1]
+        or literal[0] not in ("'", '"', "`")
+    ):
+        return literal
+    delim = literal[0]
+    content = _decode_literal(literal[1:-1], delim)
+    has_double = '"' in content
+    has_single = "'" in content
+    if not has_double:
+        target = '"'
+    elif not has_single:
+        target = "'"
+    else:
+        target = "`"
+    if target == "`" and "`" in content:
+        # Needs all three quote styles at once; a backtick string cannot
+        # contain a backtick, so leave the literal as written.
+        return literal
+    if target == delim:
+        return literal
+    return _encode_literal(content, target)
+
+
 class Formatter:
     """Accumulates formatted output line-by-line into a string buffer."""
 
@@ -202,6 +272,8 @@ def stringify_single_line_nodes(nodes: list[Node]) -> str:
 
 def stringify_single_line_node(node: Node) -> str:
     """Recursively flatten a node and its children into a single-line string."""
+    if node.type == "quoted_string":
+        return _normalize_quotes(text(node))
     if not node.children:
         return text(node)
     return stringify_single_line_nodes(node.children)
@@ -462,7 +534,7 @@ def _promiser_text(children: list[Node]) -> str | None:
     promiser_node = next((c for c in children if c.type == "promiser"), None)
     if not promiser_node:
         return None
-    return text(promiser_node)
+    return _normalize_quotes(text(promiser_node))
 
 
 def _promiser_line_with_stakeholder(children: list[Node]) -> str | None:
