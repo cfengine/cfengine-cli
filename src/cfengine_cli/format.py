@@ -777,14 +777,17 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
             return True
         if parent and parent.type in {"bundle_section", "class_guarded_promises"}:
             return prev.type in {"promise", "half_promise"} | CLASS_GUARD_TYPES
-        if parent and parent.type in {"body_block_body", "promise_block_body"}:
-            next_sib = _skip_comments(child.next_named_sibling, "next")
-            if next_sib is None:
-                return False
-            # Leading comment for a class-guarded section preceded by
-            # content above it.
-            if next_sib.type in CLASS_GUARD_TYPES:
-                return prev.type in CLASS_GUARD_TYPES | {"attribute"}
+        if parent and parent.type in {
+            "body_block_body",
+            "promise_block_body",
+            "class_guarded_body_attributes",
+        }:
+            # A comment is separated by a blank line from a preceding
+            # attribute or a preceding class-guarded block, so it reads as
+            # a leading comment for what follows (or a trailing comment for
+            # the block). This mirrors how a comment after a promise is
+            # separated in bundles.
+            return prev.type == "attribute" or prev.type in CLASS_GUARD_TYPES
         return False
 
     return False
