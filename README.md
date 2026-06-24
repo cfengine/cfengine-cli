@@ -47,13 +47,13 @@ cfengine format
 cfengine lint
 ```
 
-You can also specify filenames or folders;
+You can also specify filenames or folders:
 
 ```bash
 cfengine lint main.cf
 ```
 
-When it finds a mistake, it points out where the problem is like this;
+When it finds a mistake, it points out where the problem is like this:
 
 ```
     "Hello, CFEngine"
