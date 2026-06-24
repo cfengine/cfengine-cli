@@ -95,38 +95,67 @@ def text(node: Node) -> str:
     return node.text.decode("utf-8")
 
 
-def _decode_literal(inner: str) -> str:
-    """Return the logical character content of a quoted_string's inner text.
+def _scan_quotes(inner: str) -> tuple:
+    """Report which quote characters the inner text's logical content holds.
 
-    CFEngine processes the same escapes for all three quote styles: an escaped
-    backslash, double quote, or single quote is unescaped, and any other
-    backslash is kept as-is. (A backtick string still cannot contain a literal
-    backtick, since the delimiter itself can't be escaped.)
+    Returns (has_double, has_single, has_backtick). An escaped double or single
+    quote counts as that quote character; an escaped backslash, a line
+    continuation, and other backslash sequences contribute no quote character.
+    """
+    has_double = has_single = has_backtick = False
+    i = 0
+    n = len(inner)
+    while i < n:
+        c = inner[i]
+        if c == "\\" and i + 1 < n:
+            nxt = inner[i + 1]
+            if nxt == '"':
+                has_double = True
+            elif nxt == "'":
+                has_single = True
+            i += 2
+            continue
+        if c == '"':
+            has_double = True
+        elif c == "'":
+            has_single = True
+        elif c == "`":
+            has_backtick = True
+        i += 1
+    return has_double, has_single, has_backtick
+
+
+def _requote(inner: str, target: str) -> str:
+    """Re-emit a quoted_string's inner text using ``target`` as the quote char.
+
+    Escape sequences that mean the same thing in every quote style - an escaped
+    backslash, a line continuation, or any other backslash sequence - pass
+    through unchanged. A literal double or single quote is escaped only when it
+    is the target delimiter, otherwise it is emitted bare.
     """
     out = []
     i = 0
-    while i < len(inner):
+    n = len(inner)
+    while i < n:
         c = inner[i]
-        if c == "\\" and i + 1 < len(inner) and inner[i + 1] in ("\\", '"', "'"):
-            out.append(inner[i + 1])
+        if c == "\\" and i + 1 < n:
+            nxt = inner[i + 1]
+            if nxt == '"':
+                out.append('\\"' if target == '"' else '"')
+            elif nxt == "'":
+                out.append("\\'" if target == "'" else "'")
+            else:
+                out.append(c + nxt)
             i += 2
             continue
-        out.append(c)
+        if c == '"':
+            out.append('\\"' if target == '"' else '"')
+        elif c == "'":
+            out.append("\\'" if target == "'" else "'")
+        else:
+            out.append(c)
         i += 1
     return "".join(out)
-
-
-def _encode_literal(content: str, delim: str) -> str:
-    """Wrap content in delim, escaping as that quote style requires.
-
-    Backslashes are always escaped. Double- and single-quoted strings also
-    escape their own delimiter; a backtick can't be escaped, so the caller must
-    only choose backticks when the content contains no backtick.
-    """
-    escaped = content.replace("\\", "\\\\")
-    if delim != "`":
-        escaped = escaped.replace(delim, "\\" + delim)
-    return delim + escaped + delim
 
 
 def _normalize_quotes(literal: str) -> str:
@@ -143,23 +172,22 @@ def _normalize_quotes(literal: str) -> str:
         and literal[0] in ("'", '"', "`")
     ), f"expected a quoted string literal, got {literal!r}"
     delim = literal[0]
-    content = _decode_literal(literal[1:-1])
-    has_double = '"' in content
-    has_single = "'" in content
+    inner = literal[1:-1]
+    has_double, has_single, has_backtick = _scan_quotes(inner)
     if not has_double:
         target = '"'
     elif not has_single:
         target = "'"
     else:
         target = "`"
-    if target == "`" and "`" in content:
-        # A string containing a double quote, a single quote, and a backtick
-        # can't use any style without escaping, and a backtick can't be
-        # escaped, so leave the literal as the author wrote it.
+    if target == "`" and has_backtick:
+        # Contains a double quote, a single quote, and a backtick; no style can
+        # hold all three without escaping, and a backtick can't be escaped, so
+        # leave the literal as the author wrote it.
         return literal
     if target == delim:
         return literal
-    return _encode_literal(content, target)
+    return target + _requote(inner, target) + target
 
 
 class Formatter:
