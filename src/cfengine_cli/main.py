@@ -126,6 +126,9 @@ def _get_arg_parser():
     up_parser.add_argument(
         "--validate", action="store_true", help="Validate the given config"
     )
+    up_parser.add_argument(
+        "--reset", action="store_true", help="Create a fresh new environment"
+    )
     parser = dev_subparsers.add_parser(
         "generate-changelog",
         description="""Changelog generator for CFEngine repositories.

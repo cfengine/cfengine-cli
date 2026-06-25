@@ -1,5 +1,5 @@
 templates:
-  cfengine3.27:
+  cfengine-3.27.0:
     version: 3.27.0
     edition: enterprise
     bootstrap: hub1
@@ -12,60 +12,60 @@ templates:
     bootstrap: hub2
 
 groups:
-  - hub1:
-      role: hub
-      cfengine: cfengine3.27
-      source:
-        mode: spawn
-        spawn:
-          provider: vagrant
-          vagrant:
-            box: ubuntu/focal64
-            memory: 512
-            cpus: 1
-            sync_folder: null
-            provision: null
-        count: 1
+  hub1:
+    role: hub
+    cfengine: cfengine-3.27.0
+    source:
+      mode: spawn
+      spawn:
+        provider: vagrant
+        vagrant:
+          box: ubuntu/focal64
+          memory: 512
+          cpus: 1
+          sync_folder: null
+          provision: null
+      count: 1
 
-  - hub2:
-      role: hub
-      cfengine: cfengine-master
-      source:
-        mode: save
-        hosts: ["8.8.8.8"]
+  hub2:
+    role: hub
+    cfengine: cfengine-master
+    source:
+      mode: save
+      hosts: ["8.8.8.8"]
 
-  - client2:
-      role: client
-      cfengine: cfengine3.27
-      source:
-        mode: spawn
-        spawn:
-          provider: aws
-          aws:
-            image: debian-13
-            size: xlarge
-        count: 3
+  client2:
+    role: client
+    cfengine: cfengine-3.27.0
+    source:
+      mode: spawn
+      spawn:
+        provider: aws
+        aws:
+          image: debian-13
+          size: xlarge
+      count: 3
 
-  - client3:
-      role: client
-      cfengine: cfengine-master
-      source:
-        mode: spawn
-        spawn:
-          provider: gcp
-          gcp:
-            image: debian-13
-            network: null
-            public_ip: true
-            size: n1-standard-1
-        count: 2
+  client3:
+    role: client
+    cfengine: cfengine-master
+    source:
+      mode: spawn
+      spawn:
+        provider: gcp
+        gcp:
+          image: debian-13
+          network: null
+          public_ip: true
+          size: n1-standard-1
+      count: 2
 
-  - client4:
-      role: client
-      source:
-        mode: spawn
-        spawn:
-          provider: vagrant
-          vagrant:
-            box: generic/centos7
-        count: 1
+  client4:
+    role: client
+    source:
+      mode: spawn
+      spawn:
+        provider: vagrant
+        vagrant:
+          box: generic/centos7
+      count: 1

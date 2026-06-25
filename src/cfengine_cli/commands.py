@@ -10,9 +10,11 @@ from cfengine_cli.paths import bin
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli.format import format_paths
 from cfengine_cli.utils import UserError
-from cfengine_cli.up import validate_config
+from cfengine_cli.up import validate_config, up_do, resolve_templates
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
+from cf_remote.paths import cf_remote_dir
+from pydantic import ValidationError
 
 
 def _require_cfagent():
@@ -108,12 +110,47 @@ def up(args) -> int:
         with open(args.config, "r") as f:
             content = yaml.safe_load(f)
     except yaml.YAMLError:
-        raise UserError("'%s' is not a valid yaml config" % args.config)
+        raise UserError("'%s' is not valid yaml" % args.config)
     except FileNotFoundError:
         raise UserError("'%s' doesn't exist" % args.config)
 
-    validate_config(content)
+    new_group = resolve_templates(content)
+    try:
+        new_config = validate_config(new_group)
+    except ValidationError as v:
+        msgs = []
+        for err in v.errors():
+            msgs.append(
+                f"{err['msg']}. Input '{err['input']}' at location '{err['loc']}'"
+            )
+        raise UserError("\n".join(msgs))
+
     if args.validate:
         return 0
-    print("Starting VMs...")
+
+    old_group = {}
+    try:
+        if not args.reset:
+            with open(os.path.join(cf_remote_dir(), "old_groups.yaml"), "r") as f:
+                old_group = yaml.safe_load(f)
+        else:
+            os.remove(os.path.join(cf_remote_dir(), "old_groups.yaml"))
+    except:
+        pass
+    if old_group != {}:
+        try:
+            validate_config(old_group)
+        except ValidationError as v:
+            msgs = []
+            for err in v.errors():
+                msgs.append(
+                    f"{err['msg']}. Input '{err['input']}' at location '{err['loc']}'"
+                )
+            raise UserError("\n".join(msgs))
+
+    is_ok = up_do(old_group, new_group, new_config)
+
+    if is_ok:
+        with open(os.path.join(cf_remote_dir(), "old_groups.yaml"), "w") as f:
+            yaml.dump(new_group, f, default_flow_style=False, sort_keys=False)
     return 0
