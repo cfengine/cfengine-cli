@@ -753,7 +753,7 @@
         },
         "protocol_version": {
           "attribute": "protocol_version",
-          "range": "1,classic,2,tls,3,cookie,4,filestream,latest",
+          "range": "1,classic,2,tls,3,cookie,4,filestream,5,leech2,latest",
           "status": "normal",
           "type": "option",
           "visibility": "body"
@@ -1020,7 +1020,7 @@
         },
         "protocol_version": {
           "attribute": "protocol_version",
-          "range": "1,classic,2,tls,3,cookie,4,filestream,latest",
+          "range": "1,classic,2,tls,3,cookie,4,filestream,5,leech2,latest",
           "status": "normal",
           "type": "option",
           "visibility": "body"
@@ -7368,6 +7368,13 @@
           "type": "clist",
           "visibility": "promiseType"
         },
+        "cancel": {
+          "attribute": "cancel",
+          "range": "true,false,yes,no,on,off",
+          "status": "normal",
+          "type": "option",
+          "visibility": "promiseType"
+        },
         "classes": {
           "attribute": "classes",
           "status": "normal",
@@ -7463,6 +7470,13 @@
           "range": "[a-zA-Z0-9_!&@@$|.()\\[\\]{}:]+",
           "status": "normal",
           "type": "clist",
+          "visibility": "promiseType"
+        },
+        "timer_policy": {
+          "attribute": "timer_policy",
+          "range": "absolute,reset",
+          "status": "normal",
+          "type": "option",
           "visibility": "promiseType"
         },
         "unless": {
