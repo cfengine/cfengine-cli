@@ -1,5 +1,4 @@
-bundle agent a
-# @brief Description of a
+bundle agent a # @brief Description of a
 {
   reports:
     "Hello, world!";

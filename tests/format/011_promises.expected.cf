@@ -43,8 +43,7 @@ body common control
     services_autorun,
     @(services_autorun.bundles),
     # Agent bundle
-    cfe_internal_management,
-    # See cfe_internal/CFE_cfengine.cf
+    cfe_internal_management, # See cfe_internal/CFE_cfengine.cf
     mpf_main,
     @(cfengine_enterprise_hub_ha.management_bundles),
     @(def.bundlesequence_end),
@@ -125,13 +124,9 @@ body common control
     lastseenexpireafter => "$(def.control_common_lastseenexpireafter)";
 
   control_common_tls_min_version_defined::
-    tls_min_version => "$(default:def.control_common_tls_min_version)";
-
-  # See also: allowtlsversion in body server control
+    tls_min_version => "$(default:def.control_common_tls_min_version)"; # See also: allowtlsversion in body server control
   control_common_tls_ciphers_defined::
-    tls_ciphers => "$(default:def.control_common_tls_ciphers)";
-
-  # See also: allowciphers in body server control
+    tls_ciphers => "$(default:def.control_common_tls_ciphers)"; # See also: allowciphers in body server control
   control_common_system_log_level_defined::
     system_log_level => "$(default:def.control_common_system_log_level)";
 
@@ -500,14 +495,10 @@ bundle common services_autorun
       # automatically.
       "inputs" slist => {};
       "found_inputs" slist => {};
-      "bundles" slist => { "services_autorun" };
-
-    # run self
+      "bundles" slist => { "services_autorun" }; # run self
     services_autorun|services_autorun_inputs|services_autorun_bundles::
       "inputs" slist => { "$(sys.local_libdir)/autorun.cf" };
-      "bundles" slist => { "autorun" };
-
-  # run loaded bundles
+      "bundles" slist => { "autorun" }; # run loaded bundles
   reports:
     DEBUG|DEBUG_services_autorun::
       "DEBUG $(this.bundle): Services Autorun Disabled"

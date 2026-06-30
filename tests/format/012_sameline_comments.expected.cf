@@ -1,0 +1,25 @@
+bundle agent main
+{
+  vars:
+    "x" string => "y"; # trailing comment after promise
+    "list"
+      slist => {
+        "a", # first element
+        "b",
+        "c", # third element
+      };
+
+    "multi"
+      if => "something", # condition comment
+      string => "value"; # value comment
+    "own_line"
+      # this comment is on its own line
+      string => "value";
+}
+
+body package_method apt
+{
+  package_changes => "bulk"; # bulk method
+  # standalone comment
+  package_list_command => "/usr/bin/dpkg -l";
+}

@@ -52,17 +52,14 @@ bundle agent win_services
     "autostart_services"
       slist => {
         "Alerter",
-        "W32Time",
-        # Windows Time
+        "W32Time", # Windows Time
       };
 
     some_class::
       "autostart_services"
         slist => {
-          "MpsSvc",
-          # Windows Firewall
-          "W32Time",
-          # Windows Time
+          "MpsSvc", # Windows Firewall
+          "W32Time", # Windows Time
         };
 
     some_class::
