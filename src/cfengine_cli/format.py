@@ -95,6 +95,101 @@ def text(node: Node) -> str:
     return node.text.decode("utf-8")
 
 
+def _scan_quotes(inner: str) -> tuple:
+    """Report which quote characters the inner text's logical content holds.
+
+    Returns (has_double, has_single, has_backtick). An escaped double or single
+    quote counts as that quote character; an escaped backslash, a line
+    continuation, and other backslash sequences contribute no quote character.
+    """
+    has_double = has_single = has_backtick = False
+    i = 0
+    n = len(inner)
+    while i < n:
+        c = inner[i]
+        if c == "\\" and i + 1 < n:
+            nxt = inner[i + 1]
+            if nxt == '"':
+                has_double = True
+            elif nxt == "'":
+                has_single = True
+            i += 2
+            continue
+        if c == '"':
+            has_double = True
+        elif c == "'":
+            has_single = True
+        elif c == "`":
+            has_backtick = True
+        i += 1
+    return has_double, has_single, has_backtick
+
+
+def _requote(inner: str, target: str) -> str:
+    """Re-emit a quoted_string's inner text using ``target`` as the quote char.
+
+    Escape sequences that mean the same thing in every quote style - an escaped
+    backslash, a line continuation, or any other backslash sequence - pass
+    through unchanged. A literal double or single quote is escaped only when it
+    is the target delimiter, otherwise it is emitted bare.
+    """
+    out = []
+    i = 0
+    n = len(inner)
+    while i < n:
+        c = inner[i]
+        if c == "\\" and i + 1 < n:
+            nxt = inner[i + 1]
+            if nxt == '"':
+                out.append('\\"' if target == '"' else '"')
+            elif nxt == "'":
+                out.append("\\'" if target == "'" else "'")
+            else:
+                out.append(c + nxt)
+            i += 2
+            continue
+        if c == '"':
+            out.append('\\"' if target == '"' else '"')
+        elif c == "'":
+            out.append("\\'" if target == "'" else "'")
+        else:
+            out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def _normalize_quotes(literal: str) -> str:
+    """Normalize a CFEngine string literal to the preferred quote style.
+
+    Double quotes are preferred, then single quotes, then backticks. The style
+    is chosen from the string's content so the quote characters it contains
+    need no escaping: no double quote -> double quotes; a double quote but no
+    single quote -> single quotes; both -> backticks.
+    """
+    assert (
+        len(literal) >= 2
+        and literal[0] == literal[-1]
+        and literal[0] in ("'", '"', "`")
+    ), f"expected a quoted string literal, got {literal!r}"
+    delim = literal[0]
+    inner = literal[1:-1]
+    has_double, has_single, has_backtick = _scan_quotes(inner)
+    if not has_double:
+        target = '"'
+    elif not has_single:
+        target = "'"
+    else:
+        target = "`"
+    if target == "`" and has_backtick:
+        # Contains a double quote, a single quote, and a backtick; no style can
+        # hold all three without escaping, and a backtick can't be escaped, so
+        # leave the literal as the author wrote it.
+        return literal
+    if target == delim:
+        return literal
+    return target + _requote(inner, target) + target
+
+
 class Formatter:
     """Accumulates formatted output line-by-line into a string buffer."""
 
@@ -202,6 +297,8 @@ def stringify_single_line_nodes(nodes: list[Node]) -> str:
 
 def stringify_single_line_node(node: Node) -> str:
     """Recursively flatten a node and its children into a single-line string."""
+    if node.type == "quoted_string":
+        return _normalize_quotes(text(node))
     if not node.children:
         return text(node)
     return stringify_single_line_nodes(node.children)
@@ -462,7 +559,7 @@ def _promiser_text(children: list[Node]) -> str | None:
     promiser_node = next((c for c in children if c.type == "promiser"), None)
     if not promiser_node:
         return None
-    return text(promiser_node)
+    return _normalize_quotes(text(promiser_node))
 
 
 def _promiser_line_with_stakeholder(children: list[Node]) -> str | None:
