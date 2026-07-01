@@ -35,6 +35,8 @@ BLOCK_BODY_TYPES = {"bundle_block_body", "promise_block_body", "body_block_body"
 
 PROMISER_PARTS = {"promiser", "->", "stakeholder"}
 
+SAMELINE_COMMENT_SEPARATOR = " "
+
 
 def _has_direct_macro(node: Node) -> bool:
     """Check if any direct child of a node is a macro (non-recursive)."""
@@ -241,6 +243,9 @@ def split_generic_list(
     # outside the function call, so we do not add trailing commas into function
     # call argument lists.
     value_end_indices: list[int] = []
+    # Same-line (trailing) comments are attached only after trailing commas are
+    # placed, so the comma lands before the comment instead of after it.
+    sameline_comments: dict[int, str] = {}
     for element in middle:
         if elements and element.type == ",":
             elements[-1] = elements[-1] + ","
@@ -249,7 +254,10 @@ def split_generic_list(
             elements.append(text(element))
             continue
         if element.type == "comment":
-            elements.append(" " * indent + text(element))
+            if _is_sameline_comment(element) and elements:
+                sameline_comments[len(elements) - 1] = text(element)
+            else:
+                elements.append(" " * indent + text(element))
             continue
         line = " " * indent + stringify_single_line_node(element)
         # Strict < reserves 1 char for the comma appended after this check
@@ -275,6 +283,10 @@ def split_generic_list(
             if not elements[i].lstrip().startswith("#"):
                 elements[i] = _set_trailing_comma(elements[i], trailing_comma)
                 break
+
+    # Attach same-line comments to the end of their value lines
+    for i, comment in sameline_comments.items():
+        elements[i] = elements[i] + SAMELINE_COMMENT_SEPARATOR + comment
     return elements
 
 
@@ -354,7 +366,10 @@ def _format_attribute_with_macros(node: Node, indent: int) -> list[str]:
         if child.type == "macro":
             lines.append(text(child))
         elif child.type == "comment":
-            lines.append(" " * (indent + 2) + text(child))
+            if _is_sameline_comment(child) and lines:
+                lines[-1] = lines[-1] + SAMELINE_COMMENT_SEPARATOR + text(child)
+            else:
+                lines.append(" " * (indent + 2) + text(child))
         else:
             lines.append(" " * (indent + 2) + stringify_single_line_node(child))
 
@@ -505,13 +520,19 @@ def _format_stakeholder_elements(
         return maybe_split_generic_list(middle, indent, line_length)
     # Comments present — format element-by-element to preserve them
     elements: list[str] = []
+    # Same-line (trailing) comments are attached only after the trailing comma is
+    # placed, so the comma lands before the comment instead of after it.
+    sameline_comments: dict[int, str] = {}
     for node in middle:
         if node.type == ",":
             if elements:
                 elements[-1] = elements[-1] + ","
             continue
         if node.type == "comment":
-            elements.append(" " * indent + text(node))
+            if _is_sameline_comment(node) and elements:
+                sameline_comments[len(elements) - 1] = text(node)
+            else:
+                elements.append(" " * indent + text(node))
         else:
             line = " " * indent + stringify_single_line_node(node)
             # Strict < reserves 1 char for the comma appended after this check
@@ -528,6 +549,10 @@ def _format_stakeholder_elements(
         if not elements[i].endswith(","):
             elements[i] = elements[i] + ","
         break
+
+    # Attach inline comments to the end of their value lines
+    for i, comment in sameline_comments.items():
+        elements[i] = elements[i] + SAMELINE_COMMENT_SEPARATOR + comment
     return elements
 
 
@@ -682,9 +707,13 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
     """Format a block header line and return the body's children for further processing."""
     header_parts: list[str] = []
     header_comments: list[str] = []
+    # Direct comment children of the block (excludes comments inside a
+    # parameter list) — candidates for being kept on the header line.
+    direct_comments: list[Node] = []
     for x in node.children[0:-1]:
         if x.type == "comment":
             header_comments.append(text(x))
+            direct_comments.append(x)
         elif x.type == "parameter_list":
             parts: list[str] = []
             for p in x.children:
@@ -696,6 +725,16 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
         else:
             header_parts.append(text(x))
     line = " ".join(header_parts)
+    # A lone same-line comment stays on the header line. When the header has
+    # more than one comment, keep them together on their own lines below the
+    # header instead of splitting one off onto the header line.
+    if (
+        len(header_comments) == 1
+        and len(direct_comments) == 1
+        and _is_sameline_comment(direct_comments[0])
+    ):
+        line += SAMELINE_COMMENT_SEPARATOR + header_comments[0]
+        header_comments = []
     if not fmt.empty:
         prev_sib = node.prev_named_sibling
         # Skip over preceding empty comments since they will be removed
@@ -725,6 +764,11 @@ def _format_block_header(node: Node, fmt: Formatter) -> list[Node]:
 
 def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool:
     """Check if a blank separator line should precede this child node."""
+    # Inline (trailing) comments are appended to the preceding line, so they
+    # must never be preceded by a blank separator line.
+    if child.type == "comment" and _is_sameline_comment(child):
+        return False
+
     prev = child.prev_named_sibling
     # Empty comments preceding this child will be dropped — look past them
     # so we evaluate against the real prior content.
@@ -796,6 +840,21 @@ def _needs_blank_line_before(child: Node, indent: int, line_length: int) -> bool
 # ---------------------------------------------------------------------------
 # Comment formatting
 # ---------------------------------------------------------------------------
+
+
+def _is_sameline_comment(node: Node) -> bool:
+    """Check if a comment sits on the same source line as the element before it.
+
+    A trailing comment shares the row of the preceding sibling (which may be
+    a leaf like ',' or ';', or a whole promise/attribute). Such comments are
+    kept on the same output line as that element rather than moved to their
+    own line."""
+    if node.type != "comment":
+        return False
+    prev = node.prev_sibling
+    if prev is None:
+        return False
+    return prev.end_point[0] == node.start_point[0]
 
 
 def _is_empty_comment(node: Node) -> bool:
@@ -934,7 +993,11 @@ def _autoformat(
         else:
             fmt.print_same_line(node)
     elif node.type == "comment":
-        if not _is_empty_comment(node):
+        if _is_empty_comment(node):
+            pass
+        elif _is_sameline_comment(node) and not fmt.empty:
+            fmt.print_same_line(SAMELINE_COMMENT_SEPARATOR + text(node))
+        else:
             fmt.print(node, _comment_indent(node, indent))
     else:
         fmt.print(node, indent)

@@ -111,9 +111,7 @@ bundle agent yoda_two
 {
   reports:
     "hi" -> {
-        "yoda",
-        # this is yoda of course
-        "boba",
-        # and yet another star wars character
+        "yoda", # this is yoda of course
+        "boba", # and yet another star wars character
       };
 }
