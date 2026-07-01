@@ -174,7 +174,7 @@ def fn_replace(origin_path, snippet_path, _language, first_line, last_line, inde
             origin_lines = f.read().split("\n")
             pretty_lines = pretty_content.split("\n")
 
-            pretty_lines = [" " * indent + x for x in pretty_lines]
+            pretty_lines = ["" if x == "" else " " * indent + x for x in pretty_lines]
 
             offset = len(pretty_lines) - len(
                 origin_lines[first_line + 1 : last_line - 1]
