@@ -1031,7 +1031,13 @@ def format_policy_file(filename: str, line_length: int, check: bool) -> int:
     fmt = Formatter()
     _autoformat(root_node, fmt, line_length)
 
-    new_data = fmt.buffer + "\n"
+    new_data = fmt.buffer
+    if not new_data.endswith("\n"):
+        # TODO: Look into why formatter sometimes outputs
+        #       trailing newline and other times not.
+        new_data += "\n"
+    assert new_data.endswith("\n") and not new_data.endswith("\n\n")
+
     if new_data != original_data.decode("utf-8"):
         if check:
             print(f"Policy file '{filename}' needs reformatting")
