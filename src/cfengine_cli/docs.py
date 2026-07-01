@@ -236,7 +236,6 @@ def fn_autoformat(
             except json.decoder.JSONDecodeError:
                 raise UserError(f"Invalid json in '{snippet_path}'")
         case "cf":
-            # Note: Dead code - Not used for CFEngine policy yet
             format_policy_file(snippet_path, 80, False)
             return False
 

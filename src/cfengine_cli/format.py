@@ -93,8 +93,7 @@ def format_json_file(filename: str, check: bool) -> FormatResult:
             return FormatResult.REFORMATTED
         return FormatResult.NO_CHANGE
     except json.decoder.JSONDecodeError as e:
-        print(f"JSON file '{filename}' invalid ({str(e)})")
-        return FormatResult.NEEDS_FORMAT
+        raise UserError(f"JSON file '{filename}' invalid ({str(e)})")
 
 
 def text(node: Node) -> str:
@@ -1077,7 +1076,7 @@ def format_policy_fin_fout(
 
     new_data = fmt.buffer + "\n"
     fout.write(new_data)
-    if new_data != original_data:
+    if new_data != original_data.decode("utf-8"):
         return FormatResult.REFORMATTED
     return FormatResult.NO_CHANGE
 
