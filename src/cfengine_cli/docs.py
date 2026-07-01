@@ -434,7 +434,7 @@ def _format_docs_single_arg(path):
             formatted = True
         _process_markdown_code_blocks(
             path=path,
-            languages=["json"],  # TODO: Add cfengine3 here
+            languages=["json", "cfengine3"],
             extract=True,
             syntax_check=False,
             output_check=False,
