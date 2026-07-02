@@ -3241,6 +3241,31 @@
         }
       },
       "status": "normal"
+    },
+    "when": {
+      "attributes": {
+        "files_deleted": {
+          "attribute": "files_deleted",
+          "range": ".*",
+          "status": "normal",
+          "type": "slist",
+          "visibility": "body"
+        },
+        "inherit_from": {
+          "attribute": "inherit_from",
+          "status": "normal",
+          "type": "body",
+          "visibility": "body"
+        },
+        "meta": {
+          "attribute": "meta",
+          "range": "",
+          "status": "normal",
+          "type": "slist",
+          "visibility": "body"
+        }
+      },
+      "status": "normal"
     }
   },
   "bundleTypes": {
@@ -3315,6 +3340,17 @@
       "promiseTypes": [
         "access",
         "roles",
+        "classes",
+        "defaults",
+        "meta",
+        "reports",
+        "vars"
+      ],
+      "status": "normal"
+    },
+    "watch": {
+      "promiseTypes": [
+        "events",
         "classes",
         "defaults",
         "meta",
@@ -8160,6 +8196,91 @@
           "status": "normal",
           "type": "string",
           "visibility": "global"
+        },
+        "with": {
+          "attribute": "with",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        }
+      },
+      "status": "normal"
+    },
+    "events": {
+      "attributes": {
+        "action": {
+          "attribute": "action",
+          "status": "normal",
+          "type": "body",
+          "visibility": "global"
+        },
+        "classes": {
+          "attribute": "classes",
+          "status": "normal",
+          "type": "body",
+          "visibility": "global"
+        },
+        "comment": {
+          "attribute": "comment",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        },
+        "depends_on": {
+          "attribute": "depends_on",
+          "range": "",
+          "status": "normal",
+          "type": "slist",
+          "visibility": "global"
+        },
+        "handle": {
+          "attribute": "handle",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        },
+        "if": {
+          "attribute": "if",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        },
+        "ifvarclass": {
+          "attribute": "ifvarclass",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        },
+        "meta": {
+          "attribute": "meta",
+          "range": "",
+          "status": "normal",
+          "type": "slist",
+          "visibility": "global"
+        },
+        "then": {
+          "attribute": "then",
+          "status": "normal",
+          "type": "bundle",
+          "visibility": "promiseType"
+        },
+        "unless": {
+          "attribute": "unless",
+          "range": "",
+          "status": "normal",
+          "type": "string",
+          "visibility": "global"
+        },
+        "when": {
+          "attribute": "when",
+          "status": "normal",
+          "type": "body",
+          "visibility": "promiseType"
         },
         "with": {
           "attribute": "with",
