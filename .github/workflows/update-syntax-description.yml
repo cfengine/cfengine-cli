@@ -55,8 +55,9 @@ jobs:
           fi
       - name: Create Pull Request
         if: env.CHANGES_DETECTED == 'true'
-        uses: cfengine/create-pull-request@v6
+        uses: cfengine/create-pull-request@v7
         with:
+          sign-commits: true
           title: Updated syntax-description.json
           body: Automated update to syntax-description.json [the `update-syntax-description` workflow](https://github.com/cfengine/cfengine-cli/tree/main/.github/workflows/update-syntax-description.yml).
           reviewers: |
