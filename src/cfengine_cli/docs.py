@@ -61,15 +61,16 @@ def extract_inline_code(path, languages):
             indent = count_indent(lines[first_line])
             # Index of first line to NOT include, the line after closing triple backtick:
             last_line = child.map[1]
+            lines_to_extract = lines[first_line:last_line]
+            _remove_indentation(lines_to_extract, indent)
             yield {
                 "language": language,
                 "flags": flags,
                 "first_line": child.map[0],
                 "last_line": child.map[1],
                 "indent": indent,
-                "lines": lines[
-                    first_line:last_line
-                ],  # Includes backtick fences on both sides
+                # TODO: Dead code, the actual lines are extracted "twice" (2 places in the codebase)
+                "lines": lines_to_extract,  # Includes backtick fences on both sides
             }
 
 
@@ -97,12 +98,34 @@ def get_markdown_files(start, languages):
     return return_dict
 
 
+def _leading_spaces(s):
+    n = 0
+    for c in s:
+        if c == " ":
+            n += 1
+        else:
+            return n
+    return n
+
+
+def _remove_indentation(snippet_lines, indent):
+    for i, line in enumerate(snippet_lines):
+        if line == "":
+            continue
+        assert line.startswith(" " * indent)
+        snippet_lines[i] = line[indent:]
+
+
 def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
     try:
         with open(origin_path, "r") as f:
-            content = f.read()
-
-        code_snippet = "\n".join(content.split("\n")[first_line + 1 : last_line - 1])
+            lines = f.readlines()
+        lines = [x[0:-1] for x in lines]  # Remove newlines
+        fence = lines[first_line]
+        indent = _leading_spaces(fence)
+        snippet_lines = lines[first_line + 1 : last_line - 1]
+        _remove_indentation(snippet_lines, indent)
+        code_snippet = "\n".join(snippet_lines)
 
         with open(snippet_path, "w") as f:
             f.write(code_snippet + "\n")
@@ -174,7 +197,7 @@ def fn_replace(origin_path, snippet_path, _language, first_line, last_line, inde
             origin_lines = f.read().split("\n")
             pretty_lines = pretty_content.split("\n")
 
-            pretty_lines = [" " * indent + x for x in pretty_lines]
+            pretty_lines = ["" if x == "" else " " * indent + x for x in pretty_lines]
 
             offset = len(pretty_lines) - len(
                 origin_lines[first_line + 1 : last_line - 1]
@@ -213,7 +236,6 @@ def fn_autoformat(
             except json.decoder.JSONDecodeError:
                 raise UserError(f"Invalid json in '{snippet_path}'")
         case "cf":
-            # Note: Dead code - Not used for CFEngine policy yet
             format_policy_file(snippet_path, 80, False)
             return False
 
@@ -434,7 +456,7 @@ def _format_docs_single_arg(path):
             formatted = True
         _process_markdown_code_blocks(
             path=path,
-            languages=["json"],  # TODO: Add cfengine3 here
+            languages=["json", "cfengine3"],
             extract=True,
             syntax_check=False,
             output_check=False,
