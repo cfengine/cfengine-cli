@@ -98,16 +98,6 @@ def get_markdown_files(start, languages):
     return return_dict
 
 
-def _leading_spaces(s):
-    n = 0
-    for c in s:
-        if c == " ":
-            n += 1
-        else:
-            return n
-    return n
-
-
 def _remove_indentation(snippet_lines, indent):
     for i, line in enumerate(snippet_lines):
         if line == "":
@@ -122,7 +112,7 @@ def fn_extract(origin_path, snippet_path, _language, first_line, last_line):
             lines = f.readlines()
         lines = [x[0:-1] for x in lines]  # Remove newlines
         fence = lines[first_line]
-        indent = _leading_spaces(fence)
+        indent = count_indent(fence)
         snippet_lines = lines[first_line + 1 : last_line - 1]
         _remove_indentation(snippet_lines, indent)
         code_snippet = "\n".join(snippet_lines)
