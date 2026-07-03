@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import IntEnum
 from typing import IO
 
 import json
@@ -38,6 +39,14 @@ PROMISER_PARTS = {"promiser", "->", "stakeholder"}
 SAMELINE_COMMENT_SEPARATOR = " "
 
 
+class FormatResult(IntEnum):
+    """Outcome of a formatting operation."""
+
+    NO_CHANGE = 0  # File was already formatted, no reformat needed
+    NEEDS_FORMAT = 1  # Reformat needed (reported in check mode)
+    REFORMATTED = 2  # File was reformatted successfully
+
+
 def _has_direct_macro(node: Node) -> bool:
     """Check if any direct child of a node is a macro (non-recursive)."""
     return any(child.type == "macro" for child in node.children)
@@ -64,12 +73,8 @@ def _contains_list_with_comment(nodes: Node | list[Node]) -> bool:
     return _contains_list_with_comment(nodes.children)
 
 
-def format_json_file(filename: str, check: bool) -> int:
-    """Reformat a JSON file in place using cfbs pretty-printer.
-
-    Returns 0 in case of successful reformat or no reformat needed.
-    Returns 1 when check is True and reformat is needed.
-    """
+def format_json_file(filename: str, check: bool) -> FormatResult:
+    """Reformat a JSON file in place using cfbs pretty-printer."""
     assert filename.endswith(".json")
 
     if check:
@@ -78,16 +83,17 @@ def format_json_file(filename: str, check: bool) -> int:
         assert type(success) is bool
         if not success:
             print(f"JSON file '{filename}' needs reformatting")
-        return int(not success)
+            return FormatResult.NEEDS_FORMAT
+        return FormatResult.NO_CHANGE
 
     try:
         reformatted = pretty_file(filename)
         if reformatted:
             print(f"JSON file '{filename}' was reformatted")
-        return 0  # Successfully reformatted or no reformat needed
+            return FormatResult.REFORMATTED
+        return FormatResult.NO_CHANGE
     except json.decoder.JSONDecodeError as e:
-        print(f"JSON file '{filename}' invalid ({str(e)})")
-        return 1
+        raise UserError(f"JSON file '{filename}' invalid ({str(e)})")
 
 
 def text(node: Node) -> str:
@@ -1008,11 +1014,9 @@ def _autoformat(
 # ---------------------------------------------------------------------------
 
 
-def format_policy_file(filename: str, line_length: int, check: bool) -> int:
+def format_policy_file(filename: str, line_length: int, check: bool) -> FormatResult:
     """Format a .cf policy file in place, writing only if content changed.
 
-    Returns 0 in case of successful reformat or no reformat needed.
-    Returns 1 when check is True and reformat is needed.
     Raises PolicySyntaxError when the file has syntax errors."""
     assert filename.endswith(".cf")
 
@@ -1031,21 +1035,28 @@ def format_policy_file(filename: str, line_length: int, check: bool) -> int:
     fmt = Formatter()
     _autoformat(root_node, fmt, line_length)
 
-    new_data = fmt.buffer + "\n"
+    new_data = fmt.buffer
+    if not new_data.endswith("\n"):
+        # TODO: Look into why formatter sometimes outputs
+        #       trailing newline and other times not.
+        new_data += "\n"
+    assert new_data.endswith("\n") and not new_data.endswith("\n\n")
+
     if new_data != original_data.decode("utf-8"):
         if check:
             print(f"Policy file '{filename}' needs reformatting")
-            return 1
+            return FormatResult.NEEDS_FORMAT
 
         with open(filename, "w") as f:
             f.write(new_data)
         print(f"Policy file '{filename}' was reformatted")
-    return 0
+        return FormatResult.REFORMATTED
+    return FormatResult.NO_CHANGE
 
 
 def format_policy_fin_fout(
     fin: IO[str], fout: IO[str], line_length: int, check: bool
-) -> int:
+) -> FormatResult:
     """Format CFEngine policy read from fin, writing the result to fout.
 
     Raises PolicySyntaxError when the input has syntax errors."""
@@ -1065,10 +1076,12 @@ def format_policy_fin_fout(
 
     new_data = fmt.buffer + "\n"
     fout.write(new_data)
-    return 0
+    if new_data != original_data.decode("utf-8"):
+        return FormatResult.REFORMATTED
+    return FormatResult.NO_CHANGE
 
 
-def _format_filename(filename: str, line_length: int, check: bool) -> int:
+def _format_filename(filename: str, line_length: int, check: bool) -> FormatResult:
     """Format a single file.
 
     Raises PolicySyntaxError for .cf files with syntax errors."""
@@ -1079,8 +1092,17 @@ def _format_filename(filename: str, line_length: int, check: bool) -> int:
     raise UserError(f"Unrecognized file format: {filename}")
 
 
-def _format_dirname(directory: str, line_length: int, check: bool) -> int:
-    ret = 0
+def _combine_results(a: FormatResult, b: FormatResult) -> FormatResult:
+    """Combine two format results. A non-NO_CHANGE result takes precedence.
+
+    Within a single format run, `check` is fixed, so NEEDS_FORMAT and
+    REFORMATTED never occur together — one always dominates NO_CHANGE."""
+    return b if b != FormatResult.NO_CHANGE else a
+
+
+def _format_dirname(directory: str, line_length: int, check: bool) -> FormatResult:
+    """Format files in directory recursively."""
+    ret = FormatResult.NO_CHANGE
     for root, dirs, files in os.walk(directory):
         # Don't recurse into hidden folders
         dirs[:] = [d for d in dirs if not d.startswith(".")]
@@ -1100,18 +1122,20 @@ def _format_dirname(directory: str, line_length: int, check: bool) -> int:
                 continue  # Test files skipped during directory traversal
             filepath = os.path.join(root, name)
             if name.endswith(".json") or name.endswith(".cf"):
-                ret |= _format_filename(filepath, line_length, check)
+                ret = _combine_results(
+                    ret, _format_filename(filepath, line_length, check)
+                )
     return ret
 
 
-def _format_paths_inner(names, line_length, check) -> int:
+def _format_paths_inner(names, line_length, check) -> FormatResult:
     if not names:
         return _format_dirname(".", line_length, check)
     if len(names) == 1 and names[0] == "-":
         # Special case, format policy file from stdin to stdout
         return format_policy_fin_fout(sys.stdin, sys.stdout, line_length, check)
 
-    ret = 0
+    ret = FormatResult.NO_CHANGE
     for name in names:
         if name == "-":
             raise UserError(
@@ -1120,14 +1144,12 @@ def _format_paths_inner(names, line_length, check) -> int:
         if not os.path.exists(name):
             raise UserError(f"{name} does not exist")
         if os.path.isfile(name):
-            ret |= _format_filename(name, line_length, check)
+            ret = _combine_results(ret, _format_filename(name, line_length, check))
             continue
         if os.path.isdir(name):
-            ret |= _format_dirname(name, line_length, check)
+            ret = _combine_results(ret, _format_dirname(name, line_length, check))
             continue
-    if check:
-        return ret
-    return 0
+    return ret
 
 
 def format_paths(names, line_length, check) -> int:
@@ -1138,7 +1160,14 @@ def format_paths(names, line_length, check) -> int:
     needed), 1 when reformatting is needed in check mode or a policy file
     has syntax errors."""
     try:
-        return _format_paths_inner(names, line_length, check)
+        r = _format_paths_inner(names, line_length, check)
+        if r == FormatResult.NEEDS_FORMAT:
+            assert check
+            # File needs reformatting
+            return 1
+        assert r in (FormatResult.NO_CHANGE, FormatResult.REFORMATTED)
+        # Success - no format needed or successfully reformatted
+        return 0
     except PolicySyntaxError as e:
         print(f"Error: {e}")
         return 1
