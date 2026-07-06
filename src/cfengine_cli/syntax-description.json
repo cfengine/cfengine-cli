@@ -9409,7 +9409,7 @@
         },
         "signals": {
           "attribute": "signals",
-          "range": "(hup|int|trap|kill|pipe|cont|abrt|stop|quit|term|child|usr1|usr2|bus|segv|[0-9]+s?)",
+          "range": "((?i:hup|int|trap|kill|pipe|cont|abrt|stop|quit|term|child|usr1|usr2|bus|segv)|[0-9]+s?)",
           "status": "normal",
           "type": "slist",
           "visibility": "promiseType"
