@@ -52,14 +52,14 @@ def format(names, line_length, check) -> int:
     return format_paths(names, line_length, check)
 
 
-def _lint(files, strict) -> int:
+def _lint(files, strict, syntax_path) -> int:
     if not files:
-        return lint_args(["."], strict)
-    return lint_args(files, strict)
+        return lint_args(["."], strict, syntax_path)
+    return lint_args(files, strict, syntax_path)
 
 
-def lint(files, strict) -> int:
-    errors = _lint(files, strict)
+def lint(files, strict, syntax_path) -> int:
+    errors = _lint(files, strict, syntax_path)
     if errors == 0:
         print("Success, no errors found.")
     elif errors == 1:

@@ -59,6 +59,11 @@ def _get_arg_parser():
         default="yes",
         help="Strict mode. Default=yes, checks for undefined promise types, bundles, bodies, functions",
     )
+    lnt.add_argument(
+        "--syntax-description",
+        type=str,
+        help="Lint based on a user given syntax description",
+    )
     lnt.add_argument("files", nargs="*", help="Files to lint")
     subp.add_parser(
         "report",
@@ -188,7 +193,11 @@ def run_command_with_args(args) -> int:
     if args.command == "format":
         return commands.format(args.files, args.line_length, args.check)
     if args.command == "lint":
-        return commands.lint(args.files, (args.strict.lower() in ("y", "ye", "yes")))
+        return commands.lint(
+            args.files,
+            (args.strict.lower() in ("y", "ye", "yes")),
+            args.syntax_description,
+        )
     if args.command == "report":
         return commands.report()
     if args.command == "run":
