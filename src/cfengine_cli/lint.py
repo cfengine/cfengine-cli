@@ -81,9 +81,9 @@ class SyntaxData:
     BUILTIN_PROMISE_TYPES = {}
     BUILTIN_FUNCTIONS = {}
 
-    def __init__(self):
+    def __init__(self, syntax_path=None):
         """Load the bundled syntax-description.json and derive lookup dicts."""
-        self._data_dict = self._load_syntax_description()
+        self._data_dict = self._load_syntax_description(path=syntax_path)
         self._derive_syntax_dicts(self._data_dict)
 
         assert self.BUILTIN_BODY_TYPES
@@ -1100,6 +1100,7 @@ def _lint_main(
     state=None,
     snippet: Snippet | None = None,
     syntax_data=None,
+    syntax_path: str | None = None,
 ) -> int:
     """This is the main function used for linting, it does all the steps on all
     the arguments (files / folders).
@@ -1127,7 +1128,10 @@ def _lint_main(
     state.mode = Mode.SYNTAX
 
     if syntax_data is None:
-        syntax_data = SyntaxData()
+        try:
+            syntax_data = SyntaxData(syntax_path)
+        except FileNotFoundError:
+            raise UserError(f"'{syntax_path}' does not exist")
 
     filenames = _args_to_filenames(args)
 
@@ -1379,9 +1383,11 @@ def lint_single_file(file: str, strict: bool = True) -> int:
     return _lint_main([file], strict)
 
 
-def lint_args(args: Iterable[str], strict: bool = True) -> int:
+def lint_args(
+    args: Iterable[str], strict: bool = True, syntax_path: str | None = None
+) -> int:
     """Lint a list of args (files / folders)"""
-    return _lint_main(list(args), strict)
+    return _lint_main(list(args), strict, syntax_path=syntax_path)
 
 
 def lint_policy_file_snippet(
