@@ -493,14 +493,26 @@ class State:
             return
 
 
+def _last_real_sibling_before(node: Node) -> Node | None:
+    """Walk backwards from node through its preceding siblings, skipping
+    comments and macros, to find the last real (content) sibling."""
+    sib = node.prev_sibling
+    while sib is not None and sib.type in ("comment", "macro"):
+        sib = sib.prev_sibling
+    return sib
+
+
 def _check_syntax(policy_file: PolicyFile, state: State) -> int:
-    """Iterate over a syntax tree and print errors if it is empty or has syntax
-    errors.
+    """Iterate over a syntax tree and print errors if it is empty, has syntax
+    errors, or is missing expected tokens (e.g. a dropped ';').
 
     Notably, printing syntax errors _does not happen during parsing_.
 
     Tree sitter has already fully parsed the policy, we iterate over the result
-    and see if it has inserted any "ERROR" nodes.
+    and see if it has inserted any "ERROR" nodes, or any "MISSING" nodes
+    (tree-sitter's error recovery can silently insert a synthetic token,
+    e.g. a missing ';' right before a closing '}', without ever producing
+    an ERROR node.
 
     Stops at first error. Returns number of errors, always 0 or 1 in this case.
     """
@@ -522,15 +534,26 @@ def _check_syntax(policy_file: PolicyFile, state: State) -> int:
     state.start_file(policy_file)
     for node in policy_file.nodes:
         state.navigate(node)
-        if node.type != "ERROR":
-            continue
         line = node.range.start_point[0] + 1
         column = node.range.start_point[1] + 1
-        _highlight_range(node, lines)
-        location = state.get_location_extended(line, column)
-        print(f"Error: Syntax error {location}")
-        state.end_file()
-        return 1
+        if node.type == "ERROR":
+            _highlight_range(node, lines)
+            location = state.get_location_extended(line, column)
+            print(f"Error: Syntax error {location}")
+            state.end_file()
+            return 1
+        if node.is_missing:
+            # To avoid pointing at #comment/@macro -lines
+            prev = _last_real_sibling_before(node)
+            report_node = prev if prev is not None else node
+            _highlight_range(report_node, lines)
+            line = report_node.range.end_point[0] + 1
+            column = report_node.range.end_point[1] + 1
+            missing = node.type if not node.is_named else f"token: {node.type}"
+            location = state.get_location_extended(line, column)
+            print(f"Error: Missing '{missing}' {location}")
+            state.end_file()
+            return 1
     state.end_file()
     return 0
 
