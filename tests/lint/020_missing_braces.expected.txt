@@ -1,0 +1,7 @@
+
+    "handlers" slist => { "my_bundle_name" };
+    "args" slist => { "foo" ;
+                      ^---^
+Error: Missing '}' at tests/lint/020_missing_braces.x.cf:11:28
+FAIL: tests/lint/020_missing_braces.x.cf (1 error)
+Failure, 1 error in total.

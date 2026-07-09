@@ -1,0 +1,7 @@
+
+    ""
+      usebundle => $(handlers)(@(args))
+      ^-------------------------------^
+Error: Missing ';' at tests/lint/020_missing_semicolon.x.cf:15:40
+FAIL: tests/lint/020_missing_semicolon.x.cf (1 error)
+Failure, 1 error in total.

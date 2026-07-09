@@ -1,0 +1,18 @@
+bundle agent my_bundle_name(arg)
+{
+  reports:
+    "$(arg)";
+}
+
+bundle agent main
+{
+  vars:
+    "handlers" slist => { "my_bundle_name" };
+    "args" slist => { "foo" };
+
+  methods:
+    ""
+      usebundle => $(handlers)(@(args))
+      # Comments and such stuff point ^ not this line in error
+
+}
