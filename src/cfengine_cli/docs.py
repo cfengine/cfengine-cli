@@ -11,6 +11,7 @@ TODO: This code needs several adjustments to better fit into
 import os
 import json
 import subprocess
+import textwrap
 
 import markdown_it
 from cfbs.pretty import pretty_file
@@ -375,8 +376,11 @@ def _run_formatter(tool, args, cwd, install_hint):
             check=True,
             cwd=cwd,
         )
-    except:
-        raise UserError(f"Encountered an error running {tool}\nInstall: {install_hint}")
+    except FileNotFoundError:
+        raise UserError(f"'{tool}' not found. Install it with: {install_hint}")
+    except subprocess.CalledProcessError as e:
+        error_msg = textwrap.indent(str(e.stderr).strip(), "> ")
+        raise UserError(f"Encountered an error running {tool}:\n{error_msg}")
     return result
 
 
