@@ -6,6 +6,7 @@ import pathlib
 import subprocess
 
 from cf_remote import log
+from cfengine_cli.cfengine_wrapper import cfengine_commands
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli import commands
 from cfengine_cli.utils import UserError
@@ -65,12 +66,31 @@ def _get_arg_parser():
         help="Lint based on a user given syntax description",
     )
     lnt.add_argument("files", nargs="*", help="Files to lint")
-    subp.add_parser(
+    report_parser = subp.add_parser(
         "report",
         help="Run the agent and hub commands necessary to get new reporting data",
     )
-    subp.add_parser(
+    report_parser.add_argument(
+        "--host",
+        type=str,
+        default=None,
+        help="Select which installation to use by name/IP (e.g. 'local' or '192.168.56.90'). "
+        "If omitted and multiple installations of cf-agent+cf-hub are found, you'll be prompted.",
+    )
+    run_parser = subp.add_parser(
         "run", help="Run the CFEngine agent, fetching, evaluating, and enforcing policy"
+    )
+    run_parser.add_argument(
+        "run_args",
+        nargs="*",
+        help="Command(s) to run with cf-agent",
+    )
+    run_parser.add_argument(
+        "--host",
+        type=str,
+        default=None,
+        help="Select which installation of cf-agent to use by name/IP (e.g. 'local' or '192.168.56.90'). "
+        "If omitted and multiple installations are found, you'll be prompted.",
     )
 
     profile_parser = subp.add_parser(
@@ -187,9 +207,9 @@ def run_command_with_args(args) -> int:
         return commands.version()
     # The real commands:
     if args.command == "build":
-        return commands.build()
+        return cfengine_commands.build()
     if args.command == "deploy":
-        return commands.deploy()
+        return cfengine_commands.deploy()
     if args.command == "format":
         return commands.format(args.files, args.line_length, args.check)
     if args.command == "lint":
@@ -199,9 +219,9 @@ def run_command_with_args(args) -> int:
             args.syntax_description,
         )
     if args.command == "report":
-        return commands.report()
+        return cfengine_commands.report(target=args.host)
     if args.command == "run":
-        return commands.run()
+        return cfengine_commands.run(*args.run_args, target=args.host)
     if args.command == "dev":
         return commands.dev(args.dev_command, args)
     if args.command == "profile":
