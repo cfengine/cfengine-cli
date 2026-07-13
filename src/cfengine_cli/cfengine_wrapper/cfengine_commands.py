@@ -1,7 +1,6 @@
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
 from cf_remote.commands import install as install_command
-from cf_remote.commands import spawn as spawn_command
 from cf_remote.commands import destroy as destroy_command
 
 from cfengine_cli.cfengine_wrapper.cfengine_utils import (
@@ -31,12 +30,10 @@ def install() -> int:  # TODO ENT-14117
     return install_command(None, None)
 
 
-def spawn() -> int:  # TODO ENT-14118
-    return spawn_command(None, None, None, None)
-
-
-def destroy() -> int:  # TODO ENT-14118
-    return destroy_command(None)
+def destroy(groupname, del_all=False) -> int:
+    if del_all:
+        return destroy_command(None)
+    return destroy_command(groupname)
 
 
 def build() -> int:  # TODO ENT-14119
