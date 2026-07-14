@@ -59,8 +59,6 @@ def _get_arg_parser():
         "version",
         help="Print the version string",
     )
-    subp.add_parser("build", help="Build a policy set from a CFEngine Build project")
-    subp.add_parser("deploy", help="Deploy a built policy set")
     fmt = subp.add_parser("format", help="Autoformat .json and .cf files")
     fmt.add_argument("files", nargs="*", help="Files to format")
     fmt.add_argument("--line-length", default=80, type=int, help="Maximum line length")
@@ -184,7 +182,7 @@ def run_command_with_args(args) -> int:
     if args.command == "build":
         return cfengine_commands.build()
     if args.command == "deploy":
-        return cfengine_commands.deploy()
+        return cfengine_commands.deploy(args.hub, args.masterfiles)
     if args.command == "format":
         return commands.format(args.files, args.line_length, args.check)
     if args.command == "lint":
@@ -323,7 +321,7 @@ def validate_args(args):
             args.edition = "enterprise"
 
     if "hosts" in args and args.hosts:
-        log.debug("validate_args, hosts in args, args.hosts='{}'".format(args.hosts))
+        log.debug(f"validate_args, hosts in args, args.hosts='{args.hosts}'")
         args.hosts = resolve_hosts(args.hosts)
     if "clients" in args and args.clients:
         args.clients = resolve_hosts(args.clients)
@@ -333,6 +331,7 @@ def validate_args(args):
             for host_info in resolve_hosts(args.bootstrap, bootstrap_ips=True)
         ]
     if "hub" in args and args.hub:
+        log.debug(f"validate_args, hubs in args, args.hub='{args.hub}'")
         args.hub = resolve_hosts(args.hub)
 
     if args.command in ["uninstall"] and not (args.hosts or args.hub or args.clients):

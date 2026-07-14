@@ -2,6 +2,19 @@ import argparse
 
 
 def parse_wrapper_args(subp: argparse._SubParsersAction):
+    subp.add_parser("build", help="Build a policy set from a CFEngine Build project\n\
+A wrapper arount the cfbs `build`-function.")
+
+    sp = subp.add_parser("deploy", help="Deploy policy-set (masterfiles) to hub\n\
+A wrapper around the cf-remote `deploy`-function with some added niceties.")
+    sp.add_argument("--hub", help="Hub(s) to deploy to", type=str)
+    sp.add_argument(
+        "masterfiles",
+        help="Policy-set location (tarball URL or local path to tarball / directory)",
+        type=str,
+        nargs="?",
+    )
+
     install_parser = subp.add_parser(
         "install",
         help="Install CFEngine on the given hosts",

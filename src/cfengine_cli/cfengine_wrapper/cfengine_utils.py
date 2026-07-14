@@ -12,6 +12,16 @@ from cf_remote.paths import CLOUD_STATE_FPATH
 from cf_remote.utils import read_json
 
 
+def prompt_yes_no(prompt: str, default: bool = True) -> bool:
+    if not sys.stdin.isatty():
+        raise UserError(f"{prompt} -- no terminal to confirm.")
+    suffix = "[Y/n]" if default else "[y/N]"
+    answer = input(f"{prompt} {suffix} ").strip().lower()
+    if not answer:
+        return default
+    return answer in ("y", "yes")
+
+
 def prompt_two_options(header: str, option_a: str, option_b: str) -> str:
     print(header)
     print(f"  1) {option_a}")

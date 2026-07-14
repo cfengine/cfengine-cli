@@ -14,6 +14,7 @@ from cfengine_cli.cfengine_wrapper.cfengine_objects import (
 from cfengine_cli.cfengine_wrapper.cfengine_utils import (
     extract_agent_file,
     prompt_two_options,
+    prompt_yes_no,
     require_executable,
     require_installation,
 )
@@ -154,9 +155,17 @@ def destroy(groupname, del_all=False) -> int:
     return destroy_command(groupname)
 
 
-def build() -> int:  # TODO ENT-14119
-    return build_command()
+def build() -> int:
+    rc = build_command()
+    if rc != 0:
+        return rc
+    if prompt_yes_no("Deploy the built policy set now?", default=True):
+        return deploy(None, None)
+    return 0
 
 
-def deploy() -> int:  # TODO ENT-14119
-    return deploy_command(None, None)
+def deploy(target: str | list[str] | None, masterfiles: str | None = None) -> int:
+    if isinstance(target, str):
+        target = [target]
+    hubs = [require_executable("cf-agent", h).location for h in (target or [])] or None
+    return deploy_command(hubs, masterfiles)
