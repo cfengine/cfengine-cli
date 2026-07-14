@@ -1,6 +1,5 @@
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
-from cf_remote.commands import install as install_command
 from cf_remote.commands import destroy as destroy_command
 
 from cfengine_cli.cfengine_wrapper.cfengine_utils import (
@@ -24,10 +23,6 @@ def run(*args, target: str | None = None) -> int:
     if args:
         return agent.run(*args)
     return agent.run("-KIf update.cf", "-KI")
-
-
-def install() -> int:  # TODO ENT-14117
-    return install_command(None, None)
 
 
 def destroy(groupname, del_all=False) -> int:
