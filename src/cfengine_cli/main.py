@@ -6,12 +6,21 @@ import pathlib
 import subprocess
 
 from cf_remote import log
+from cf_remote.main import resolve_hosts
+from cf_remote.utils import is_package_url, strip_user
 from cfengine_cli.cfengine_wrapper import cfengine_commands
 from cfengine_cli.cfengine_wrapper.arg_parse import parse_wrapper_args
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli import commands
 from cfengine_cli.utils import UserError
-from cf_remote.commands import spawn, list_boxes, list_platforms, init_cloud_config
+from cf_remote.commands import (
+    spawn,
+    list_boxes,
+    list_platforms,
+    init_cloud_config,
+    install,
+    uninstall,
+)
 from cf_remote.spawn import CFRUserError, Providers
 from cfbs.utils import CFBSProgrammerError
 
@@ -41,7 +50,9 @@ def _get_arg_parser():
         % os.path.basename(sys.argv[0])
     )
     subp = ap.add_subparsers(dest="command", title=command_help_hint)
-    parse_wrapper_args(subp)  # The flags for run/report/spawn/destroy/...all wrapper functions
+    parse_wrapper_args(
+        subp
+    )  # The flags for run/report/spawn/destroy/...all wrapper functions
 
     subp.add_parser("help", help="Print help information")
     subp.add_parser(
@@ -184,6 +195,32 @@ def run_command_with_args(args) -> int:
         )
     if args.command == "report":
         return cfengine_commands.report(target=args.host)
+
+    if args.command == "install":
+        print(args)
+        if args.trust_keys:
+            trust_keys = args.trust_keys.split(",")
+        else:
+            trust_keys = None
+
+        return install(
+            args.hub,
+            args.clients,
+            package=args.package,
+            bootstrap=args.bootstrap,
+            hub_package=args.hub_package,
+            client_package=args.client_package,
+            version=args.version,
+            demo=args.demo,
+            call_collect=args.call_collect,
+            edition=args.edition,
+            remote_download=args.remote_download,
+            trust_keys=trust_keys,
+            insecure=args.insecure,
+        )
+    elif args.command == "uninstall":
+        all_hosts = (args.hosts or []) + (args.hub or []) + (args.clients or [])
+        return uninstall(all_hosts, purge=args.purge)
     if args.command == "run":
         return cfengine_commands.run(*args.run_args, target=args.host)
     if args.command == "spawn":
@@ -275,6 +312,56 @@ def validate_args(args):
             raise UserError(
                 "Only one of '--all' or 'NAME' may be specified for destruction"
             )
+    if args.command in ["install"]:  # , "packages", "list", "download"]:
+        if args.edition:
+            args.edition = args.edition.lower()
+            if args.edition == "core":
+                args.edition = "community"
+            if args.edition not in ["enterprise", "community"]:
+                raise UserError("--edition must be either community or enterprise")
+        else:
+            args.edition = "enterprise"
+
+    if "hosts" in args and args.hosts:
+        log.debug("validate_args, hosts in args, args.hosts='{}'".format(args.hosts))
+        args.hosts = resolve_hosts(args.hosts)
+    if "clients" in args and args.clients:
+        args.clients = resolve_hosts(args.clients)
+    if "bootstrap" in args and args.bootstrap:
+        args.bootstrap = [
+            strip_user(host_info)
+            for host_info in resolve_hosts(args.bootstrap, bootstrap_ips=True)
+        ]
+    if "hub" in args and args.hub:
+        args.hub = resolve_hosts(args.hub)
+
+    if args.command in ["uninstall"] and not (args.hosts or args.hub or args.clients):
+        raise UserError("Use --hosts, --hub or --clients to specify remote hosts")
+
+    if args.command == "install":
+        if args.call_collect and not args.demo:
+            raise UserError("--call-collect must be used with --demo")
+        if not args.clients and not args.hub:
+            raise UserError("Specify hosts using --hub and --clients")
+        if args.hub and args.clients and args.package:
+            raise UserError(
+                "Use --hub-package / --client-package instead to distinguish between hosts"
+            )
+        if args.package and (args.hub_package or args.client_package):
+            raise UserError(
+                "--package cannot be used in combination with --hub-package / --client-package"
+            )
+        if args.package and not is_package_url(args.package):
+            if not os.path.exists(os.path.expanduser(args.package)):
+                raise UserError("Package/directory '%s' does not exist" % args.package)
+        if args.hub_package and not is_package_url(args.hub_package):
+            if not os.path.isfile(args.hub_package):
+                raise UserError("Hub package '%s' does not exist" % args.hub_package)
+        if args.client_package and not is_package_url(args.client_package):
+            if not os.path.isfile(args.client_package):
+                raise UserError(
+                    "Client package '%s' does not exist" % args.client_package
+                )
 
 
 def _main():

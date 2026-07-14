@@ -2,6 +2,90 @@ import argparse
 
 
 def parse_wrapper_args(subp: argparse._SubParsersAction):
+    install_parser = subp.add_parser(
+        "install",
+        help="Install CFEngine on the given hosts",
+        description="A wrapper around the cf-remote `install` function",
+    )
+    install_parser.add_argument(
+        "--version",
+        "-V",
+        help="Specify version",
+        type=str,
+    )
+    # install_parser._option_string_actions.get("--version").help = "absdfsf"
+    # TODO: Update cf-remote/cfbs to have more modular arg-parsing, then we can import
+    # and override any differences? technically illegal since _option_string_actions,
+    # but will save ~ 200-1000 loc depending on how much we import into cfengine-cli
+
+    install_parser.add_argument(
+        "--edition",
+        "-E",
+        choices=["community", "enterprise"],
+        help="Enterprise or community packages",
+        type=str,
+    )
+    install_parser.add_argument(
+        "--package", help="Local path to package or URL to download", type=str
+    )
+    install_parser.add_argument(
+        "--hub-package",
+        help="Local path to package or URL to download for --hub",
+        type=str,
+    )
+    install_parser.add_argument(
+        "--client-package",
+        help="Local path to package or URL to download for --clients",
+        type=str,
+    )
+    install_parser.add_argument(
+        "--bootstrap", "-B", help="cf-agent --bootstrap argument", type=str
+    )
+    install_parser.add_argument(
+        "--clients", "-c", help="Where to install client package", type=str
+    )
+    install_parser.add_argument("--hub", help="Where to install hub package", type=str)
+    install_parser.add_argument(
+        "--demo",
+        help="Use defaults to make demos smoother (NOT secure)",
+        action="store_true",
+    )
+    install_parser.add_argument(
+        "--call-collect",
+        help="Enable call collect in --demo def.json",
+        action="store_true",
+    )
+    install_parser.add_argument(
+        "--remote-download",
+        help="Package will be downloaded directly to the target machine",
+        action="store_true",
+    )
+    install_parser.add_argument(
+        "--trust-keys",
+        help="Comma-separated list of paths to keys hosts should trust"
+        + " (implies '--trust-server no' when boostraping)",
+        type=str,
+    )
+    install_parser.add_argument(
+        "--insecure",
+        help="Ignore mismatching checksums when downloading urls",
+        action="store_true",
+    )
+
+    uninstall_parser = subp.add_parser(
+        "uninstall",
+        help="Uninstall CFEngine on the given hosts",
+        description="A wrapper around the cf-remote `uninstall` function",
+    )
+    uninstall_parser.add_argument(
+        "--purge", help="Complete uninstallation", action="store_true"
+    )
+    uninstall_parser.add_argument(
+        "--clients", "-c", help="Where to uninstall", type=str
+    )
+    uninstall_parser.add_argument("--hub", help="Where to uninstall", type=str)
+    uninstall_parser.add_argument("--hosts", "-H", help="Where to uninstall", type=str)
+
     report_parser = subp.add_parser(
         "report",
         help="Run the agent and hub commands necessary to get new reporting data",

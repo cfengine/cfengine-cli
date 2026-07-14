@@ -3,7 +3,6 @@ import logging
 
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
-from cf_remote.commands import install as install_command
 from cf_remote.commands import destroy as destroy_command
 from cf_remote.remote import run_command, transfer_file
 
@@ -147,10 +146,6 @@ def run(*args, target: str | None = None) -> int:
         return agent.run("-KIf update.cf", "-KI")
     resolved = [_resolve_command_for_agent(agent, command) for command in args]
     return agent.run(*resolved)
-
-
-def install() -> int:  # TODO ENT-14117
-    return install_command(None, None)
 
 
 def destroy(groupname, del_all=False) -> int:
