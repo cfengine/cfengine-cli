@@ -95,7 +95,9 @@ def _find_all_paired() -> list[Installation]:
     for host, aliases in _known_hosts(role_filter="hub"):
         try:
             data = get_info(host)
-        except Exception:
+        except (Exception, SystemExit) as e:
+            # Same reasoning as _find_all()
+            logging.warning(f"Skipping {host}: {e}")
             continue
         if not data:
             continue
