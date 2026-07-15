@@ -140,7 +140,9 @@ def _find_all_paired() -> list[Installation]:
         if not data:
             continue
         agent_path = data.get("agent")
-        hub_path = data.get("hub")
+        # If role is hub, assume hub exists and path resolves correctly
+        is_hub = data.get("role") == "hub"
+        hub_path = "cf-hub" if is_hub else None
         if agent_path and hub_path:
             installations.append(
                 Installation(
