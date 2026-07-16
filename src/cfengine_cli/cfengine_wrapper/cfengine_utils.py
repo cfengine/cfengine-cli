@@ -12,6 +12,34 @@ from cf_remote.paths import CLOUD_STATE_FPATH
 from cf_remote.utils import read_json
 
 
+def prompt_two_options(header: str, option_a: str, option_b: str) -> str:
+    print(header)
+    print(f"  1) {option_a}")
+    print(f"  2) {option_b}")
+    while True:
+        choice = input("Select [1-2]: ").strip()
+        if choice == "1":
+            return "a"
+        if choice == "2":
+            return "b"
+        print("Invalid selection, try again.")
+
+
+def extract_agent_file(command: str) -> str | None:
+    """
+    Best-effort extraction of the filename cf-agent would read as policy
+    input, from an already-flagged command string (e.g. "-KIf update.cf").
+    Returns None if there's no file argument to check at all (e.g. plain
+    "-KI"), in which case there's nothing to resolve.
+    """
+    tokens = command.split()
+    for i, token in enumerate(tokens):
+        if token.startswith("-") and not token.startswith("--") and "f" in token:
+            if i + 1 < len(tokens):
+                return tokens[i + 1]
+    return None
+
+
 def _find_local_path(binary_name: str) -> str | None:
     candidate = bin(binary_name)
     if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
@@ -95,7 +123,9 @@ def _find_all_paired() -> list[Installation]:
     for host, aliases in _known_hosts(role_filter="hub"):
         try:
             data = get_info(host)
-        except Exception:
+        except (Exception, SystemExit) as e:
+            # Same reasoning as _find_all()
+            logging.warning(f"Skipping {host}: {e}")
             continue
         if not data:
             continue
