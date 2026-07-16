@@ -6,5 +6,5 @@ module.exports = {
   onboarding: false,
   requireConfig: "optional",
   branchPrefix: "renovate/",
-  repositories: ["."],
+  repositories: ["cfengine/cfengine-cli"],
 };
