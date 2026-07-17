@@ -16,21 +16,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout cfengine-cli
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: cfengine-cli
       - name: Checkout masterfiles
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: cfengine/masterfiles
           path: masterfiles
       - name: Checkout documentation
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: cfengine/documentation
           path: documentation
       - name: Checkout modules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: cfengine/modules
           path: modules
