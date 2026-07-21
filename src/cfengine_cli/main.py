@@ -192,7 +192,10 @@ def run_command_with_args(args) -> int:
             args.syntax_description,
         )
     if args.command == "report":
-        return cfengine_commands.report(target=args.host)
+        return cfengine_commands.report(
+            target=args.hub,
+            run_agent=args.run_agent,
+        )
     if args.command == "setup-code":
         return cfengine_commands.setup_code(target=args.hub)
     if args.command == "install":

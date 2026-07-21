@@ -111,14 +111,19 @@ A wrapper around the cf-remote `deploy`-function with some added niceties.")
 
     report_parser = subp.add_parser(
         "report",
-        help="Run the agent and hub commands necessary to get new reporting data",
+        help="Refresh reporting data",
     )
     report_parser.add_argument(
-        "--host",
+        "--run-agent",
+        action="store_true",
+        help="Runs the agent on the chosen host(s) before collecting report data.",
+    )
+    report_parser.add_argument(
+        "--hub",
+        "-H",
         type=str,
         default=None,
-        help="Select which installation to use by name/IP (e.g. 'local' or '192.168.56.90'). "
-        "If omitted and multiple installations of cf-agent+cf-hub are found, you'll be prompted.",
+        help="Only refresh one hub specified by name/IP (e.g. 'local' or '192.168.56.90') and accompanying clients",
     )
 
     run_parser = subp.add_parser(

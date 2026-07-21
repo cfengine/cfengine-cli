@@ -52,12 +52,12 @@ class Executable:
         return self.location
 
     def run(self, *commands) -> int:
-        rc = 0
+        errors = 0
         for command in commands:
             rc = self._run_one(command)
             if rc != 0:
-                return rc
-        return rc
+                errors += 1
+        return errors
 
     def _run_one(self, command: str) -> int:
         if self.name == "cf-agent":
