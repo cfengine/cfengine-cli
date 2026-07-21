@@ -199,7 +199,6 @@ def run_command_with_args(args) -> int:
     if args.command == "setup-code":
         return cfengine_commands.setup_code(target=args.hub)
     if args.command == "install":
-        print(args)
         if args.trust_keys:
             trust_keys = args.trust_keys.split(",")
         else:
