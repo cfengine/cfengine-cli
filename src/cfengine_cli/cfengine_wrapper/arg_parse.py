@@ -2,9 +2,41 @@ import argparse
 
 
 def parse_wrapper_args(subp: argparse._SubParsersAction):
+
+    sp = subp.add_parser(
+        "save", help="Save host(s) with a group name to use in other commands"
+    )
+    sp.add_argument(
+        "--role",
+        help="Role of the hosts",
+        choices=["hub", "hubs", "client", "clients"],
+        required=True,
+    )
+    sp.add_argument(
+        "--name",
+        help="Name of the group of hosts (can be used in other commands)",
+        required=True,
+    )
+    sp.add_argument(
+        "--hosts",
+        "-H",
+        help="SSH usernames and IPs for SSH and CFEngine in the form of user@ip",
+        required=True,
+    )
+
+    sp = subp.add_parser(
+        "setup-code", help="Fetches a new setup-code for mission-portal login"
+    )
+    sp.add_argument(
+        "--hub",
+        "-H",
+        help="Hub from which to fetch new setup-code",
+        type=str,
+        default=None,
+    )
+
     subp.add_parser("build", help="Build a policy set from a CFEngine Build project\n\
 A wrapper arount the cfbs `build`-function.")
-
     sp = subp.add_parser("deploy", help="Deploy policy-set (masterfiles) to hub\n\
 A wrapper around the cf-remote `deploy`-function with some added niceties.")
     sp.add_argument("--hub", help="Hub(s) to deploy to", type=str)
@@ -101,14 +133,19 @@ A wrapper around the cf-remote `deploy`-function with some added niceties.")
 
     report_parser = subp.add_parser(
         "report",
-        help="Run the agent and hub commands necessary to get new reporting data",
+        help="Refresh reporting data",
     )
     report_parser.add_argument(
-        "--host",
+        "--run-agent",
+        action="store_true",
+        help="Runs the agent on the chosen host(s) before collecting report data.",
+    )
+    report_parser.add_argument(
+        "--hub",
+        "-H",
         type=str,
         default=None,
-        help="Select which installation to use by name/IP (e.g. 'local' or '192.168.56.90'). "
-        "If omitted and multiple installations of cf-agent+cf-hub are found, you'll be prompted.",
+        help="Only refresh one hub specified by name/IP (e.g. 'local' or '192.168.56.90') and accompanying clients",
     )
 
     run_parser = subp.add_parser(

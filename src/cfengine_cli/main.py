@@ -179,6 +179,8 @@ def run_command_with_args(args) -> int:
     if args.command == "version":
         return commands.version()
     # The real commands:
+    if args.command == "save":
+        return cfengine_commands.save(hosts=args.hosts, role=args.role, name=args.name)
     if args.command == "build":
         return cfengine_commands.build()
     if args.command == "deploy":
@@ -192,10 +194,13 @@ def run_command_with_args(args) -> int:
             args.syntax_description,
         )
     if args.command == "report":
-        return cfengine_commands.report(target=args.host)
-
+        return cfengine_commands.report(
+            target=args.hub,
+            run_agent=args.run_agent,
+        )
+    if args.command == "setup-code":
+        return cfengine_commands.setup_code(target=args.hub)
     if args.command == "install":
-        print(args)
         if args.trust_keys:
             trust_keys = args.trust_keys.split(",")
         else:

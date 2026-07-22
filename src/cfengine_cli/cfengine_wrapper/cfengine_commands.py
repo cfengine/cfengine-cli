@@ -4,19 +4,20 @@ import logging
 from cfbs.commands import build_command
 from cf_remote.commands import deploy as deploy_command
 from cf_remote.commands import destroy as destroy_command
+from cf_remote.commands import save as save_command
 from cf_remote.remote import run_command, transfer_file
 
 from cfengine_cli.utils import UserError
 from cfengine_cli.cfengine_wrapper.cfengine_objects import (
     Executable,
-    _ensure_default_agent_flags,
+    ensure_default_agent_flags,
 )
 from cfengine_cli.cfengine_wrapper.cfengine_utils import (
     extract_agent_file,
     prompt_two_options,
     prompt_yes_no,
     require_executable,
-    require_installation,
+    select_report_targets,
 )
 
 _DEFAULT_CFENGINE_INPUTS_DIR = "/var/cfengine/inputs"
@@ -113,7 +114,7 @@ def _resolve_command_for_agent(agent: Executable, command: str) -> str:
     if agent.name != "cf-agent":
         return command
 
-    command = _ensure_default_agent_flags(command)
+    command = ensure_default_agent_flags(command)
     file_arg = extract_agent_file(command)
     if not file_arg:
         return command
@@ -131,14 +132,74 @@ def _resolve_command_for_agent(agent: Executable, command: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def report(target: str | None = None) -> int:  # TODO? ENT-14122
-    installation = require_installation(target)
-    rc = installation.agent.run("-KIf update.cf", "-KI")
-    if rc != 0:
-        return rc
-    return installation.hub.run(
-        "--query rebase -H 127.0.0.1", "--query delta -H 127.0.0.1"
-    )
+def save(hosts: str, role: str, name: str) -> int:  # TODO: Add to existing group
+    return save_command(hosts=hosts, role=role, name=name)
+
+
+def _refresh_agent(agent: Executable) -> int:
+    try:
+        return agent.run("-KIf update.cf", "-KI")
+    except (Exception, SystemExit) as e:
+        logging.error(f"Skipping {agent.label}: {e}")
+        return 1
+
+
+def _query_hub_delta(hub: Executable, client_ips: list[str]) -> int:
+    """
+    Ask a hub to recompute delta report data for itself and
+    for every client bootstrapped to it.
+    """
+    try:
+        queries = ["--query delta -H 127.0.0.1"] + [
+            f"--query delta -H {ip}" for ip in client_ips
+        ]
+        return hub.run(*queries)
+    except (Exception, SystemExit) as e:
+        logging.error(f"Skipping hub {hub.label}: {e}")
+        return 1
+
+
+def report(
+    target: str | None = None,
+    run_agent: bool = False,
+) -> int:
+    errors = 0
+    hubs, clients = select_report_targets(target)
+
+    hub_agent_failed = {}
+    if run_agent:
+        for hub in hubs:
+            rc = _refresh_agent(hub.agent)
+            hub_agent_failed[hub.location] = rc != 0
+            if rc != 0:
+                logging.error(f"Agent run failed on {hub.agent.label}")
+                errors += 1
+
+        for agent in clients:
+            rc = _refresh_agent(agent)
+            if rc != 0:
+                logging.error(f"Refresh failed on {agent.label})")
+                errors += 1
+
+    for hub in hubs:
+        if run_agent and hub_agent_failed[hub.location]:
+            logging.warning(
+                f"Agent run failed for {hub.location}, some data may be stale."
+            )
+        client_ips = [client.location.split("@", 1)[1] for client in clients]
+        rc = _query_hub_delta(hub.hub, client_ips)
+        if rc != 0:
+            logging.error(f"Hub refresh failed on {hub.label})")
+            errors += 1
+
+    if errors > 0:
+        logging.error(f"Encountered {errors}.")
+    return errors
+
+
+def setup_code(target: str | None = None) -> int:
+    hub = require_executable("cf-hub", target)
+    return hub.run("--new-setup-code")
 
 
 def run(*args, target: str | None = None) -> int:
