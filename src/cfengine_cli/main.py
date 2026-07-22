@@ -162,6 +162,36 @@ Core and Masterfiles only reflect themselves""",
         metavar="GIT_ARG",
         help="Commit range [other optional args], e.g. 3.27.0..origin/3.27.x",
     )
+
+    inip = subp.add_parser(
+        "init", help="Initialize a [policy-set, policy-module, promise-type] example."
+    )
+    init_type = inip.add_mutually_exclusive_group()
+    init_type.add_argument(
+        "--policy-set",
+        help="Initializes a Build project for working on your policy set on top of the default masterfiles",
+        action="store_true",
+    )
+    init_type.add_argument(
+        "--promise-type",
+        help="Initializes a Build project for working on a new custom promise type in python",
+        action="store_true",
+    )
+    init_type.add_argument(
+        "--policy-module",
+        help="Initializes a Build project for working on a module for build.cfengine.com (or internal use)",
+        action="store_true",
+    )
+    inip.add_argument(
+        "--with-input",
+        help="Adds input data to the --policy-module project, for working on a module which takes input.",
+        action="store_true",
+    )
+    inip.add_argument(
+        "--non-interactive",
+        help="Non-interactive mode (picks the default for all prompts)",
+        action="store_true",
+    )
     return ap
 
 
@@ -181,6 +211,8 @@ def run_command_with_args(args) -> int:
     # The real commands:
     if args.command == "save":
         return cfengine_commands.save(hosts=args.hosts, role=args.role, name=args.name)
+    if args.command == "init":
+        return commands.init(args)
     if args.command == "build":
         return cfengine_commands.build()
     if args.command == "deploy":
