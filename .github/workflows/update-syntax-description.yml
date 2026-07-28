@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: "main"
+          persist-credentials: false # prevents duplicate Authorization header error with create-pull-request
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
