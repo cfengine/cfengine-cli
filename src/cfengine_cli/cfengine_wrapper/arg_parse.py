@@ -35,10 +35,16 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         default=None,
     )
 
-    subp.add_parser("build", help="Build a policy set from a CFEngine Build project\n\
-A wrapper arount the cfbs `build`-function.")
-    sp = subp.add_parser("deploy", help="Deploy policy-set (masterfiles) to hub\n\
-A wrapper around the cf-remote `deploy`-function with some added niceties.")
+    subp.add_parser(
+        "build",
+        help="""Build a policy set from a CFEngine Build project.
+A wrapper around the cfbs `build`-function.""",
+    )
+    sp = subp.add_parser(
+        "deploy",
+        help="""Deploy policy-set (masterfiles) to hub.
+A wrapper around the cf-remote `deploy`-function with some added niceties.""",
+    )
     sp.add_argument("--hub", help="Hub(s) to deploy to", type=str)
     sp.add_argument(
         "masterfiles",
