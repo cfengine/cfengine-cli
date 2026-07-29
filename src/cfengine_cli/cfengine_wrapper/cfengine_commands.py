@@ -68,63 +68,65 @@ def _remote_home_dir(location: str) -> str:
     return "/root" if user == "root" else f"/home/{user}"
 
 
-def _resolve_file_remote(location: str, command: str, file_arg: str) -> str:
-    local_exists = os.path.isfile(file_arg)
-
+def _remote_path_for(location: str, file_arg: str) -> str:
     local_home = os.path.expanduser("~")
     remote_home = _remote_home_dir(location)
 
     if file_arg.startswith(local_home + os.sep):
-        # e.g. "~/update.cf", shell expands to /home/{user}/update.cf
         rel = file_arg[len(local_home) + 1 :]
-        remote_path = f"{remote_home}/{rel}"
-    elif file_arg.startswith("/"):
-        remote_path = file_arg
-    else:
-        remote_path = f"{_DEFAULT_CFENGINE_INPUTS_DIR}/{file_arg}"
+        return f"{remote_home}/{rel}"
+    if file_arg.startswith("/"):
+        return file_arg
+    return f"{_DEFAULT_CFENGINE_INPUTS_DIR}/{file_arg}"
 
-    remote_exists = _remote_path_exists(location, remote_path)
 
-    if not local_exists and not remote_exists:
+def _resolve_file_remote(
+    location: str, command: str, file_arg: str
+) -> tuple[str, str | None]:
+
+    remote_path = _remote_path_for(location, file_arg)
+    exists_in_inputs = _remote_path_exists(location, remote_path)
+
+    if os.path.isfile(file_arg):
+        remote_home = _remote_home_dir(location)
+        uploaded_path = f"{remote_home}/{os.path.basename(file_arg)}"
+        if exists_in_inputs:
+            logging.warning(
+                f"File `{file_arg}` also exists in `{remote_path}`, consider renaming `{file_arg}` in the future."
+            )
+        logging.warning(f"Uploading {file_arg} to {location}:{uploaded_path}")
+        transfer_file(location, file_arg)
+        return _replace_file_token(command, file_arg, uploaded_path), uploaded_path
+
+    if not exists_in_inputs:
         raise UserError(
             f"Could not find '{file_arg}' locally or on {location} (checked {remote_path})."
         )
-
-    if local_exists and remote_exists:
-        choice = prompt_two_options(
-            f"'{file_arg}' exists both locally and on {location} (at {remote_path}).\nUse the:",
-            "local copy (uploads it, possibly overwriting the remote copy)",
-            f"copy already on {location}, unchanged",
-        )
-    elif local_exists:
-        choice = "a"
-    else:
-        choice = "b"
-
-    if choice == "b":
-        return _replace_file_token(command, file_arg, remote_path)
-
-    uploaded_path = f"{remote_home}/{os.path.basename(file_arg)}"
-    logging.warning(f"Uploading {file_arg} to {location}:{uploaded_path}")
-    transfer_file(location, file_arg)
-    return _replace_file_token(command, file_arg, uploaded_path)
+    return _replace_file_token(command, file_arg, remote_path), None
 
 
-def _resolve_command_for_agent(agent: Executable, command: str) -> str:
+def _resolve_command_for_agent(
+    agent: Executable, command: str
+) -> tuple[str, str | None]:
     if agent.name != "cf-agent":
-        return command
+        return command, None
 
     command = ensure_default_agent_flags(command)
     file_arg = extract_agent_file(command)
     if not file_arg:
-        return command
+        return command, None
 
     if agent.is_local:
         if "/" in file_arg:
-            return command  # no ambiguity for a local target
-        return _resolve_bare_filename_local(command, file_arg)
+            return command, None  # no ambiguity for a local target
+        return _resolve_bare_filename_local(command, file_arg), None
 
     return _resolve_file_remote(agent.location, command, file_arg)
+
+
+def _remove_remote_file(location: str, path: str) -> None:
+    if run_command(location, f"rm -f {path}", sudo=False) is None:
+        logging.warning(f"Failed to remove uploaded file '{path}' from {location}")
 
 
 # ---------------------------------------------------------------------------
@@ -206,8 +208,20 @@ def run(*args, target: str | None = None) -> int:
     agent = require_executable("cf-agent", target)
     if not args:
         return agent.run("-KIf update.cf", "-KI")
-    resolved = [_resolve_command_for_agent(agent, command) for command in args]
-    return agent.run(*resolved)
+
+    resolved = []
+    cleanup_paths = []
+    for command in args:
+        resolved_command, cleanup_path = _resolve_command_for_agent(agent, command)
+        resolved.append(resolved_command)
+        if cleanup_path:
+            cleanup_paths.append(cleanup_path)
+
+    try:
+        return agent.run(*resolved)
+    finally:
+        for path in cleanup_paths:
+            _remove_remote_file(agent.location, path)
 
 
 def destroy(groupname, del_all=False) -> int:
