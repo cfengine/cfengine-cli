@@ -1,7 +1,7 @@
 import os
-import logging
 
 from cfbs.commands import build_command
+from cf_remote import log
 from cf_remote.commands import deploy as deploy_command
 from cf_remote.commands import destroy as destroy_command
 from cf_remote.commands import save as save_command
@@ -91,10 +91,10 @@ def _resolve_file_remote(
         remote_home = _remote_home_dir(location)
         uploaded_path = f"{remote_home}/{os.path.basename(file_arg)}"
         if exists_in_inputs:
-            logging.warning(
+            log.warning(
                 f"File `{file_arg}` also exists in `{remote_path}`, consider renaming `{file_arg}` in the future."
             )
-        logging.warning(f"Uploading {file_arg} to {location}:{uploaded_path}")
+        log.info(f"Uploading {file_arg} to {location}:{uploaded_path}")
         transfer_file(location, file_arg)
         return _replace_file_token(command, file_arg, uploaded_path), uploaded_path
 
@@ -126,7 +126,7 @@ def _resolve_command_for_agent(
 
 def _remove_remote_file(location: str, path: str) -> None:
     if run_command(location, f"rm -f {path}", sudo=False) is None:
-        logging.warning(f"Failed to remove uploaded file '{path}' from {location}")
+        log.warning(f"Failed to remove uploaded file '{path}' from {location}")
 
 
 # ---------------------------------------------------------------------------
@@ -142,7 +142,7 @@ def _refresh_agent(agent: Executable) -> int:
     try:
         return agent.run("-KIf update.cf", "-KI")
     except (Exception, SystemExit) as e:
-        logging.error(f"Skipping {agent.label}: {e}")
+        log.warning(f"Skipping {agent.label}: {e}")
         return 1
 
 
@@ -157,7 +157,7 @@ def _query_hub_delta(hub: Executable, client_ips: list[str]) -> int:
         ]
         return hub.run(*queries)
     except (Exception, SystemExit) as e:
-        logging.error(f"Skipping hub {hub.label}: {e}")
+        log.warning(f"Skipping hub {hub.label}: {e}")
         return 1
 
 
@@ -174,28 +174,26 @@ def report(
             rc = _refresh_agent(hub.agent)
             hub_agent_failed[hub.location] = rc != 0
             if rc != 0:
-                logging.error(f"Agent run failed on {hub.agent.label}")
+                log.error(f"Agent run failed on {hub.agent.label}")
                 errors += 1
 
         for agent in clients:
             rc = _refresh_agent(agent)
             if rc != 0:
-                logging.error(f"Refresh failed on {agent.label})")
+                log.error(f"Refresh failed on {agent.label})")
                 errors += 1
 
     for hub in hubs:
         if run_agent and hub_agent_failed[hub.location]:
-            logging.warning(
-                f"Agent run failed for {hub.location}, some data may be stale."
-            )
+            log.warning(f"Agent run failed for {hub.location}, some data may be stale.")
         client_ips = [client.location.split("@", 1)[1] for client in clients]
         rc = _query_hub_delta(hub.hub, client_ips)
         if rc != 0:
-            logging.error(f"Hub refresh failed on {hub.label})")
+            log.error(f"Hub refresh failed on {hub.label})")
             errors += 1
 
     if errors > 0:
-        logging.error(f"Encountered {errors}.")
+        log.error(f"Encountered {errors}.")
     return errors
 
 
