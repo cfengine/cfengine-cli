@@ -1,7 +1,7 @@
 from dataclasses import dataclass
+from cf_remote import log
 from cf_remote.remote import run_command
 import subprocess
-import logging
 import os
 
 
@@ -73,7 +73,7 @@ class Executable:
             return result.returncode
 
         full_command = f"{self.path} {command}"
-        logging.warning(f"Executing command {full_command} on {self.location}")
+        log.info(f"Executing command {full_command} on {self.location}")
         output = run_command(self.location, full_command, sudo=True)
         if (
             output is None

@@ -1,11 +1,11 @@
 import os
 import shutil
-import logging
 import random
 
 from collections.abc import Iterator
 from functools import lru_cache
 
+from cf_remote import log
 from cf_remote.remote import get_info
 from cfengine_cli.paths import bin
 from cfengine_cli.utils import UserError
@@ -92,7 +92,7 @@ def _host_info(host: str):
     try:
         return get_info(host) or None
     except (Exception, SystemExit) as e:
-        logging.warning(f"Skipping {host}: {e}")
+        log.warning(f"Skipping {host}: {e}")
         return None
 
 
@@ -196,7 +196,7 @@ def _select(candidates, description, target: str | None = None):
 
 def require_executable(name: str, target: str | None = None) -> Executable:
     chosen = _select(_find_all(name), name, target)
-    logging.warning(
+    log.info(
         f"Using {'local' if chosen.is_local else 'remote'} installation of {name} ({chosen.label})"
     )
     return chosen
@@ -249,7 +249,7 @@ def select_report_targets(
         return installations, other_agents
 
     sampled_agents = random.sample(other_agents, budget)
-    logging.warning(
+    log.info(
         f"{len(other_agents)} additional host(s) found; refreshing a random "
         f"{budget} of them (plus {len(installations)} hub(s)) to keep this fast. "
     )
