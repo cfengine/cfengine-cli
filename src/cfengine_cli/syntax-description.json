@@ -6786,15 +6786,30 @@
     "string_replace": {
       "cached": false,
       "category": "data",
-      "collecting": false,
+      "collecting": true,
+      "maxArgs": 4,
+      "minArgs": 3,
       "parameters": [
         { "description": "Source string", "range": ".*", "type": "string" },
-        { "description": "String to replace", "range": ".*", "type": "string" },
-        { "description": "Replacement string", "range": ".*", "type": "string" }
+        {
+          "description": "String or list of strings to replace",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Replacement string or list of strings",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Whether to expect strings or list of strings",
+          "range": "strings,lists",
+          "type": "option"
+        }
       ],
       "returnType": "string",
       "status": "normal",
-      "variadic": false
+      "variadic": true
     },
     "string_reverse": {
       "cached": false,
