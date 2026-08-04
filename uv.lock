@@ -34,14 +34,14 @@ wheels = [
 
 [[package]]
 name = "cf-remote"
-version = "0.9.0"
+version = "0.9.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-libcloud" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/99/46/d784f34cf508ffc560b7fe5975e421d6f0d0d9d97a156c72abca45aa65d7/cf_remote-0.9.0.tar.gz", hash = "sha256:c7f5e290a618cabd7281a9cd5357f261bb1edd077f296e9586c326d1638f676c", size = 67374, upload-time = "2026-06-12T17:29:19.787Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/97/bf02d8c78164bab0159aae505a9fbb7ec88703bb0035aef066aa47fd0df1/cf_remote-0.9.4.tar.gz", hash = "sha256:f00e5d852a83253f0398e4a490355ec2c00454f583977f5ace2f22453d4a8657", size = 69156, upload-time = "2026-08-07T10:40:26.015Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/68/8d2d95ccc080433d98de0003cb0c5018be8e10f2554ffbcf069d2497f179/cf_remote-0.9.0-py3-none-any.whl", hash = "sha256:e6c14d54d726dc91d9a8fc34cae48eeafd2e06ff71a14b55272fc3bc97d3b38b", size = 71449, upload-time = "2026-06-12T17:29:18.7Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/86/327d432911279e14203e13554213cb7f27677a60bb530468a33693cee2a1/cf_remote-0.9.4-py3-none-any.whl", hash = "sha256:d7856fd506762ef59bfb57ae5f52a2d8cbbcf475bfb9a9f7cb55bf1a6cf396fb", size = 73351, upload-time = "2026-08-07T10:40:24.884Z" },
 ]
 
 [[package]]
@@ -74,7 +74,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cf-remote", specifier = ">=0.7.3" },
+    { name = "cf-remote", specifier = ">=0.9.4" },
     { name = "cfbs", specifier = ">=5.5.0" },
     { name = "markdown-it-py", specifier = ">=3.0.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
@@ -208,7 +208,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
