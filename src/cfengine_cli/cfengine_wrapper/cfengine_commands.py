@@ -2,9 +2,10 @@ import os
 
 from cfbs.commands import build_command
 from cf_remote import log
-from cf_remote.commands import deploy as deploy_command
+from cf_remote.commands import deploy as deploy_command, info
 from cf_remote.commands import destroy as destroy_command
 from cf_remote.commands import save as save_command
+from cf_remote.commands import show as show_command
 from cf_remote.remote import run_command, transfer_file
 
 from cfengine_cli.utils import UserError
@@ -242,3 +243,11 @@ def deploy(target: str | list[str] | None, masterfiles: str | None = None) -> in
         target = [target]
     hubs = [require_executable("cf-agent", h).location for h in (target or [])] or None
     return deploy_command(hubs, masterfiles)
+
+
+def show(target: list[str] | None = None) -> int:
+    if target == [] or target is None:
+        return show_command(False)
+    if isinstance(target, str):
+        target = [target]
+    return info(target)

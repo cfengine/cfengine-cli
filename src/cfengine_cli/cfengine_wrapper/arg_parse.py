@@ -11,6 +11,15 @@ from cf_remote.args import (
 
 
 def parse_wrapper_args(subp: argparse._SubParsersAction):
+    show_parser = subp.add_parser(
+        "show", help="Shows your saved host-groups or info about a specified host"
+    )
+    show_parser.add_argument(
+        "--hosts",
+        "--host",
+        "-H",
+        help="Shows more specific information about specific host(s)",
+    )
 
     add_save_args(
         subp.add_parser(

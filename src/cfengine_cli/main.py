@@ -325,6 +325,8 @@ def run_command_with_args(args) -> int:
         return commands.profile(args)
     if args.command == "up":
         return commands.up(args)
+    if args.command == "show":
+        return cfengine_commands.show(args.hosts)
     raise UserError(f"Unknown command: '{args.command}'")
 
 
