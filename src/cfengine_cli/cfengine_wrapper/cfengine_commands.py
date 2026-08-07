@@ -12,6 +12,7 @@ from cf_remote.commands import destroy as destroy_command
 from cf_remote.commands import save as save_command
 from cf_remote.commands import show as show_command
 from cf_remote.remote import run_command, transfer_file
+from cf_remote.commands import connect_cmd
 
 from cfengine_cli.utils import UserError
 from cfengine_cli.cfengine_wrapper.cfengine_objects import (
@@ -290,3 +291,7 @@ def moduleinfo(modules: list[str]) -> int:
         log.error("This is not a cfbs repo, to get started, type: cfengine init")
         return 1
     return status_command()
+
+
+def connect(host) -> int:
+    return connect_cmd(host)
