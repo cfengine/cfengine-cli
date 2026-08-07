@@ -13,6 +13,7 @@ from cf_remote.commands import save as save_command
 from cf_remote.commands import show as show_command
 from cf_remote.remote import run_command, transfer_file
 from cf_remote.commands import connect_cmd
+from cfbs.commands import input_command
 
 from cfengine_cli.utils import UserError
 from cfengine_cli.cfengine_wrapper.cfengine_objects import (
@@ -295,3 +296,7 @@ def moduleinfo(modules: list[str]) -> int:
 
 def connect(host) -> int:
     return connect_cmd(host)
+
+
+def cfbs_input(modules: list[str] | None = None) -> int:
+    return input_command(modules, "cfengine input")
