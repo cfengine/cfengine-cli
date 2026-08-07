@@ -7,7 +7,7 @@ import subprocess
 
 from cf_remote import log
 from cf_remote.main import resolve_hosts
-from cf_remote.utils import is_package_url, strip_user
+from cf_remote.utils import strip_user, CFRExitError
 from cfengine_cli.cfengine_wrapper import cfengine_commands
 from cfengine_cli.cfengine_wrapper.arg_parse import parse_wrapper_args
 from cfengine_cli.version import cfengine_cli_version_string
@@ -22,6 +22,14 @@ from cf_remote.commands import (
     uninstall,
 )
 from cf_remote.spawn import CFRUserError, Providers
+from cf_remote.validate import (
+    validate_edition_args,
+    validate_install_args,
+    validate_uninstall_args,
+    validate_spawn_args,
+    validate_deploy_args,
+    validate_destroy_args,
+)
 from cfbs.utils import CFBSProgrammerError
 
 
@@ -323,39 +331,19 @@ def run_command_with_args(args) -> int:
 def validate_args(args):
     if args.command == "dev" and args.dev_command is None:
         raise UserError("Missing subcommand - cfengine dev <subcommand>")
-    if (
-        args.command == "spawn"
-        and not args.list_platforms
-        and not args.init_config
-        and not args.list_boxes
-    ):
-        # The above options don't require any other options/arguments (TODO:
-        # --provider), but otherwise all have to be given
-        if not args.platform:
-            raise UserError("--platform needs to be specified")
-        if not args.count:
-            raise UserError("--count needs to be specified")
-        if not args.role:
-            raise UserError("--role needs to be specified")
-        if not args.name:
-            raise UserError("--name needs to be specified")
+
+    if args.command == "spawn":
+        validate_spawn_args(args)
 
     if args.command == "destroy":
-        if not args.all and not args.name:
-            raise UserError("Either '--all' or 'NAME' must be specified for destroy")
+        validate_destroy_args(args)
         if args.all and args.name:
             raise UserError(
                 "Only one of '--all' or 'NAME' may be specified for destruction"
             )
-    if args.command in ["install"]:  # , "packages", "list", "download"]:
-        if args.edition:
-            args.edition = args.edition.lower()
-            if args.edition == "core":
-                args.edition = "community"
-            if args.edition not in ["enterprise", "community"]:
-                raise UserError("--edition must be either community or enterprise")
-        else:
-            args.edition = "enterprise"
+
+    if args.command == "install":
+        validate_edition_args(args)
 
     if "hosts" in args and args.hosts:
         log.debug(f"validate_args, hosts in args, args.hosts='{args.hosts}'")
@@ -371,33 +359,14 @@ def validate_args(args):
         log.debug(f"validate_args, hubs in args, args.hub='{args.hub}'")
         args.hub = resolve_hosts(args.hub)
 
-    if args.command in ["uninstall"] and not (args.hosts or args.hub or args.clients):
-        raise UserError("Use --hosts, --hub or --clients to specify remote hosts")
+    if args.command == "uninstall":
+        validate_uninstall_args(args)
 
     if args.command == "install":
-        if args.call_collect and not args.demo:
-            raise UserError("--call-collect must be used with --demo")
-        if not args.clients and not args.hub:
-            raise UserError("Specify hosts using --hub and --clients")
-        if args.hub and args.clients and args.package:
-            raise UserError(
-                "Use --hub-package / --client-package instead to distinguish between hosts"
-            )
-        if args.package and (args.hub_package or args.client_package):
-            raise UserError(
-                "--package cannot be used in combination with --hub-package / --client-package"
-            )
-        if args.package and not is_package_url(args.package):
-            if not os.path.exists(os.path.expanduser(args.package)):
-                raise UserError("Package/directory '%s' does not exist" % args.package)
-        if args.hub_package and not is_package_url(args.hub_package):
-            if not os.path.isfile(args.hub_package):
-                raise UserError("Hub package '%s' does not exist" % args.hub_package)
-        if args.client_package and not is_package_url(args.client_package):
-            if not os.path.isfile(args.client_package):
-                raise UserError(
-                    "Client package '%s' does not exist" % args.client_package
-                )
+        validate_install_args(args)
+
+    if args.command == "deploy":
+        validate_deploy_args(args)
 
 
 def _main():
@@ -416,7 +385,7 @@ def main():
         exit_code = _main()
         assert type(exit_code) is int
         sys.exit(exit_code)
-    except (UserError, CFRUserError) as e:
+    except (UserError, CFRUserError, CFRExitError) as e:
         print(str(e))
         sys.exit(-1)
     # Exceptions below are not expected, print extra info:
