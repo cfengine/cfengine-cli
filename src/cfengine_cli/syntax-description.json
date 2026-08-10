@@ -2141,6 +2141,27 @@
           "type": "option",
           "visibility": "body"
         },
+        "remount": {
+          "attribute": "remount",
+          "range": "true,false,yes,no,on,off",
+          "status": "normal",
+          "type": "option",
+          "visibility": "body"
+        },
+        "remount_methods": {
+          "attribute": "remount_methods",
+          "range": "remount,unmount_mount",
+          "status": "normal",
+          "type": "olist",
+          "visibility": "body"
+        },
+        "remount_timeout": {
+          "attribute": "remount_timeout",
+          "range": "0,99999999999",
+          "status": "normal",
+          "type": "int",
+          "visibility": "body"
+        },
         "unmount": {
           "attribute": "unmount",
           "range": "true,false,yes,no,on,off",
