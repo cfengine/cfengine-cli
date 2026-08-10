@@ -1,11 +1,25 @@
 import os
 
-from cfbs.commands import build_command
+from cfbs.utils import is_cfbs_repo
+from cfbs.commands import (
+    build_command,
+    info_command,
+    status_command,
+)
 from cf_remote import log
-from cf_remote.commands import deploy as deploy_command
+from cf_remote.commands import deploy as deploy_command, info
 from cf_remote.commands import destroy as destroy_command
 from cf_remote.commands import save as save_command
+from cf_remote.commands import show as show_command
 from cf_remote.remote import run_command, transfer_file
+from cf_remote.commands import connect_cmd
+from cfbs.commands import (
+    input_command,
+    add_command,
+    remove_command,
+    update_command,
+    search_command,
+)
 
 from cfengine_cli.utils import UserError
 from cfengine_cli.cfengine_wrapper.cfengine_objects import (
@@ -228,17 +242,87 @@ def destroy(groupname, del_all=False) -> int:
     return destroy_command(groupname)
 
 
-def build() -> int:
+def build(hub=None, non_interactive=False) -> int:
     rc = build_command()
     if rc != 0:
         return rc
-    if prompt_yes_no("Deploy the built policy set now?", default=True):
-        return deploy(None, None)
+    if prompt_yes_no(
+        "Deploy the built policy set now?",
+        default=True,
+        non_interactive=non_interactive,
+    ):
+        return deploy(hub, None, non_interactive)
     return 0
 
 
-def deploy(target: str | list[str] | None, masterfiles: str | None = None) -> int:
+def deploy(
+    target: str | list[str] | None,
+    masterfiles: str | None = None,
+    non_interactive: bool = False,
+) -> int:
+    error = 0
     if isinstance(target, str):
         target = [target]
-    hubs = [require_executable("cf-agent", h).location for h in (target or [])] or None
-    return deploy_command(hubs, masterfiles)
+    hubs = {
+        x.location: x
+        for h in (target or [])
+        for x in [require_executable("cf-agent", h)]
+    } or None
+
+    # TODO/WOULD be nice: Deploy without run (CFE-4704: https://northerntech.atlassian.net/browse/CFE-4704)
+    if hubs:
+        # cf-remote functions use "localhost" (not "local" as it is here)
+        deploy_targets = [
+            "localhost" if location == "local" else location for location in hubs
+        ]
+        error = deploy_command(deploy_targets, masterfiles)
+    else:
+        return deploy_command(hubs, masterfiles)
+
+    if prompt_yes_no(
+        "Run policy set now?", default=True, non_interactive=non_interactive
+    ):
+        for hub in hubs:
+            hubs[hub].run("-KIf update.cf", "-KI")
+    return error
+
+
+def show(target: list[str] | None = None) -> int:
+    if target == [] or target is None:
+        return show_command(False)
+    if isinstance(target, str):
+        target = [target]
+    return info(target)
+
+
+def moduleinfo(modules: list[str]) -> int:
+    if modules != []:
+        return info_command(modules)
+    if not is_cfbs_repo():
+        log.error("This is not a cfbs repo, to get started, type: cfengine init")
+        return 1
+    return status_command()
+
+
+def connect(host) -> int:
+    return connect_cmd(host)
+
+
+def cfbs_input(modules: list[str]) -> int:
+    return input_command(modules, "cfengine input")
+
+
+def cfbs_add(modules: list[str]) -> int:
+    return add_command(modules, "cfengine input")
+
+
+def cfbs_remove(modules: list[str] | None = None) -> int:
+    return remove_command(modules, "cfengine input")
+
+
+def cfbs_update(to_update) -> int:
+    return update_command(to_update)
+
+
+def cfbs_search(modules: list[str]) -> int:
+    return search_command(modules)

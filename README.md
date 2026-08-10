@@ -121,6 +121,8 @@ To ignore the previously saved configuration and apply the current configuration
 cfengine up --reset config.yaml
 ```
 
+See [CHEATSHEET.md](./CHEATSHEET.md) for a fuller command reference.
+
 ## Supported platforms and versions
 
 This tool will only support a limited number of platforms, it is not intended to run everywhere CFEngine runs.

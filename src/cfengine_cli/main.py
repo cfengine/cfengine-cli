@@ -222,9 +222,21 @@ def run_command_with_args(args) -> int:
     if args.command == "init":
         return commands.init(args)
     if args.command == "build":
-        return cfengine_commands.build()
+        return cfengine_commands.build(args.hub, args.non_interactive)
     if args.command == "deploy":
-        return cfengine_commands.deploy(args.hub, args.masterfiles)
+        return cfengine_commands.deploy(
+            args.hub, args.masterfiles, args.non_interactive
+        )
+    if args.command == "input":
+        return cfengine_commands.cfbs_input(args.module)
+    if args.command == "add":
+        return cfengine_commands.cfbs_add(args.module)
+    if args.command == "remove":
+        return cfengine_commands.cfbs_remove(args.module)
+    if args.command == "search":
+        return cfengine_commands.cfbs_search(args.module)
+    if args.command == "update":
+        return cfengine_commands.cfbs_update(args.to_update)
     if args.command == "format":
         return commands.format(args.files, args.line_length, args.check)
     if args.command == "lint":
@@ -325,6 +337,12 @@ def run_command_with_args(args) -> int:
         return commands.profile(args)
     if args.command == "up":
         return commands.up(args)
+    if args.command == "show":
+        return cfengine_commands.show(args.hosts)
+    if args.command == "moduleinfo":
+        return cfengine_commands.moduleinfo(args.modules)
+    if args.command == "connect":
+        return cfengine_commands.connect(args.hosts)
     raise UserError(f"Unknown command: '{args.command}'")
 
 
@@ -357,7 +375,10 @@ def validate_args(args):
         ]
     if "hub" in args and args.hub:
         log.debug(f"validate_args, hubs in args, args.hub='{args.hub}'")
-        args.hub = resolve_hosts(args.hub)
+        if args.hub in ["local", "localhost"]:
+            args.hub = ["local"]
+        else:
+            args.hub = resolve_hosts(args.hub)
 
     if args.command == "uninstall":
         validate_uninstall_args(args)

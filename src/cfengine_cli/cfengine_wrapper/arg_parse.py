@@ -7,10 +7,93 @@ from cf_remote.args import (
     add_uninstall_args,
     add_spawn_args,
     add_destroy_args,
+    add_connect_args,
 )
 
 
 def parse_wrapper_args(subp: argparse._SubParsersAction):
+    update_parser = subp.add_parser(
+        "update",
+        help="Updates the current cfbs project",
+        description="A wrapper around the cfbs `update` function",
+    )
+    update_parser.add_argument(
+        "to_update",
+        nargs="*",
+        help="Directory of cfbs-project to update",
+    )
+    remove_parser = subp.add_parser(
+        "remove",
+        help="Removes the specified module(s) from cfbs project",
+        description="A wrapper around the cfbs `remove` function",
+    )
+    remove_parser.add_argument(
+        "module",
+        nargs="+",
+        help="Module(s) for which to remove",
+    )
+
+    add_parser = subp.add_parser(
+        "add",
+        help="Adds the specified module(s) to cfbs project",
+        description="A wrapper around the cfbs `add` function",
+    )
+    add_parser.add_argument(
+        "module",
+        nargs="+",
+        help="Module(s) for which to add",
+    )
+    search_parser = subp.add_parser(
+        "search",
+        help="Searches the build-index for specified module(s)",
+        description="A wrapper around the cfbs `search` function",
+    )
+    search_parser.add_argument(
+        "module",
+        nargs="+",
+        help="Module(s) for which to lookup",
+    )
+
+    input_parser = subp.add_parser(
+        "input",
+        help="Sets/updates input.json for selected module(s)",
+        description="A wrapper around the cfbs `input` function",
+    )
+    input_parser.add_argument(
+        "module",
+        nargs="+",
+        help="Module(s) for which to set input",
+    )
+
+    add_connect_args(
+        subp.add_parser(
+            "connect",
+            help="Opens interactive ssh shell",
+            description="A wrapper around cf-remote `connect` function",
+        )
+    )
+
+    moduleinfo_parser = subp.add_parser(
+        "moduleinfo",
+        help="Shows information about your cfbs-project or a specific module",
+        description="A wrapper around the cfbs `status` function",
+    )
+
+    moduleinfo_parser.add_argument(
+        "modules",
+        nargs="*",
+        help="Module(s) for which you would like more info, utilizes cfbs `info` function",
+    )
+
+    show_parser = subp.add_parser(
+        "show", help="Shows your saved host-groups or info about a specified host"
+    )
+    show_parser.add_argument(
+        "--hosts",
+        "--host",
+        "-H",
+        help="Shows more specific information about specific host(s)",
+    )
 
     add_save_args(
         subp.add_parser(
@@ -29,18 +112,29 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         default=None,
     )
 
-    subp.add_parser(
+    sp = subp.add_parser(
         "build",
-        help="""Build a policy set from a CFEngine Build project.
-A wrapper around the cfbs `build`-function.""",
+        help="Build a policy set from a CFEngine Build project",
+        description="A wrapper around the cf-remote `build`-function with some added niceties",
     )
+    sp.add_argument(
+        "--non-interactive",
+        help="Non-interactive mode (picks the default for all prompts)",
+        action="store_true",
+    )
+    sp.add_argument("--hub", help="Hub(s) to deploy to after building", type=str)
 
     deploy_parser = subp.add_parser(
         "deploy",
-        help="""Deploy policy-set (masterfiles) to hub.
-A wrapper around the cf-remote `deploy`-function with some added niceties.""",
+        help="Deploy policy-set (masterfiles) to hub.",
+        description="A wrapper around the cf-remote `deploy`-function with some added niceties.",
     )
     add_deploy_args(deploy_parser)
+    deploy_parser.add_argument(
+        "--non-interactive",
+        help="Non-interactive mode (picks the default for all prompts)",
+        action="store_true",
+    )
 
     install_parser = subp.add_parser(
         "install",
@@ -81,8 +175,8 @@ A wrapper around the cf-remote `deploy`-function with some added niceties.""",
 
     run_parser = subp.add_parser(
         "run",
-        description="Run the CFEngine agent, fetching, evaluating, and enforcing policy.\n\
-A wrapper around the cf-remote `run`-function with some added niceties",
+        help="Run the CFEngine agent, fetching, evaluating, and enforcing policy.",
+        description="A wrapper around the cf-remote `run`-function with some added niceties",
         epilog="""Examples:
   `cfengine run` defaults to use `cf-agent -KIf update.cf && cf-agent -KI`
 
