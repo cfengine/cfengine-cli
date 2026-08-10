@@ -375,7 +375,10 @@ def validate_args(args):
         ]
     if "hub" in args and args.hub:
         log.debug(f"validate_args, hubs in args, args.hub='{args.hub}'")
-        args.hub = resolve_hosts(args.hub)
+        if args.hub in ["local", "localhost"]:
+            args.hub = ["local"]
+        else:
+            args.hub = resolve_hosts(args.hub)
 
     if args.command == "uninstall":
         validate_uninstall_args(args)

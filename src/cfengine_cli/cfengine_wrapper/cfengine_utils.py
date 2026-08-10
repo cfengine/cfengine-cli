@@ -111,7 +111,7 @@ _Id = namedtuple("_Id", "location aliases")
 
 def _identities(binary_name: str) -> Iterator[_Id]:
     """local + every known host as (location, aliases), without connecting."""
-    yield _Id("local", [])
+    yield _Id("local", ["localhost"])
     for host, aliases in _known_hosts(None if binary_name == "cf-agent" else "hub"):
         yield _Id(host, aliases)
 
