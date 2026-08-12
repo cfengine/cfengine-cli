@@ -4264,7 +4264,7 @@
     "format": {
       "cached": false,
       "category": "data",
-      "collecting": false,
+      "collecting": true,
       "minArgs": 1,
       "parameters": [
         {
@@ -7090,6 +7090,26 @@
       "returnType": "context",
       "status": "normal",
       "variadic": true
+    },
+    "validfiledata": {
+      "cached": false,
+      "category": "io",
+      "collecting": false,
+      "parameters": [
+        {
+          "description": "File name to read",
+          "range": "\"?(/.*)",
+          "type": "string"
+        },
+        {
+          "description": "Type of data to read",
+          "range": "CSV,YAML,JSON,ENV,auto",
+          "type": "option"
+        }
+      ],
+      "returnType": "context",
+      "status": "normal",
+      "variadic": false
     },
     "validjson": {
       "cached": false,
