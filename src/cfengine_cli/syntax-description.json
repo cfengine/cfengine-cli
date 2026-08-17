@@ -6799,7 +6799,18 @@
       "collecting": true,
       "maxArgs": 2,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Mustache template string",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "CFEngine variable identifier or inline JSON, can be blank",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "string",
       "status": "normal",
       "variadic": true
