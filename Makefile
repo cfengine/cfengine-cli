@@ -1,4 +1,4 @@
-.PHONY: default format lint install check venv
+.PHONY: default format lint install check venv coverage
 
 default: check
 
@@ -21,6 +21,19 @@ lint: venv
 
 install:
 	pipx install --force --editable .
+
+
+export COVERAGE_PROCESS_START = $(PWD)/.coveragerc
+coverage:
+	uv run coverage erase
+	uv run coverage run --parallel-mode -m pytest
+	uv run bash tests/run-lint-tests.sh
+	uv run bash tests/run-format-tests.sh
+	uv run bash tests/run-shell-tests.sh
+	uv run bash tests/run-up-validate-tests.sh
+	uv run coverage combine
+	uv run coverage report --fail-under=50
+	uv run coverage xml
 
 check: venv format lint
 	uv run pytest
