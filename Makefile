@@ -33,5 +33,6 @@ coverage:
 	uv run bash tests/run-up-validate-tests.sh
 	uv run coverage combine
 	uv run coverage report --fail-under=50
+	uv run coverage xml
 
 check: venv format lint coverage

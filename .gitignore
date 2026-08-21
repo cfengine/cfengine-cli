@@ -16,3 +16,4 @@ git_diff_exists
 commit_message.txt
 black_output.txt
 .coverage*
+coverage.xml
