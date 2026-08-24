@@ -3439,7 +3439,9 @@
       "category": "data",
       "collecting": false,
       "minArgs": 0,
-      "parameters": [],
+      "parameters": [
+        { "description": "Class expression", "range": ".*", "type": "string" }
+      ],
       "returnType": "context",
       "status": "normal",
       "variadic": true
@@ -3653,7 +3655,18 @@
       "category": "utils",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Regular expression",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Tag regular expression",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "slist",
       "status": "normal",
       "variadic": true
@@ -3729,7 +3742,18 @@
       "category": "utils",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Regular expression",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Tag regular expression",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "context",
       "status": "normal",
       "variadic": true
@@ -3739,7 +3763,13 @@
       "category": "data",
       "collecting": false,
       "minArgs": 0,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "String to concatenate",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "string",
       "status": "normal",
       "variadic": true
@@ -3749,7 +3779,18 @@
       "category": "utils",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Regular expression",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Tag regular expression",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "int",
       "status": "normal",
       "variadic": true
@@ -4192,7 +4233,13 @@
       "category": "files",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Glob pattern to match files",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "slist",
       "status": "normal",
       "variadic": true
@@ -4737,7 +4784,14 @@
       "category": "data",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        { "description": "Class expression", "range": ".*", "type": "string" },
+        {
+          "description": "Value if the preceding class expression is true",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "string",
       "status": "normal",
       "variadic": true
@@ -5353,7 +5407,18 @@
       "category": "data",
       "collecting": true,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "CFEngine variable identifier or inline JSON",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "CFEngine variable identifier or inline JSON",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "data",
       "status": "normal",
       "variadic": true
@@ -5476,7 +5541,9 @@
       "category": "data",
       "collecting": false,
       "minArgs": 0,
-      "parameters": [],
+      "parameters": [
+        { "description": "Class expression", "range": ".*", "type": "string" }
+      ],
       "returnType": "context",
       "status": "normal",
       "variadic": true
@@ -7149,7 +7216,18 @@
       "category": "data",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Regular expression",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Tag regular expression",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "slist",
       "status": "normal",
       "variadic": true
@@ -7159,7 +7237,18 @@
       "category": "data",
       "collecting": false,
       "minArgs": 1,
-      "parameters": [],
+      "parameters": [
+        {
+          "description": "Regular expression",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Tag regular expression",
+          "range": ".*",
+          "type": "string"
+        }
+      ],
       "returnType": "data",
       "status": "normal",
       "variadic": true
