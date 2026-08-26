@@ -12,6 +12,15 @@
     "schedule": ["before 5am on monday"]
   },
 
+  // osvVulnerabilityAlerts does not depend on the PAT being able to read
+  // GitHub's own alerts API.
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "labels": ["security"]
+  },
+  "osvVulnerabilityAlerts": true,
+
   "packageRules": [
     // pyproject.toml uses ">=" floors, which newer releases already satisfy,
     // so the default rangeStrategy proposes nothing. "bump" raises the floor.
