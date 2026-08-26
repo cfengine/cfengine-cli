@@ -1,0 +1,13 @@
+body changes my_changes
+{
+  silence => { "mtime", "content" };
+}
+
+bundle reactor my_reactor
+{
+  vars:
+    "timestamp" int => strtotime("2026-08-26");
+
+  reports:
+    "Parsed timestamp => $(timestamp)";
+}

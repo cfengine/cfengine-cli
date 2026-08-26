@@ -525,6 +525,13 @@
           "type": "option",
           "visibility": "body"
         },
+        "silence": {
+          "attribute": "silence",
+          "range": "content|add|remove|owner|group|perms|device|mtime|inode|stats|all",
+          "status": "normal",
+          "type": "slist",
+          "visibility": "body"
+        },
         "update_hashes": {
           "attribute": "update_hashes",
           "range": "true,false,yes,no,on,off",
@@ -3349,6 +3356,17 @@
     "monitor": {
       "promiseTypes": [
         "measurements",
+        "classes",
+        "defaults",
+        "meta",
+        "reports",
+        "vars"
+      ],
+      "status": "normal"
+    },
+    "reactor": {
+      "promiseTypes": [
+        "events",
         "classes",
         "defaults",
         "meta",
@@ -6973,6 +6991,17 @@
         { "description": "Input string", "range": ".*", "type": "string" }
       ],
       "returnType": "string",
+      "status": "normal",
+      "variadic": false
+    },
+    "strtotime": {
+      "cached": false,
+      "category": "data",
+      "collecting": false,
+      "parameters": [
+        { "description": "String to parse", "range": ".*", "type": "string" }
+      ],
+      "returnType": "int",
       "status": "normal",
       "variadic": false
     },
