@@ -72,6 +72,14 @@
       "groupSlug": "github-actions"
     },
 
+    // The python version is also pinned in the make-check matrix and in the
+    // classifiers, which Renovate cannot reach. One PR, not three.
+    {
+      "matchDepNames": ["python"],
+      "groupName": "python-version",
+      "groupSlug": "python-version"
+    },
+
     // Support floor, not a dependency. "bump" would raise it to ">=3.14.7"
     // and drop 3.10 - 3.13, which make-check.yml still tests.
     {
