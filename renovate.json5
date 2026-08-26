@@ -41,6 +41,29 @@
       "rangeStrategy": "bump"
     },
 
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies", "build-system.requires"],
+      "groupName": "python-dependencies",
+      "groupSlug": "python-deps"
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["dependency-groups"],
+      "groupName": "python-dev-dependencies",
+      "groupSlug": "python-dev-deps"
+    },
+
+    // Bumping CFEngine's own packages is a product decision. Must stay after
+    // the python-dependencies rule above: packageRules are last-match-wins.
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies"],
+      "matchPackageNames": ["cf-remote", "cfbs", "tree-sitter-cfengine"],
+      "groupName": "cfengine-dependencies",
+      "groupSlug": "cfengine-deps"
+    },
+
     // Support floor, not a dependency. "bump" would raise it to ">=3.14.7"
     // and drop 3.10 - 3.13, which make-check.yml still tests.
     {
