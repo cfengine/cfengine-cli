@@ -1,91 +1,91 @@
 // Global (self-hosted) settings are in .github/renovate-config.js,
 // the runner workflow is .github/workflows/renovate.yml.
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "reviewers": ["larsewi", "olehermanse"],
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended"],
+  reviewers: ["larsewi", "olehermanse"],
 
   // Renovate does not infer maintenance branches from git, they have to be
   // named here.
-  "baseBranchPatterns": ["main"],
+  baseBranchPatterns: ["main"],
 
   // Rebasing on every push to main would restart a pipeline per open PR.
-  "rebaseWhen": "conflicted",
+  rebaseWhen: "conflicted",
 
   // The workflow runs once a day, so an hourly limit would act as a daily
   // limit. Let the concurrent limit do the throttling.
-  "prHourlyLimit": 0,
-  "prConcurrentLimit": 5,
+  prHourlyLimit: 0,
+  prConcurrentLimit: 5,
 
   // Transitive deps only exist in uv.lock, so nothing in pyproject.toml
   // reaches them. Replaces dependabot's "uv" ecosystem.
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["before 5am on monday"]
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["before 5am on monday"],
   },
 
   // osvVulnerabilityAlerts does not depend on the PAT being able to read
   // GitHub's own alerts API.
-  "vulnerabilityAlerts": {
-    "enabled": true,
-    "schedule": ["at any time"],
-    "labels": ["security"]
+  vulnerabilityAlerts: {
+    enabled: true,
+    schedule: ["at any time"],
+    labels: ["security"],
   },
-  "osvVulnerabilityAlerts": true,
+  osvVulnerabilityAlerts: true,
 
-  "packageRules": [
+  packageRules: [
     // pyproject.toml uses ">=" floors, which newer releases already satisfy,
     // so the default rangeStrategy proposes nothing. "bump" raises the floor.
     {
-      "matchManagers": ["pep621"],
-      "rangeStrategy": "bump"
+      matchManagers: ["pep621"],
+      rangeStrategy: "bump",
     },
 
     {
-      "matchManagers": ["pep621"],
-      "matchDepTypes": ["project.dependencies", "build-system.requires"],
-      "groupName": "python-dependencies",
-      "groupSlug": "python-deps"
+      matchManagers: ["pep621"],
+      matchDepTypes: ["project.dependencies", "build-system.requires"],
+      groupName: "python-dependencies",
+      groupSlug: "python-deps",
     },
     {
-      "matchManagers": ["pep621"],
-      "matchDepTypes": ["dependency-groups"],
-      "groupName": "python-dev-dependencies",
-      "groupSlug": "python-dev-deps"
+      matchManagers: ["pep621"],
+      matchDepTypes: ["dependency-groups"],
+      groupName: "python-dev-dependencies",
+      groupSlug: "python-dev-deps",
     },
 
     // Bumping CFEngine's own packages is a product decision. Must stay after
     // the python-dependencies rule above: packageRules are last-match-wins.
     {
-      "matchManagers": ["pep621"],
-      "matchDepTypes": ["project.dependencies"],
-      "matchPackageNames": ["cf-remote", "cfbs", "tree-sitter-cfengine"],
-      "groupName": "cfengine-dependencies",
-      "groupSlug": "cfengine-deps"
+      matchManagers: ["pep621"],
+      matchDepTypes: ["project.dependencies"],
+      matchPackageNames: ["cf-remote", "cfbs", "tree-sitter-cfengine"],
+      groupName: "cfengine-dependencies",
+      groupSlug: "cfengine-deps",
     },
 
     // Majors stay separate so they get a real review.
     {
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "groupName": "github-actions",
-      "groupSlug": "github-actions"
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "github-actions",
+      groupSlug: "github-actions",
     },
 
     // The python version is also pinned in the make-check matrix and in the
     // classifiers, which Renovate cannot reach. One PR, not three.
     {
-      "matchDepNames": ["python"],
-      "groupName": "python-version",
-      "groupSlug": "python-version"
+      matchDepNames: ["python"],
+      groupName: "python-version",
+      groupSlug: "python-version",
     },
 
     // Support floor, not a dependency. "bump" would raise it to ">=3.14.7"
     // and drop 3.10 - 3.13, which make-check.yml still tests.
     {
-      "matchManagers": ["pep621"],
-      "matchDepTypes": ["requires-python"],
-      "enabled": false
-    }
-  ]
+      matchManagers: ["pep621"],
+      matchDepTypes: ["requires-python"],
+      enabled: false,
+    },
+  ],
 }
