@@ -1,10 +1,24 @@
-// Repository-level Renovate configuration.
 // Global (self-hosted) settings are in .github/renovate-config.js,
 // the runner workflow is .github/workflows/renovate.yml.
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "reviewers": ["larsewi", "olehermanse"],
 
-  // There is no CODEOWNERS file in this repo, so reviewers are named here.
-  "reviewers": ["larsewi", "olehermanse"]
+  "packageRules": [
+    // pyproject.toml uses ">=" floors, which newer releases already satisfy,
+    // so the default rangeStrategy proposes nothing. "bump" raises the floor.
+    {
+      "matchManagers": ["pep621"],
+      "rangeStrategy": "bump"
+    },
+
+    // Support floor, not a dependency. "bump" would raise it to ">=3.14.7"
+    // and drop 3.10 - 3.13, which make-check.yml still tests.
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["requires-python"],
+      "enabled": false
+    }
+  ]
 }
