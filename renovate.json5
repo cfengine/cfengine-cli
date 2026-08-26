@@ -5,6 +5,10 @@
   "extends": ["config:recommended"],
   "reviewers": ["larsewi", "olehermanse"],
 
+  // Renovate does not infer maintenance branches from git, they have to be
+  // named here.
+  "baseBranchPatterns": ["main"],
+
   // Rebasing on every push to main would restart a pipeline per open PR.
   "rebaseWhen": "conflicted",
 
