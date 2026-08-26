@@ -1,0 +1,10 @@
+// Repository-level Renovate configuration.
+// Global (self-hosted) settings are in .github/renovate-config.js,
+// the runner workflow is .github/workflows/renovate.yml.
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+
+  // There is no CODEOWNERS file in this repo, so reviewers are named here.
+  "reviewers": ["larsewi", "olehermanse"]
+}
