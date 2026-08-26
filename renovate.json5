@@ -5,6 +5,14 @@
   "extends": ["config:recommended"],
   "reviewers": ["larsewi", "olehermanse"],
 
+  // Rebasing on every push to main would restart a pipeline per open PR.
+  "rebaseWhen": "conflicted",
+
+  // The workflow runs once a day, so an hourly limit would act as a daily
+  // limit. Let the concurrent limit do the throttling.
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 5,
+
   // Transitive deps only exist in uv.lock, so nothing in pyproject.toml
   // reaches them. Replaces dependabot's "uv" ecosystem.
   "lockFileMaintenance": {
