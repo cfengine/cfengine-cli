@@ -5,6 +5,13 @@
   "extends": ["config:recommended"],
   "reviewers": ["larsewi", "olehermanse"],
 
+  // Transitive deps only exist in uv.lock, so nothing in pyproject.toml
+  // reaches them. Replaces dependabot's "uv" ecosystem.
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  },
+
   "packageRules": [
     // pyproject.toml uses ">=" floors, which newer releases already satisfy,
     // so the default rangeStrategy proposes nothing. "bump" raises the floor.
