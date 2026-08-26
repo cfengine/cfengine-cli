@@ -64,6 +64,14 @@
       "groupSlug": "cfengine-deps"
     },
 
+    // Majors stay separate so they get a real review.
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "github-actions",
+      "groupSlug": "github-actions"
+    },
+
     // Support floor, not a dependency. "bump" would raise it to ">=3.14.7"
     // and drop 3.10 - 3.13, which make-check.yml still tests.
     {
