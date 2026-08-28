@@ -54,7 +54,7 @@ venv = ".venv"
 
 [dependency-groups]
 dev = [
-    "flake8>=7.1.2",
-    "pytest>=8.3.4",
+    "flake8>=7.3.0",
+    "pytest>=8.4.2",
     "coverage; python_version >= '3.10'",
 ]
