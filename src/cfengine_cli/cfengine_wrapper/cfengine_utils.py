@@ -124,8 +124,9 @@ def _resolve(binary_name: str, ident: _Id) -> Executable | None:
     data = _host_info(ident.location)
     if not data:
         return None
-    # band-aid: hostinfo has no path for cf-hub, so assume it's on PATH
-    path = data.get("agent") if binary_name == "cf-agent" else "cf-hub"
+    path = data.get("agent") if binary_name == "cf-agent" else data.get("hub")
+    if not path:
+        return None
     return (
         Executable(binary_name, ident.location, path, ident.aliases) if path else None
     )
