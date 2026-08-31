@@ -4146,6 +4146,29 @@
       "status": "normal",
       "variadic": false
     },
+    "file_older_than": {
+      "cached": false,
+      "category": "files",
+      "collecting": false,
+      "maxArgs": 3,
+      "minArgs": 2,
+      "parameters": [
+        {
+          "description": "Path to file",
+          "range": "\"?(/.*)",
+          "type": "string"
+        },
+        { "description": "Date string", "range": ".*", "type": "string" },
+        {
+          "description": "file timespec",
+          "range": "modify,access,change",
+          "type": "option"
+        }
+      ],
+      "returnType": "context",
+      "status": "normal",
+      "variadic": true
+    },
     "fileexists": {
       "cached": false,
       "category": "files",
