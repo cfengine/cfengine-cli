@@ -287,6 +287,18 @@ def deploy(
     return error
 
 
+def test(hub=None) -> int:
+    rc = build_command()
+    if rc != 0:
+        return rc
+
+    agent = require_executable("cf-agent", hub)
+    location = "localhost" if agent.location == "local" else agent.location
+
+    error = deploy_command([location], None)
+    return error if error else agent.run("-KIf update.cf", "-KI")
+
+
 def show(target: list[str] | None = None) -> int:
     if target == [] or target is None:
         return show_command(False)

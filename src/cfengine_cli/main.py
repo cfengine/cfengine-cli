@@ -88,6 +88,26 @@ def _get_arg_parser():
     )
     lnt.add_argument("files", nargs="*", help="Files to lint")
 
+    tst = subp.add_parser(
+        "test",
+        help="Lint, then build/deploy/run a cfbs project as one non-interactive check",
+        description="A convenience wrapper chaining `cfengine lint` and `cfengine build` "
+        "to quickly test a module or policy-set end-to-end. "
+        "Without --hub HUB specified, you will be prompted, else the chosen hub will be used.",
+    )
+    tst.add_argument(
+        "--strict",
+        type=str,
+        default="yes",
+        help="Strict mode for linting. Default=yes, checks for undefined promise types, bundles, bodies, functions",
+    )
+    tst.add_argument("--hub", help="Hub to deploy to after building", type=str)
+    tst.add_argument(
+        "files",
+        nargs="*",
+        help="Files/Folder to lint (default is . (the entire project) )",
+    )
+
     dev_parser = subp.add_parser(
         "dev", help="Utilities intended for developers / maintainers of CFEngine"
     )
@@ -244,6 +264,12 @@ def run_command_with_args(args) -> int:
             args.files,
             (args.strict.lower() in ("y", "ye", "yes")),
             args.syntax_description,
+        )
+    if args.command == "test":
+        return commands.test(
+            args.files,
+            (args.strict.lower() in ("y", "ye", "yes")),
+            args.hub,
         )
     if args.command == "report":
         return cfengine_commands.report(
