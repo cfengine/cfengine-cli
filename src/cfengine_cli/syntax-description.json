@@ -3386,17 +3386,6 @@
         "vars"
       ],
       "status": "normal"
-    },
-    "watch": {
-      "promiseTypes": [
-        "events",
-        "classes",
-        "defaults",
-        "meta",
-        "reports",
-        "vars"
-      ],
-      "status": "normal"
     }
   },
   "functions": {
