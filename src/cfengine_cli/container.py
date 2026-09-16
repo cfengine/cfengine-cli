@@ -42,7 +42,9 @@ def run_in_container(masterfiles_dir: str) -> int:
             "sh",
             "-c",
             "rm -rf /var/cfengine/inputs "
-            "&& cp -r /mnt/masterfiles /var/cfengine/inputs "
+            "&& rm -rf /var/cfengine/masterfiles "
+            "&& cp -r /mnt/masterfiles /var/cfengine/masterfiles "
+            "&& /var/cfengine/bin/cf-agent --bootstrap 127.0.0.1 "
             "&& /var/cfengine/bin/cf-agent -KIf update.cf "
             "&& /var/cfengine/bin/cf-agent -KI",
         ]
