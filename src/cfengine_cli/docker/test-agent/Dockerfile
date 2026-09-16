@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 ENV PATH="/root/.local/bin:${PATH}"
 
 RUN apt-get update \
