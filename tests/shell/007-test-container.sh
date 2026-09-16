@@ -12,5 +12,3 @@ cd $tmpdir/test-module
 
 cfengine init --policy-module --with-input --non-interactive
 cfengine test
-
-
