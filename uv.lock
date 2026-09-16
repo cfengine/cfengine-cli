@@ -34,14 +34,14 @@ wheels = [
 
 [[package]]
 name = "cf-remote"
-version = "0.9.5"
+version = "0.9.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-libcloud" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/53/0d/6b94b3207ad4c20ef59d5fd6ee5a13c4783e6d36e5d7e73b53b58a373512/cf_remote-0.9.5.tar.gz", hash = "sha256:a37ce5b68c268476a6ef046b3061a428b040d603b4e1c8c77d2523d18117edb5", size = 71137, upload-time = "2026-08-13T12:59:57.267Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/a5/28eec1ee83e065b580eff504c0dbe22c8a0682c9d0aba62b30198744cb6c/cf_remote-0.9.6.tar.gz", hash = "sha256:2025561e8cc8c2337a8e5924a32f29354ad8e62204bc562193e47754257e07e8", size = 80896, upload-time = "2026-09-16T19:45:46.151Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/78/70f26a8e650f6f08984b504366d6ab92c70977a709a34656928d23f3e611/cf_remote-0.9.5-py3-none-any.whl", hash = "sha256:285c15f65308e7d4cc134a940418d8eca4f383ac557c26f1f04c2899d7c5bff0", size = 75654, upload-time = "2026-08-13T12:59:56.225Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/3b/f8258c38b15e480c72485f799f4ee796ad48ae9c12bf8fceb025c6f0de03/cf_remote-0.9.6-py3-none-any.whl", hash = "sha256:b7b60da04be3c37f195cee0ac2756f9b186915bd576c1d3292b489ff04b6ce95", size = 85236, upload-time = "2026-09-16T19:45:45.127Z" },
 ]
 
 [[package]]
@@ -75,7 +75,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cf-remote", specifier = ">=0.9.5" },
+    { name = "cf-remote", specifier = ">=0.9.6" },
     { name = "cfbs", specifier = ">=5.8.0" },
     { name = "markdown-it-py", specifier = ">=4.2.0" },
     { name = "pydantic", specifier = ">=2.13.5" },
