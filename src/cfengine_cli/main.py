@@ -88,6 +88,24 @@ def _get_arg_parser():
     )
     lnt.add_argument("files", nargs="*", help="Files to lint")
 
+    tst = subp.add_parser(
+        "test",
+        help="Lint, then build/run a cfbs project in a throwaway container as one non-interactive check",
+        description="A convenience wrapper chaining `cfengine lint`, `cfengine build`, `cfengine deploy` and `cfengine run` "
+        "to quickly test a module or policy-set end-to-end.",
+    )
+    tst.add_argument(
+        "--strict",
+        type=str,
+        default="yes",
+        help="Strict mode for linting. Default=yes, checks for undefined promise types, bundles, bodies, functions",
+    )
+    tst.add_argument(
+        "files",
+        nargs="*",
+        help="Files/Folder to lint (default is . (the entire project) )",
+    )
+
     dev_parser = subp.add_parser(
         "dev", help="Utilities intended for developers / maintainers of CFEngine"
     )
@@ -245,6 +263,11 @@ def run_command_with_args(args) -> int:
             (args.strict.lower() in ("y", "ye", "yes")),
             args.syntax_description,
         )
+    if args.command == "test":
+        return commands.test(
+            args.files,
+            (args.strict.lower() in ("y", "ye", "yes")),
+        )
     if args.command == "report":
         return cfengine_commands.report(
             target=args.hub,
@@ -376,7 +399,7 @@ def validate_args(args):
     if "hub" in args and args.hub:
         log.debug(f"validate_args, hubs in args, args.hub='{args.hub}'")
         if args.hub in ["local", "localhost"]:
-            args.hub = ["local"]
+            args.hub = ["localhost"]
         else:
             args.hub = resolve_hosts(args.hub)
 

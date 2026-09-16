@@ -22,6 +22,7 @@ from cfbs.commands import (
 )
 
 from cfengine_cli.utils import UserError
+from cfengine_cli.container import run_in_container
 from cfengine_cli.cfengine_wrapper.cfengine_objects import (
     Executable,
     ensure_default_agent_flags,
@@ -271,10 +272,7 @@ def deploy(
 
     # TODO/WOULD be nice: Deploy without run (CFE-4704: https://northerntech.atlassian.net/browse/CFE-4704)
     if hubs:
-        # cf-remote functions use "localhost" (not "local" as it is here)
-        deploy_targets = [
-            "localhost" if location == "local" else location for location in hubs
-        ]
+        deploy_targets = [location for location in hubs]
         error = deploy_command(deploy_targets, masterfiles)
     else:
         return deploy_command(hubs, masterfiles)
@@ -285,6 +283,14 @@ def deploy(
         for hub in hubs:
             hubs[hub].run("-KIf update.cf", "-KI")
     return error
+
+
+def test() -> int:
+    rc = build_command()
+    if rc != 0:
+        return rc
+
+    return run_in_container("out/masterfiles")
 
 
 def show(target: list[str] | None = None) -> int:
