@@ -15,7 +15,7 @@ jobs:
   update_syntax_desc:
     if: contains(fromJSON('["cfengine","mendersoftware","NorthernTechHQ"]'), github.repository_owner)
     name: Update syntax-description
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write
