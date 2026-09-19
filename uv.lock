@@ -46,11 +46,11 @@ wheels = [
 
 [[package]]
 name = "cfbs"
-version = "5.8.0"
+version = "5.8.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9d/aa/4733c43363a568852107f191cdb7dac7ff6f53d7c7977f0984e5d1cc3810/cfbs-5.8.0.tar.gz", hash = "sha256:3fd66d51b212840fa4a8088cb678c8e9bd0575afde14af58ced1ae58808e24d2", size = 164897, upload-time = "2026-09-14T10:43:38.432Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/fe/6db3ffdf5356ee28e6e56b144f8b437c0efe6717daad05824546f349e2a6/cfbs-5.8.1.tar.gz", hash = "sha256:7514fb512e3900d5182dd4a7f9aeb6dacce08e3cf635d186f8838fa90732eafa", size = 168802, upload-time = "2026-09-18T11:46:57.114Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/96/02b5fa85907b776a62b55a4ddedb09886c20b762633ce2fc8c28181d250b/cfbs-5.8.0-py3-none-any.whl", hash = "sha256:fcb7f9f67998f49a979d704b83253fb318d1c6611bc6522777680f12b1e5db85", size = 91841, upload-time = "2026-09-14T10:43:37.363Z" },
+    { url = "https://files.pythonhosted.org/packages/76/c9/0a963823b15ef3da1e61e0f55a9d319d88f4e2c4112559459a277901f83a/cfbs-5.8.1-py3-none-any.whl", hash = "sha256:930e36c8f5864d45a34e1afb1000783b9a5ff4d396de6670f68ec38a57b6d9d4", size = 93116, upload-time = "2026-09-18T11:46:56.14Z" },
 ]
 
 [[package]]
@@ -76,7 +76,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cf-remote", specifier = ">=0.9.6" },
-    { name = "cfbs", specifier = ">=5.8.0" },
+    { name = "cfbs", specifier = ">=5.8.1" },
     { name = "markdown-it-py", specifier = ">=4.2.0" },
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },
