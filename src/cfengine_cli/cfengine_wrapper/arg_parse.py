@@ -11,6 +11,15 @@ from cf_remote.args import (
 )
 
 
+def _add_index_arg(parser: argparse.ArgumentParser):
+    parser.add_argument(
+        "--index",
+        help="Specify alternate index (HTTPS URL or relative path to JSON file)",
+        type=str,
+        default=None,
+    )
+
+
 def parse_wrapper_args(subp: argparse._SubParsersAction):
     update_parser = subp.add_parser(
         "update",
@@ -20,7 +29,7 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
     update_parser.add_argument(
         "to_update",
         nargs="*",
-        help="Directory of cfbs-project to update",
+        help="Module(s) to update (all modules if omitted)",
     )
     remove_parser = subp.add_parser(
         "remove",
@@ -43,6 +52,7 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         nargs="+",
         help="Module(s) for which to add",
     )
+    _add_index_arg(add_parser)
     search_parser = subp.add_parser(
         "search",
         help="Searches the build-index for specified module(s)",
@@ -53,6 +63,7 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         nargs="+",
         help="Module(s) for which to lookup",
     )
+    _add_index_arg(search_parser)
 
     input_parser = subp.add_parser(
         "input",
@@ -84,6 +95,7 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         nargs="*",
         help="Module(s) for which you would like more info, utilizes cfbs `info` function",
     )
+    _add_index_arg(moduleinfo_parser)
 
     show_parser = subp.add_parser(
         "show", help="Shows your saved host-groups or info about a specified host"
