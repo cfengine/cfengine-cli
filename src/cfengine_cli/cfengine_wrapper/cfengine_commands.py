@@ -1,6 +1,8 @@
 import os
 
+from cfbs.cfbs_config import CFBSConfig
 from cfbs.utils import is_cfbs_repo
+from cfbs.validate import validate_index_string
 from cfbs.commands import (
     build_command,
     info_command,
@@ -301,7 +303,14 @@ def show(target: list[str] | None = None) -> int:
     return info(target)
 
 
-def moduleinfo(modules: list[str]) -> int:
+def _init_cfbs_config(index: str | None = None) -> None:
+    if index is not None:
+        validate_index_string(index)
+    CFBSConfig.get_instance(index=index)
+
+
+def moduleinfo(modules: list[str], index: str | None = None) -> int:
+    _init_cfbs_config(index)
     if modules != []:
         return info_command(modules)
     if not is_cfbs_repo():
@@ -318,17 +327,19 @@ def cfbs_input(modules: list[str]) -> int:
     return input_command(modules, "cfengine input")
 
 
-def cfbs_add(modules: list[str]) -> int:
-    return add_command(modules, "cfengine input")
+def cfbs_add(modules: list[str], index: str | None = None) -> int:
+    _init_cfbs_config(index)
+    return add_command(modules, "cfengine add")
 
 
-def cfbs_remove(modules: list[str] | None = None) -> int:
-    return remove_command(modules, "cfengine input")
+def cfbs_remove(modules: list[str]) -> int:
+    return remove_command(modules)
 
 
-def cfbs_update(to_update) -> int:
+def cfbs_update(to_update: list[str]) -> int:
     return update_command(to_update)
 
 
-def cfbs_search(modules: list[str]) -> int:
+def cfbs_search(modules: list[str], index: str | None = None) -> int:
+    _init_cfbs_config(index)
     return search_command(modules)

@@ -30,7 +30,14 @@ from cf_remote.validate import (
     validate_deploy_args,
     validate_destroy_args,
 )
-from cfbs.utils import CFBSProgrammerError
+from cfbs.utils import (
+    CFBSProgrammerError,
+    CFBSExitError,
+    CFBSUserError,
+    CFBSNetworkError,
+    CFBSValidationError,
+)
+from cfbs.git import CFBSGitError
 
 
 def _get_arg_parser():
@@ -248,11 +255,11 @@ def run_command_with_args(args) -> int:
     if args.command == "input":
         return cfengine_commands.cfbs_input(args.module)
     if args.command == "add":
-        return cfengine_commands.cfbs_add(args.module)
+        return cfengine_commands.cfbs_add(args.module, args.index)
     if args.command == "remove":
         return cfengine_commands.cfbs_remove(args.module)
     if args.command == "search":
-        return cfengine_commands.cfbs_search(args.module)
+        return cfengine_commands.cfbs_search(args.module, args.index)
     if args.command == "update":
         return cfengine_commands.cfbs_update(args.to_update)
     if args.command == "format":
@@ -363,7 +370,7 @@ def run_command_with_args(args) -> int:
     if args.command == "show":
         return cfengine_commands.show(args.hosts)
     if args.command == "moduleinfo":
-        return cfengine_commands.moduleinfo(args.modules)
+        return cfengine_commands.moduleinfo(args.modules, args.index)
     if args.command == "connect":
         return cfengine_commands.connect(args.hosts)
     raise UserError(f"Unknown command: '{args.command}'")
@@ -429,7 +436,16 @@ def main():
         exit_code = _main()
         assert type(exit_code) is int
         sys.exit(exit_code)
-    except (UserError, CFRUserError, CFRExitError) as e:
+    except (
+        UserError,
+        CFRUserError,
+        CFRExitError,
+        CFBSExitError,
+        CFBSUserError,
+        CFBSNetworkError,
+        CFBSValidationError,
+        CFBSGitError,
+    ) as e:
         print(str(e))
         sys.exit(-1)
     # Exceptions below are not expected, print extra info:
