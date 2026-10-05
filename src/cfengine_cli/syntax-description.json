@@ -3272,11 +3272,11 @@
     },
     "when": {
       "attributes": {
-        "files_deleted": {
-          "attribute": "files_deleted",
+        "file_deleted": {
+          "attribute": "file_deleted",
           "range": ".*",
           "status": "normal",
-          "type": "slist",
+          "type": "string",
           "visibility": "body"
         },
         "inherit_from": {
