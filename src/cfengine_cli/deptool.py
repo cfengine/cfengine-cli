@@ -109,6 +109,8 @@ class GitRepo:
                           a ref from previous work might be left checked out.
         """
         self.repo_path = repo_path
+        self.repo_owner = repo_owner
+        self.repo_name = repo_name
 
         repo_url = "https://github.com/{}/{}.git".format(repo_owner, repo_name)
 
@@ -211,6 +213,36 @@ class GitRepo:
             return False
         return True
 
+    def upstream_remote(self):
+        result = self.run_command("remote", "-v", capture_output=True)
+        upstream = "github\\.com[:/]{}/{}(\\.git)?/?$".format(
+            re.escape(self.repo_owner), re.escape(self.repo_name)
+        )
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            # GitHub owner and repository names are case-insensitive
+            if len(parts) >= 2 and re.search(upstream, parts[1], re.IGNORECASE):
+                return parts[0]
+        return None
+
+    def upstream_branch(self, ref):
+        remote = self.upstream_remote()
+        if remote is None:
+            log.warning(
+                "No remote points to github.com/{}/{}, using local refs".format(
+                    self.repo_owner, self.repo_name
+                )
+            )
+            return None
+        remote_ref = "{}/{}".format(remote, ref)
+        try:
+            self.run_command(
+                "show-ref", "--verify", "refs/remotes/{}".format(remote_ref)
+            )
+        except subprocess.CalledProcessError:
+            return None
+        return remote_ref
+
 
 def pretty(data):
     return json.dumps(data, indent=2)
@@ -311,10 +343,17 @@ class DepsReader:
         ```
         The ref is checked out during the execution of this function.
         """
-        self.buildscripts_repo.checkout(ref)
-        # also support checking out refs that are not necessarily branches, such as tags
-        if self.buildscripts_repo.is_git_branch(ref):
-            self.buildscripts_repo.run_command("pull")
+        upstream_ref = self.buildscripts_repo.upstream_branch(ref)
+        if upstream_ref is not None:
+            self.buildscripts_repo.checkout(upstream_ref)
+        else:
+            if self.buildscripts_repo.is_git_branch(ref):
+                log.warning(
+                    "Branch '{}' not found in upstream remote, using local branch".format(
+                        ref
+                    )
+                )
+            self.buildscripts_repo.checkout(ref)
 
         deps_versions = {}
         deps_list = self.deps_list(ref)
