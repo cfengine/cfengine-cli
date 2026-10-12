@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 import logging
+from cfengine_cli.utils import get_upstream_remote
 
 # ---------------------------------------------------------------------------
 # Regex
@@ -42,21 +43,37 @@ def fetch_git_output(path, args):
     ).stdout.splitlines(keepends=True)
 
 
+REPO_OWNER = "cfengine"
+
+
+def get_versions(prev, branch, repo, repo_path, git_args, repo_owner=REPO_OWNER):
+    """Assumes cfengine dev generate-changelog is run inside cfengine repos only"""
+    if git_args:
+        return git_args
+    else:
+        remote = get_upstream_remote(repo, repo_owner, repo_path)
+        if remote is None:
+            logging.error("No remote points to 'github.com/cfengine/{}'".format(repo))
+            exit(1)
+        return [f"{prev}..{remote}/{branch}"]
+
+
 # ---------------------------------------------------------------------------
 # Fetch and merge dependency upgrades / reverts
 # ---------------------------------------------------------------------------
-def collect_version_updates(repos, git_args):
+def collect_version_updates(repos, prev, branch, git_args):
     dep_history: dict[str, list[tuple[str, str]]] = {}
     for repo in repos:
+        repo_path = os.path.join(os.getcwd(), repo)
         for raw in fetch_git_output(
-            os.path.join(os.getcwd(), repo),
+            repo_path,
             [
                 "log",
                 "--no-merges",
                 "--reverse",
                 "--pretty=format:%s",
             ]
-            + git_args,
+            + get_versions(prev, branch, repo, repo_path, git_args),
         ):
             subject = raw.decode().strip()
 
@@ -212,21 +229,22 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
         add_entry(sha, title)
 
 
-def parse_git_log(repos, git_args):
+def parse_git_log(repos, prev, branch, git_args):
     """Walk git history across repos and return (entry_list, missed_tickets)."""
     entries = {}  # sha -> [msg, ...]
     linked_shas = {}  # sha -> [linked_sha, ...]
     sha_to_tracker = {}  # sha -> set of ticket strings
 
     for repo in repos:
+        repo_path = os.path.join(os.getcwd(), repo)
         for raw_sha in fetch_git_output(
-            os.path.join(os.getcwd(), repo),
+            repo_path,
             [
                 "rev-list",
                 "--no-merges",
                 "--reverse",
             ]
-            + git_args,
+            + get_versions(prev, branch, repo, repo_path, git_args),
         ):
             parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo)
 
@@ -362,13 +380,7 @@ def generate_changelog_impl(args):
         f"next version to be {expected}, but cfversion says {actual}"
     )
 
-    if args.git_args:
-        versions = args.git_args
-    else:
-        # Assumes tag exists and origin follows the same naming scheme for this release
-        versions = [f"{prev}..origin/{branch}"]
-
-    entry_list, missed_tickets = parse_git_log(repos, versions)
+    entry_list, missed_tickets = parse_git_log(repos, prev, branch, args.git_args)
     entry_list.sort()
 
     output = ""
@@ -389,9 +401,13 @@ def generate_changelog_impl(args):
     if (
         os.path.basename(os.path.abspath(os.curdir)) == "enterprise"
     ):  # packaging changes only included in enterprise
-        pkg_changes, missed_pkg_tickets = parse_git_log(REPO_MAP["packaging"], versions)
+        pkg_changes, missed_pkg_tickets = parse_git_log(
+            REPO_MAP["packaging"], prev, branch, args.git_args
+        )
         missed_tickets.update(missed_pkg_tickets)
-        pkg_changes += collect_version_updates(REPO_MAP["packaging"], versions)
+        pkg_changes += collect_version_updates(
+            REPO_MAP["packaging"], prev, branch, args.git_arg
+        )
         pkg_changes.sort()
         if pkg_changes:
             lines.append("\n**Packaging changes:**")
