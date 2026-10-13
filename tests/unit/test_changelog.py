@@ -18,7 +18,9 @@ class TestCollectVersionUpdates(unittest.TestCase):
     def _run(self, subjects):
         lines = _lines(*subjects)
         with patch.object(cg, "fetch_git_output", return_value=lines):
-            return cg.collect_version_updates(["../somerepo"], ["3.27.0..3.27.1"])
+            return cg.collect_version_updates(
+                ["../somerepo"], "3.27.0", "3.27.x", ["3.27.0..3.27.1"]
+            )
 
     def test_single_update(self):
         result = self._run(["Updated dependency 'openssl' from version 1.1.1 to 3.0.0"])

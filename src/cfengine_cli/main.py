@@ -189,6 +189,19 @@ Core and Masterfiles only reflect themselves""",
         dest="show_version",
         help="Print the version from .CFVERSION and exit",
     )
+    fetch = parser.add_mutually_exclusive_group()
+    fetch.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Fetch out-of-date upstream branches without asking",
+    )
+    fetch.add_argument(
+        "--no-fetch",
+        action="store_true",
+        dest="no_fetch",
+        help="Don't check for or fetch upstream changes, use local remote-tracking branches as they are",
+    )
     parser.add_argument(
         "git_args",
         nargs="*",

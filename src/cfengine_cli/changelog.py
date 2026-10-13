@@ -20,6 +20,8 @@ import os
 import re
 import subprocess
 import logging
+import sys
+from cfengine_cli.utils import get_upstream_remote
 
 # ---------------------------------------------------------------------------
 # Regex
@@ -42,21 +44,42 @@ def fetch_git_output(path, args):
     ).stdout.splitlines(keepends=True)
 
 
+REPO_OWNER = "cfengine"
+
+
+def get_versions(prev, branch, repo, repo_path, git_args, repo_owner=REPO_OWNER):
+    """Assumes cfengine dev generate-changelog is run inside cfengine repos only"""
+    if git_args:
+        return git_args
+    else:
+        name = os.path.basename(repo)
+        remote = get_upstream_remote(name, repo_owner, repo_path)
+        if remote is None:
+            logging.error(
+                "No remote in '{}' points to 'github.com/{}/{}'".format(
+                    repo, repo_owner, name
+                )
+            )
+            exit(1)
+        return [f"{prev}..{remote}/{branch}"]
+
+
 # ---------------------------------------------------------------------------
 # Fetch and merge dependency upgrades / reverts
 # ---------------------------------------------------------------------------
-def collect_version_updates(repos, git_args):
+def collect_version_updates(repos, prev, branch, git_args):
     dep_history: dict[str, list[tuple[str, str]]] = {}
     for repo in repos:
+        repo_path = os.path.join(os.getcwd(), repo)
         for raw in fetch_git_output(
-            os.path.join(os.getcwd(), repo),
+            repo_path,
             [
                 "log",
                 "--no-merges",
                 "--reverse",
                 "--pretty=format:%s",
             ]
-            + git_args,
+            + get_versions(prev, branch, repo, repo_path, git_args),
         ):
             subject = raw.decode().strip()
 
@@ -212,21 +235,22 @@ def parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo):
         add_entry(sha, title)
 
 
-def parse_git_log(repos, git_args):
+def parse_git_log(repos, prev, branch, git_args):
     """Walk git history across repos and return (entry_list, missed_tickets)."""
     entries = {}  # sha -> [msg, ...]
     linked_shas = {}  # sha -> [linked_sha, ...]
     sha_to_tracker = {}  # sha -> set of ticket strings
 
     for repo in repos:
+        repo_path = os.path.join(os.getcwd(), repo)
         for raw_sha in fetch_git_output(
-            os.path.join(os.getcwd(), repo),
+            repo_path,
             [
                 "rev-list",
                 "--no-merges",
                 "--reverse",
             ]
-            + git_args,
+            + get_versions(prev, branch, repo, repo_path, git_args),
         ):
             parse_sha(raw_sha, entries, sha_to_tracker, linked_shas, repo)
 
@@ -293,6 +317,58 @@ def get_current_branch():
     return subprocess.check_output(
         ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
     ).strip()
+
+
+def remote_is_ahead(repo_path, remote, branch):
+    out = subprocess.check_output(
+        ["git", "-C", repo_path, "ls-remote", remote, f"refs/heads/{branch}"],
+        text=True,
+    ).split()
+    if not out:
+        return False  # branch doesn't exist on the remote
+    try:
+        local = subprocess.check_output(
+            ["git", "-C", repo_path, "rev-parse", f"{remote}/{branch}"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return True  # never fetched
+    return out[0] != local
+
+
+def _fetch_prompt():
+    # Prompt on stderr so it doesn't end up in the changelog with -o
+    answer = None
+    while answer not in ("", "y", "n", "yes", "no"):
+        print("Fetch? (Y/n): ", end="", file=sys.stderr, flush=True)
+        answer = input().strip().lower()
+    return answer in ("", "y", "yes")
+
+
+def fetch_upstream(repos, branch, assume_yes=False, repo_owner=REPO_OWNER):
+    """Fetch the upstream remote in each repo where it's behind GitHub,
+    asking first unless assume_yes is set."""
+    outdated = {}  # repo_path -> remote
+    for repo in repos:
+        repo_path = os.path.join(os.getcwd(), repo)
+        remote = get_upstream_remote(os.path.basename(repo), repo_owner, repo_path)
+        if remote is None:
+            continue  # reported by get_versions
+        if remote_is_ahead(repo_path, remote, branch):
+            outdated[repo_path] = remote
+
+    if not outdated:
+        return
+    for repo_path, remote in outdated.items():
+        print(
+            f"'{remote}/{branch}' is out of date in {os.path.basename(repo_path)}",
+            file=sys.stderr,
+        )
+    if not assume_yes and not _fetch_prompt():
+        return
+    for repo_path, remote in outdated.items():
+        subprocess.run(["git", "-C", repo_path, "fetch", remote], check=True)
 
 
 # ---------------------------------------------------------------------------
@@ -362,13 +438,15 @@ def generate_changelog_impl(args):
         f"next version to be {expected}, but cfversion says {actual}"
     )
 
-    if args.git_args:
-        versions = args.git_args
-    else:
-        # Assumes tag exists and origin follows the same naming scheme for this release
-        versions = [f"{prev}..origin/{branch}"]
+    # packaging changes only included in enterprise
+    is_enterprise = os.path.basename(os.path.abspath(os.curdir)) == "enterprise"
 
-    entry_list, missed_tickets = parse_git_log(repos, versions)
+    if not args.git_args and not args.no_fetch:
+        fetch_upstream(
+            repos + (REPO_MAP["packaging"] if is_enterprise else []), branch, args.yes
+        )
+
+    entry_list, missed_tickets = parse_git_log(repos, prev, branch, args.git_args)
     entry_list.sort()
 
     output = ""
@@ -386,12 +464,14 @@ def generate_changelog_impl(args):
             else f"## {args.git_args[0].split('..')[-1]}\n"
         )
 
-    if (
-        os.path.basename(os.path.abspath(os.curdir)) == "enterprise"
-    ):  # packaging changes only included in enterprise
-        pkg_changes, missed_pkg_tickets = parse_git_log(REPO_MAP["packaging"], versions)
+    if is_enterprise:
+        pkg_changes, missed_pkg_tickets = parse_git_log(
+            REPO_MAP["packaging"], prev, branch, args.git_args
+        )
         missed_tickets.update(missed_pkg_tickets)
-        pkg_changes += collect_version_updates(REPO_MAP["packaging"], versions)
+        pkg_changes += collect_version_updates(
+            REPO_MAP["packaging"], prev, branch, args.git_args
+        )
         pkg_changes.sort()
         if pkg_changes:
             lines.append("\n**Packaging changes:**")

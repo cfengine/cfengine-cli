@@ -8,6 +8,8 @@ import re
 import subprocess
 import sys
 
+from cfengine_cli.utils import get_upstream_remote
+
 ACTIVE_BRANCHES = ["3.24.x", "3.27.x", "master"]
 
 HUMAN_NAME = {
@@ -213,20 +215,8 @@ class GitRepo:
             return False
         return True
 
-    def upstream_remote(self):
-        result = self.run_command("remote", "-v", capture_output=True)
-        upstream = "github\\.com[:/]{}/{}(\\.git)?/?$".format(
-            re.escape(self.repo_owner), re.escape(self.repo_name)
-        )
-        for line in result.stdout.splitlines():
-            parts = line.split()
-            # GitHub owner and repository names are case-insensitive
-            if len(parts) >= 2 and re.search(upstream, parts[1], re.IGNORECASE):
-                return parts[0]
-        return None
-
     def upstream_branch(self, ref):
-        remote = self.upstream_remote()
+        remote = get_upstream_remote(self.repo_name, self.repo_owner, self.repo_path)
         if remote is None:
             log.warning(
                 "No remote points to github.com/{}/{}, using local refs".format(
