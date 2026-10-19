@@ -8463,7 +8463,7 @@
         "then": {
           "attribute": "then",
           "status": "normal",
-          "type": "bundle",
+          "type": "blist",
           "visibility": "promiseType"
         },
         "unless": {
