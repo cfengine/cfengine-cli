@@ -31,6 +31,7 @@ from cfengine_cli.cfengine_wrapper.cfengine_objects import (
 )
 from cfengine_cli.cfengine_wrapper.cfengine_utils import (
     extract_agent_file,
+    has_known_hubs,
     prompt_two_options,
     prompt_yes_no,
     require_executable,
@@ -249,6 +250,10 @@ def build(hub=None, non_interactive=False) -> int:
     rc = build_command()
     if rc != 0:
         return rc
+    if not hub and not has_known_hubs():
+        # Nothing to deploy to, so don't ask. Mirrors the check cf-remote's
+        # deploy does (it errors with "No hub to deploy to" in this case).
+        return 0
     if prompt_yes_no(
         "Deploy the built policy set now?",
         default=True,
