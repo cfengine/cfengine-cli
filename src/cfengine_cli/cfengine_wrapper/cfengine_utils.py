@@ -90,6 +90,11 @@ def _known_hosts(role_filter=None) -> Iterator[tuple[str, list[str]]]:
             yield host_id, aliases
 
 
+def has_known_hubs() -> bool:
+    """True if cf-remote knows about any saved/spawned hub (without connecting)."""
+    return any(True for _ in _known_hosts("hub"))
+
+
 @lru_cache(maxsize=None)
 def _host_info(host: str):
     try:
