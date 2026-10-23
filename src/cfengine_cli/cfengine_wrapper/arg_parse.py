@@ -8,6 +8,8 @@ from cf_remote.args import (
     add_spawn_args,
     add_destroy_args,
     add_connect_args,
+    add_list_args,
+    add_download_args,
 )
 
 
@@ -17,6 +19,15 @@ def _add_index_arg(parser: argparse.ArgumentParser):
         help="Specify alternate index (HTTPS URL or relative path to JSON file)",
         type=str,
         default=None,
+    )
+
+
+def _add_version_arg(parser: argparse.ArgumentParser):
+    parser.add_argument(
+        "--version",
+        "-V",
+        help="Specify version",
+        type=str,
     )
 
 
@@ -153,13 +164,24 @@ def parse_wrapper_args(subp: argparse._SubParsersAction):
         help="Install CFEngine on the given hosts",
         description="A wrapper around the cf-remote `install` function",
     )
-    install_parser.add_argument(
-        "--version",
-        "-V",
-        help="Specify version",
-        type=str,
-    )
+    _add_version_arg(install_parser)
     add_install_args(install_parser)
+
+    list_parser = subp.add_parser(
+        "list",
+        help="List CFEngine packages available for download",
+        description="A wrapper around the cf-remote `list` function",
+    )
+    _add_version_arg(list_parser)
+    add_list_args(list_parser)
+
+    download_parser = subp.add_parser(
+        "download",
+        help="Download CFEngine packages",
+        description="A wrapper around the cf-remote `download` function",
+    )
+    _add_version_arg(download_parser)
+    add_download_args(download_parser)
 
     uninstall_parser = subp.add_parser(
         "uninstall",
