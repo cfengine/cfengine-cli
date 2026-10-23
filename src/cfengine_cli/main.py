@@ -20,6 +20,8 @@ from cf_remote.commands import (
     init_cloud_config,
     install,
     uninstall,
+    list_command,
+    download,
 )
 from cf_remote.spawn import CFRUserError, Providers
 from cf_remote.validate import (
@@ -319,6 +321,22 @@ def run_command_with_args(args) -> int:
     elif args.command == "uninstall":
         all_hosts = (args.hosts or []) + (args.hub or []) + (args.clients or [])
         return uninstall(all_hosts, purge=args.purge)
+    if args.command == "list":
+        return list_command(
+            tags=args.tags,
+            version=args.version,
+            edition=args.edition,
+            allow_expired=args.allow_expired,
+        )
+    if args.command == "download":
+        return download(
+            tags=args.tags,
+            version=args.version,
+            edition=args.edition,
+            output_dir=args.output_dir,
+            insecure=args.insecure,
+            allow_expired=args.allow_expired,
+        )
     if args.command == "run":
         return cfengine_commands.run(*args.run_args, target=args.host)
     if args.command == "spawn":
@@ -403,7 +421,7 @@ def validate_args(args):
                 "Only one of '--all' or 'NAME' may be specified for destruction"
             )
 
-    if args.command == "install":
+    if args.command in ("install", "list", "download"):
         validate_edition_args(args)
 
     if "hosts" in args and args.hosts:
