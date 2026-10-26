@@ -3285,6 +3285,13 @@
           "type": "body",
           "visibility": "body"
         },
+        "interval": {
+          "attribute": "interval",
+          "range": "1,99999999999",
+          "status": "normal",
+          "type": "int",
+          "visibility": "body"
+        },
         "meta": {
           "attribute": "meta",
           "range": "",
