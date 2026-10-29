@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     name: setup-python
     env:
-      PYTHON_VERSION: "3.10"
+      PYTHON_VERSION: "3.11"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
