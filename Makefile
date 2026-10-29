@@ -7,7 +7,7 @@ venv:
 	uv sync
 
 format: venv
-	uv tool run black . --target-version py310
+	uv tool run black . --target-version py311
 	prettier . --write
 	uv run cfengine format ./
 
