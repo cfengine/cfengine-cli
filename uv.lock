@@ -86,9 +86,9 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "coverage", marker = "python_full_version >= '3.10'" },
-    { name = "flake8", specifier = ">=7.4.1" },
-    { name = "pytest", specifier = ">=9.1.1" },
+    { name = "coverage" },
+    { name = "flake8", specifier = ">=7.5.0" },
+    { name = "pytest", specifier = ">=9.2.0" },
 ]
 
 [[package]]
