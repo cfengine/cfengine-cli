@@ -5226,6 +5226,28 @@
       "status": "normal",
       "variadic": true
     },
+    "isvalidip": {
+      "cached": false,
+      "category": "communication",
+      "collecting": false,
+      "maxArgs": 2,
+      "minArgs": 1,
+      "parameters": [
+        {
+          "description": "String to validate as an IP address",
+          "range": ".*",
+          "type": "string"
+        },
+        {
+          "description": "Only accept this IP version",
+          "range": "ipv4,ipv6",
+          "type": "option"
+        }
+      ],
+      "returnType": "context",
+      "status": "normal",
+      "variadic": true
+    },
     "isvariable": {
       "cached": false,
       "category": "utils",
