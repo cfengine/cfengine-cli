@@ -15,8 +15,8 @@ dependencies = [
     "tree-sitter-cfengine>=1.1.12",
     "tree-sitter>=0.26.1",
     "markdown-it-py>=4.3.0",
-    "pyyaml>=6.0.3",
-    "pydantic>=2.14.3",
+    "pyyaml>=6.0.4",
+    "pydantic>=2.14.4",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
