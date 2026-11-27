@@ -10,6 +10,11 @@ from cf_remote.main import resolve_hosts
 from cf_remote.utils import strip_user, CFRExitError
 from cfengine_cli.cfengine_wrapper import cfengine_commands
 from cfengine_cli.cfengine_wrapper.arg_parse import parse_wrapper_args
+from cfengine_cli.release.args import (
+    add_publish_args,
+    add_release_args,
+    add_update_repo_args,
+)
 from cfengine_cli.version import cfengine_cli_version_string
 from cfengine_cli import commands
 from cfengine_cli.utils import UserError
@@ -210,6 +215,24 @@ Core and Masterfiles only reflect themselves""",
         metavar="GIT_ARG",
         help="Commit range [other optional args], e.g. 3.27.0..origin/3.27.x",
     )
+
+    parser = dev_subparsers.add_parser(
+        "release",
+        help="Release packages built by build-in-container",
+    )
+    add_release_args(parser)
+
+    parser = dev_subparsers.add_parser(
+        "update-repo",
+        help="Add a community release to the APT and YUM repositories",
+    )
+    add_update_repo_args(parser)
+
+    parser = dev_subparsers.add_parser(
+        "publish",
+        help="Upload the release files, repositories and release data to S3",
+    )
+    add_publish_args(parser)
 
     inip = subp.add_parser(
         "init", help="Initialize a [policy-set, policy-module, promise-type] example."

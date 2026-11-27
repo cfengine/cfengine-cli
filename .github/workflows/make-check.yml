@@ -49,3 +49,23 @@ jobs:
         run: |
           git diff --exit-code
           git ls-files --other --directory --exclude-standard | sed q1
+  # Not part of make check, as it needs packaging and signing tools that dev
+  # machines usually lack
+  release-e2e:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          sudo apt-get update
+          sudo apt-get install --yes rpm debsigs apt-utils createrepo-c
+      - name: Run the release end-to-end test
+        run: |
+          uv sync
+          uv run bash tests/release/e2e.sh

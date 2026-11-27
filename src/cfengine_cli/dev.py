@@ -10,6 +10,9 @@ from cfengine_cli.deptool import (
 )
 from cfengine_cli import docs
 from cfengine_cli.syntax_tree import syntax_tree
+from cfengine_cli.release.release import release
+from cfengine_cli.release.publish import publish
+from cfengine_cli.release.update_repo import update_repo
 
 
 def generate_release_information_command(
@@ -84,5 +87,27 @@ def dispatch_dev_subcommand(subcommand, args) -> int:
         )
     if subcommand == "generate-changelog":
         return generate_changelog_impl(args)
+    if subcommand == "release":
+        return release(
+            project=args.project,
+            version=args.version,
+            build_dir=args.build,
+            output_dir=args.output,
+            dry_run=args.dry_run,
+        )
+    if subcommand == "publish":
+        return publish(
+            output_dir=args.output,
+            bucket=args.bucket,
+            release_data_only=args.release_data_only,
+            dry_run=args.dry_run,
+        )
+    if subcommand == "update-repo":
+        return update_repo(
+            version=args.version,
+            build_dir=args.build,
+            output_dir=args.output,
+            dry_run=args.dry_run,
+        )
 
     raise UserError("Invalid cfengine dev subcommand - " + subcommand)

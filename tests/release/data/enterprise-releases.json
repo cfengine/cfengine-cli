@@ -1,0 +1,664 @@
+{
+    "lts_branches": [
+        {
+            "supported_until": "2028-12",
+            "branch_name": "3.27.x"
+        },
+        {
+            "supported_until": "2027-08",
+            "branch_name": "3.24.x"
+        },
+        {
+            "supported_until": "2025-12",
+            "branch_name": "3.21.x"
+        },
+        {
+            "supported_until": "2024-08",
+            "branch_name": "3.18.x"
+        },
+        {
+            "supported_until": "2022-12",
+            "branch_name": "3.15.x"
+        },
+        {
+            "supported_until": "2022-12",
+            "branch_name": "master"
+        },
+        {
+            "supported_until": "2021-08",
+            "branch_name": "3.12.x"
+        },
+        {
+            "supported_until": "2019-12",
+            "branch_name": "3.10.x"
+        },
+        {
+            "supported_until": "2018-08",
+            "branch_name": "3.7.x"
+        }
+    ],
+    "releases": [
+        {
+            "version": "master",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/master.json",
+            "debug": true,
+            "release_date": "nightly",
+            "alpha": true
+        },
+        {
+            "version": "3.29.0",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.29.0.json",
+            "debug": false,
+            "release_date": "2026-11-06",
+            "latest": true,
+            "latest_stable": true
+        },
+        {
+            "version": "3.28.0",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.28.0.json",
+            "debug": false,
+            "release_date": "2026-07-10"
+        },
+        {
+            "version": "3.27.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.27.x.json",
+            "debug": true,
+            "release_date": "nightly",
+            "lts_branch": "3.27.x"
+        },
+        {
+            "version": "3.27.3",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.27.3.json",
+            "debug": false,
+            "release_date": "2026-10-22",
+            "lts_branch": "3.27.x",
+            "latest_on_branch": true,
+            "latestLTS": true
+        },
+        {
+            "version": "3.27.2",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.27.2.json",
+            "debug": false,
+            "release_date": "2026-10-16",
+            "lts_branch": "3.27.x"
+        },
+        {
+            "version": "3.27.1",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.27.1.json",
+            "debug": false,
+            "release_date": "2026-05-08",
+            "lts_branch": "3.27.x"
+        },
+        {
+            "lts_branch": "3.27.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.27.0.json",
+            "release_date": "2026-01-12",
+            "version": "3.27.0",
+            "debug": false
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.26.0.json",
+            "debug": false,
+            "release_date": "2025-05-20",
+            "version": "3.26.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.25.0.json",
+            "debug": false,
+            "release_date": "2025-01-06",
+            "version": "3.25.0"
+        },
+        {
+            "version": "3.24.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.x.json",
+            "debug": true,
+            "release_date": "nightly",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "version": "3.24.6",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.6.json",
+            "debug": false,
+            "release_date": "2026-10-22",
+            "lts_branch": "3.24.x",
+            "latest_on_branch": true
+        },
+        {
+            "version": "3.24.5",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.5.json",
+            "debug": false,
+            "release_date": "2026-10-16",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "version": "3.24.4",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.4.json",
+            "debug": false,
+            "release_date": "2026-05-08",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "lts_branch": "3.24.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.3.json",
+            "release_date": "2025-12-12",
+            "version": "3.24.3",
+            "debug": false
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.2.json",
+            "debug": false,
+            "release_date": "2025-05-15",
+            "version": "3.24.2",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.1.json",
+            "debug": false,
+            "release_date": "2024-12-04",
+            "version": "3.24.1",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.24.0.json",
+            "debug": false,
+            "release_date": "2024-07-22",
+            "version": "3.24.0",
+            "lts_branch": "3.24.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.23.0.json",
+            "debug": false,
+            "release_date": "2023-12-05",
+            "version": "3.23.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.22.0.json",
+            "debug": false,
+            "release_date": "2023-06-16",
+            "version": "3.22.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.x.json",
+            "debug": true,
+            "release_date": "2026-01-14",
+            "version": "3.21.x",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "lts_branch": "3.21.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.8.json",
+            "release_date": "2025-12-12",
+            "version": "3.21.8",
+            "debug": false,
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.7.json",
+            "debug": false,
+            "release_date": "2025-05-14",
+            "version": "3.21.7",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.6.json",
+            "debug": false,
+            "release_date": "2024-12-03",
+            "version": "3.21.6",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.5.json",
+            "debug": false,
+            "release_date": "2024-06-20",
+            "version": "3.21.5",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.4.json",
+            "debug": false,
+            "release_date": "2024-01-11",
+            "version": "3.21.4",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.3.json",
+            "debug": false,
+            "release_date": "2023-10-06",
+            "version": "3.21.3",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.2.json",
+            "debug": false,
+            "release_date": "2023-06-08",
+            "version": "3.21.2",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.1.json",
+            "debug": false,
+            "release_date": "2023-03-02",
+            "version": "3.21.1",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.21.0.json",
+            "debug": false,
+            "release_date": "2022-12-22",
+            "version": "3.21.0",
+            "lts_branch": "3.21.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.20.0.json",
+            "debug": false,
+            "release_date": "2022-07-01",
+            "version": "3.20.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.19.0.json",
+            "debug": false,
+            "release_date": "2021-12-09",
+            "version": "3.19.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.x.json",
+            "debug": true,
+            "release_date": "2024-07-23",
+            "version": "3.18.x",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "lts_branch": "3.18.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.8.json",
+            "release_date": "2024-06-20",
+            "version": "3.18.8",
+            "debug": false,
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.7.json",
+            "debug": false,
+            "release_date": "2024-01-11",
+            "version": "3.18.7",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.6.json",
+            "debug": false,
+            "release_date": "2023-10-06",
+            "version": "3.18.6",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.5.json",
+            "debug": false,
+            "release_date": "2023-08-31",
+            "version": "3.18.5",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.4.json",
+            "debug": false,
+            "release_date": "2023-03-02",
+            "version": "3.18.4",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.3.json",
+            "debug": false,
+            "release_date": "2022-11-18",
+            "version": "3.18.3",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.2.json",
+            "debug": false,
+            "release_date": "2022-06-29",
+            "version": "3.18.2",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.1.json",
+            "debug": false,
+            "release_date": "2021-11-26",
+            "version": "3.18.1",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.18.0.json",
+            "debug": false,
+            "release_date": "2021-06-24",
+            "version": "3.18.0",
+            "lts_branch": "3.18.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.17.0.json",
+            "debug": false,
+            "release_date": "2020-11-19",
+            "version": "3.17.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.16.0.json",
+            "debug": false,
+            "release_date": "2020-06-23",
+            "version": "3.16.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.x.json",
+            "debug": true,
+            "release_date": "2022-12-02",
+            "version": "3.15.x",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "lts_branch": "3.15.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.7.json",
+            "release_date": "2022-11-14",
+            "version": "3.15.7",
+            "debug": false,
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.6.json",
+            "debug": false,
+            "release_date": "2022-06-29",
+            "version": "3.15.6",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.5.json",
+            "debug": false,
+            "release_date": "2021-11-26",
+            "version": "3.15.5",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.4.json",
+            "debug": false,
+            "release_date": "2021-06-08",
+            "version": "3.15.4",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.3.json",
+            "debug": false,
+            "release_date": "2020-11-10",
+            "version": "3.15.3",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.2.json",
+            "debug": false,
+            "release_date": "2020-06-02",
+            "version": "3.15.2",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.1.json",
+            "debug": false,
+            "release_date": "2020-03-25",
+            "version": "3.15.1",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.0.json",
+            "debug": false,
+            "release_date": "2020-01-28",
+            "version": "3.15.0",
+            "lts_branch": "3.15.x"
+        },
+        {
+            "lts_branch": "master",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.15.0b1.json",
+            "release_date": "2019-09-17",
+            "beta": true,
+            "version": "3.15.0b1",
+            "debug": false
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.14.0.json",
+            "debug": false,
+            "release_date": "2019-07-01",
+            "version": "3.14.0",
+            "re-release_date": "2019-07-29"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.13.0.json",
+            "version": "3.13.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.x.json",
+            "debug": true,
+            "release_date": "2021-06-25",
+            "version": "3.12.x",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "lts_branch": "3.12.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.7.json",
+            "release_date": "2021-06-08",
+            "version": "3.12.7",
+            "debug": false,
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.6.json",
+            "debug": false,
+            "release_date": "2020-11-10",
+            "version": "3.12.6",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.5.json",
+            "debug": false,
+            "release_date": "2020-06-02",
+            "version": "3.12.5",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.4.json",
+            "debug": false,
+            "release_date": "2020-04-06",
+            "version": "3.12.4",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.3.json",
+            "debug": false,
+            "release_date": "2020-01-29",
+            "version": "3.12.3",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.2.json",
+            "debug": false,
+            "release_date": "2019-10-03",
+            "version": "3.12.2",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.1.json",
+            "version": "3.12.1",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.12.0.json",
+            "version": "3.12.0",
+            "lts_branch": "3.12.x"
+        },
+        {
+            "comment": "after LTS/non-LTS split, this should become unsupported",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.11.0.json",
+            "version": "3.11.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.11.0b1.json",
+            "version": "3.11.0b1"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.x.json",
+            "debug": true,
+            "release_date": "2019-11-27",
+            "version": "3.10.x",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "lts_branch": "3.10.x",
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.7.json",
+            "release_date": "2019-12-06",
+            "version": "3.10.7",
+            "debug": false,
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.6.json",
+            "debug": false,
+            "version": "3.10.6",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.5.json",
+            "version": "3.10.5",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.4.json",
+            "version": "3.10.4",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.3.json",
+            "version": "3.10.3",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.2.json",
+            "version": "3.10.2",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.1.json",
+            "version": "3.10.1",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.10.0.json",
+            "version": "3.10.0",
+            "lts_branch": "3.10.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.9.2.json",
+            "version": "3.9.2"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.9.0.json",
+            "version": "3.9.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.9.0b1.json",
+            "version": "3.9.0b1"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.8.2.json",
+            "version": "3.8.2"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.8.1.json",
+            "version": "3.8.1"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.8.0.json",
+            "version": "3.8.0"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.8.0b1.json",
+            "version": "3.8.0b1"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.8.json",
+            "version": "3.7.8",
+            "lts_branch": "3.7.x",
+            "latest_on_branch": true
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.7.json",
+            "version": "3.7.7",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.6.json",
+            "version": "3.7.6",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.5.json",
+            "version": "3.7.5",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.4.json",
+            "version": "3.7.4",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.3.json",
+            "version": "3.7.3",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.2.json",
+            "version": "3.7.2",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.1.json",
+            "version": "3.7.1",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "LTS": true,
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.7.0.json",
+            "version": "3.7.0",
+            "lts_branch": "3.7.x"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.7.json",
+            "version": "3.6.7"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.6.json",
+            "version": "3.6.6"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.5.json",
+            "version": "3.6.5"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.4.json",
+            "version": "3.6.4"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.3.json",
+            "version": "3.6.3"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.2.json",
+            "version": "3.6.2"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.1.json",
+            "version": "3.6.1"
+        },
+        {
+            "URL": "https://cfengine-package-repos.s3.amazonaws.com/release-data/enterprise/3.6.0.json",
+            "version": "3.6.0"
+        }
+    ]
+}
