@@ -46,6 +46,28 @@ def add_release_args(sp: argparse.ArgumentParser) -> None:
     )
 
 
+def add_publish_args(sp: argparse.ArgumentParser) -> None:
+    _ = sp.add_argument(
+        "--output",
+        required=True,
+        help="Root directory with release/, repo/ and release-data/",
+    )
+    _ = sp.add_argument(
+        "--bucket",
+        required=True,
+        choices=["test", "prod"],
+        help="test: only the repos, to try them. prod: everything, release data last",
+    )
+    _ = sp.add_argument(
+        "--release-data-only",
+        action="store_true",
+        help="Only upload the release data, e.g. for nightlies. Needs --bucket prod",
+    )
+    _ = sp.add_argument(
+        "--dry-run", action="store_true", help="Only list what would be uploaded"
+    )
+
+
 def add_update_repo_args(sp: argparse.ArgumentParser) -> None:
     _ = sp.add_argument(
         "--version",
