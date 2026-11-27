@@ -3,7 +3,7 @@ import os
 from cfengine_cli.release.build import read_build
 from cfengine_cli.release.checksums import verify_build
 from cfengine_cli.release.metadata import is_nightly, release_branch
-from cfengine_cli.release.plan import PlannedFile, plan_packages
+from cfengine_cli.release.plan import PlannedFile, plan_assets, plan_packages
 from cfengine_cli.utils import UserError
 
 
@@ -33,7 +33,9 @@ def release(
     build = read_build(build_dir)
     verify_build(build)
 
-    planned = plan_packages(project, version, build, output_dir, debug)
+    planned = plan_packages(project, version, build, output_dir, debug) + plan_assets(
+        project, version, build, output_dir, debug
+    )
     _print_plan(planned)
     return 0
 
