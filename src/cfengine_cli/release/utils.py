@@ -1,6 +1,7 @@
 import fcntl
 import shutil
 import signal
+import subprocess
 import sys
 import tempfile
 from collections.abc import Generator
@@ -11,10 +12,15 @@ from typing import NoReturn
 
 from cfengine_cli.utils import UserError
 
+SIGNED_SUFFIXES = (".rpm", ".deb")
+# Signs the packages and the repo metadata. Always named, as gpg silently
+# falls back to the default key for --default-key or no key.
+SIGNING_KEY = "contact@northern.tech"
 # In the output dir. Also taken by the legacy release.py in infra.
 LOCK_FILE = ".lock"
 # Free space to keep on top of the files to copy, as in the legacy release.py.
 DISK_SPACE_MARGIN = 1024**3
+AR_MAGIC = b"!<arch>\n"
 
 
 def exit_on_sigterm() -> None:
@@ -28,6 +34,78 @@ def exit_on_sigterm() -> None:
         sys.exit(1)
 
     _ = signal.signal(signal.SIGTERM, handler)
+
+
+def run(command: list[str]) -> str:
+    """Run a command and return its stdout. stderr goes to the terminal."""
+    try:
+        return subprocess.run(
+            command, check=True, stdout=subprocess.PIPE, text=True
+        ).stdout
+    except subprocess.CalledProcessError as e:
+        # A UserError, as a failed command is not a bug in cfengine-cli
+        raise UserError(f"Command failed: {' '.join(command)}") from e
+
+
+def _deb_build_time(path: Path) -> int:
+    """Return the mtime of the first ar member, set from SOURCE_DATE_EPOCH."""
+    with open(path, "rb") as f:
+        header = f.read(len(AR_MAGIC) + 60)
+    if not header.startswith(AR_MAGIC) or len(header) < len(AR_MAGIC) + 60:
+        raise UserError(f"Not a .deb: '{path}'")
+    # An ar member header starts with a 16 byte name, then a 12 byte mtime
+    mtime = header[len(AR_MAGIC) + 16 : len(AR_MAGIC) + 28]
+    return int(mtime.decode("ascii"))
+
+
+def _rpm_build_time(path: Path) -> int:
+    """Return BUILDTIME, set from SOURCE_DATE_EPOCH by build-in-container."""
+    # Skip signature checking. The package is not signed yet, and checking
+    # needs the rpm database, which Debian hosts lack.
+    return int(run(["rpm", "-qp", "--nosignature", "--qf", "%{BUILDTIME}", str(path)]))
+
+
+def build_time(path: Path) -> int:
+    """Return the package's SOURCE_DATE_EPOCH."""
+    if path.name.endswith(".rpm"):
+        return _rpm_build_time(path)
+    return _deb_build_time(path)
+
+
+def sign(path: Path, time: int) -> None:
+    """Sign a .rpm or .deb with the given signature creation time.
+
+    A fixed time makes the signed package reproducible with the same key.
+    """
+    # The "!" stops the faked clock, so the time does not tick during signing
+    faked_time = f"--faked-system-time {time}!"
+    if path.name.endswith(".rpm"):
+        _ = run(
+            [
+                "rpmsign",
+                "--resign",
+                "--digest-algo=sha256",
+                "--define",
+                f"_gpg_name {SIGNING_KEY}",
+                "--define",
+                f"_gpg_sign_cmd_extra_args {faked_time}",
+                str(path),
+            ]
+        )
+    else:
+        # debsigs has no strict key option, its -k is --default-key
+        gpgopts = f"{faked_time} --local-user {SIGNING_KEY}"
+        _ = run(["debsigs", "--sign=origin", f"--gpgopts={gpgopts}", str(path)])
+        # debsigs can print an error, yet exit 0 with an unsigned package.
+        # So check that the signature is there and good.
+        _ = run(["debsigs", "--verify", str(path)])
+
+
+def check_tools(kind: str, tools: tuple[str, ...]) -> None:
+    """Fail before any work if a tool is missing, e.g. kind "Signing"."""
+    missing = [tool for tool in tools if shutil.which(tool) is None]
+    if missing:
+        raise UserError(f"{kind} tools not found: {', '.join(missing)}")
 
 
 @contextmanager
@@ -45,6 +123,7 @@ def atomic_write(destination: Path, output_dir: str) -> Generator[Path, None, No
     # Removed with its contents on errors, also on Ctrl-C. Only SIGKILL or a
     # crash leaves it behind.
     with tempfile.TemporaryDirectory(dir=output_dir, prefix=".tmp-") as directory:
+        # The destination name, as sign() needs the .rpm or .deb suffix
         temporary = Path(directory) / destination.name
         yield temporary
         _ = temporary.rename(destination)
@@ -101,7 +180,7 @@ def check_disk_space(copies: list[tuple[Path, Path | None]], output_dir: str) ->
 
 
 def copy_or_skip(
-    source: Path, destination: Path, output_dir: str, *, dry_run: bool
+    source: Path, destination: Path, output_dir: str, *, signed: bool, dry_run: bool
 ) -> None:
     """Copy source to destination unless it exists, and print what is done."""
     if destination.exists():
@@ -110,16 +189,22 @@ def copy_or_skip(
         return
     if dry_run:
         print(f"Would have copied '{source}' to '{destination}'")
+        if signed:
+            print(f"Would have signed '{destination}'")
         return
-    copy_file(source, destination, output_dir)
-    print(f"Copied '{source}' to '{destination}'")
+    copy_file(source, destination, output_dir, signed=signed)
+    print(f"Copied '{source}' to '{destination}'{' and signed' if signed else ''}")
 
 
-def copy_file(source: Path, destination: Path, output_dir: str) -> None:
-    """Copy source to destination.
+def copy_file(
+    source: Path, destination: Path, output_dir: str, *, signed: bool
+) -> None:
+    """Copy source to destination, and sign the copy if signed.
 
     The copy is written in a temporary directory in output_dir, see
     atomic_write().
     """
     with atomic_write(destination, output_dir) as temporary:
         _ = shutil.copyfile(source, temporary)
+        if signed:
+            sign(temporary, build_time(source))

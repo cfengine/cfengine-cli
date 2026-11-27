@@ -4,6 +4,7 @@ import pytest
 
 from cfengine_cli.release.plan import PlannedFile
 from cfengine_cli.release.copy_files import copy_files
+from cfengine_cli.utils import UserError
 
 
 def _planned(source: Path, destination: Path | None) -> PlannedFile:
@@ -28,7 +29,14 @@ def _built(tmp_path: Path, name: str) -> Path:
 
 @pytest.fixture
 def tarball(tmp_path: Path) -> Path:
+    """Copied, but not signed."""
     return _built(tmp_path, "cfengine-masterfiles-3.30.0-1.pkg.tar.gz")
+
+
+@pytest.fixture
+def rpm(tmp_path: Path) -> Path:
+    """Signed when copied, so these tests never copy it."""
+    return _built(tmp_path, "cfengine-nova-3.30.0-1.el9.x86_64.rpm")
 
 
 def test_copy_files(tmp_path: Path, tarball: Path) -> None:
@@ -51,9 +59,9 @@ def test_copy_files_skips_existing(
 
 
 def test_copy_files_skips_debug(
-    tmp_path: Path, tarball: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, rpm: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    copy_files([_planned(tarball, None)], str(tmp_path), dry_run=False)
+    copy_files([_planned(rpm, None)], str(tmp_path), dry_run=False)
     assert capsys.readouterr().out == ""
 
 
@@ -66,3 +74,12 @@ def test_copy_files_dry_run(
     assert capsys.readouterr().out == (
         f"Would have copied '{tarball}' to '{destination}'\n"
     )
+
+
+def test_copy_files_missing_signing_tools(
+    tmp_path: Path, rpm: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PATH", str(tmp_path))
+    destination = tmp_path / "release" / rpm.name
+    with pytest.raises(UserError, match="Signing tools not found"):
+        copy_files([_planned(rpm, destination)], str(tmp_path), dry_run=True)
