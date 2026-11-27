@@ -1,5 +1,7 @@
 import os
 
+from cfengine_cli.release.build import read_build
+from cfengine_cli.release.checksums import verify_build
 from cfengine_cli.release.metadata import is_nightly, release_branch
 from cfengine_cli.utils import UserError
 
@@ -26,6 +28,9 @@ def release(
         debug,
         dry_run,
     )
+
+    build = read_build(build_dir)
+    verify_build(build)
     return 0
 
 
