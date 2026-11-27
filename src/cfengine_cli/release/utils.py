@@ -1,4 +1,5 @@
 import fcntl
+import os
 import shutil
 import signal
 import subprocess
@@ -19,6 +20,7 @@ SIGNING_KEY = "contact@northern.tech"
 # In the output dir. Also taken by the legacy release.py in infra.
 LOCK_FILE = ".lock"
 # Free space to keep on top of the files to copy, as in the legacy release.py.
+# Also covers the repo metadata that update-repo regenerates.
 DISK_SPACE_MARGIN = 1024**3
 AR_MAGIC = b"!<arch>\n"
 
@@ -63,6 +65,42 @@ def _rpm_build_time(path: Path) -> int:
     # Skip signature checking. The package is not signed yet, and checking
     # needs the rpm database, which Debian hosts lack.
     return int(run(["rpm", "-qp", "--nosignature", "--qf", "%{BUILDTIME}", str(path)]))
+
+
+def is_signed_deb(path: Path) -> bool:
+    """Return True if the deb has an origin signature, as debsigs adds."""
+    with open(path, "rb") as f:
+        if f.read(len(AR_MAGIC)) != AR_MAGIC:
+            raise UserError(f"Not a .deb: '{path}'")
+        # Each ar member has a 60 byte header: a 16 byte name, and the size
+        # at bytes 48 to 58. Members start at even offsets.
+        while len(header := f.read(60)) == 60:
+            name = header[:16].rstrip(b" ").rstrip(b"/")
+            if name == b"_gpgorigin":
+                return True
+            size = int(header[48:58].decode("ascii"))
+            _ = f.seek(size + size % 2, os.SEEK_CUR)
+    return False
+
+
+def is_signed(path: Path) -> bool:
+    """Return True if the .rpm or .deb has a signature."""
+    if path.name.endswith(".rpm"):
+        return is_signed_rpm(path)
+    return is_signed_deb(path)
+
+
+def is_signed_rpm(path: Path) -> bool:
+    """Return True if the rpm has a signature, as rpmsign adds."""
+    # rpmsign of rpm 4 signs into RSAHEADER, of rpm 6 into OPENPGP. rpm 4 does
+    # not know OPENPGP, and prints nothing for it. --nosignature as in
+    # _rpm_build_time(). Only checks that a signature is there, verifying it
+    # would need the key in an rpm database.
+    for tag in ("RSAHEADER", "OPENPGP"):
+        query = ["rpm", "-qp", "--nosignature", "--qf", f"%{{{tag}:pgpsig}}"]
+        if run([*query, str(path)]).strip() not in ("", "(none)"):
+            return True
+    return False
 
 
 def build_time(path: Path) -> int:

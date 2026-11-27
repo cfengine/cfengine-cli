@@ -2,7 +2,7 @@ import argparse
 
 import pytest
 
-from cfengine_cli.release.args import release_version
+from cfengine_cli.release.args import release_version, stable_version
 
 
 @pytest.mark.parametrize("version", ["3.30.0", "3.27.x", "master"])
@@ -14,3 +14,13 @@ def test_release_version(version: str) -> None:
 def test_release_version_invalid(version: str) -> None:
     with pytest.raises(argparse.ArgumentTypeError):
         _ = release_version(version)
+
+
+def test_stable_version() -> None:
+    assert stable_version("3.30.0") == "3.30.0"
+
+
+@pytest.mark.parametrize("version", ["3.27.x", "master"])
+def test_stable_version_invalid(version: str) -> None:
+    with pytest.raises(argparse.ArgumentTypeError):
+        _ = stable_version(version)
