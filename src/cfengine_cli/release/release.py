@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from cfengine_cli.release.build import read_build
@@ -5,6 +6,7 @@ from cfengine_cli.release.checksums import verify_build
 from cfengine_cli.release.metadata import is_nightly, release_branch
 from cfengine_cli.release.plan import PlannedFile, plan_assets, plan_packages
 from cfengine_cli.release.copy_files import copy_files
+from cfengine_cli.release.release_data import write_release_data
 from cfengine_cli.release.utils import (
     check_disk_space,
     exit_on_sigterm,
@@ -49,6 +51,16 @@ def release(
     with output_lock(output_dir, dry_run=dry_run):
         check_disk_space([(f.source, f.destination) for f in planned], output_dir)
         copy_files(planned, output_dir, dry_run=dry_run)
+        write_release_data(
+            project,
+            version,
+            branch,
+            debug,
+            planned,
+            output_dir,
+            dry_run=dry_run,
+            today=datetime.date.today(),
+        )
     return 0
 
 
