@@ -3,6 +3,7 @@ import os
 from cfengine_cli.release.build import read_build
 from cfengine_cli.release.checksums import verify_build
 from cfengine_cli.release.metadata import is_nightly, release_branch
+from cfengine_cli.release.plan import PlannedFile, plan_packages
 from cfengine_cli.utils import UserError
 
 
@@ -31,7 +32,23 @@ def release(
 
     build = read_build(build_dir)
     verify_build(build)
+
+    planned = plan_packages(project, version, build, output_dir, debug)
+    _print_plan(planned)
     return 0
+
+
+def _print_plan(planned: list[PlannedFile]) -> None:
+    print(f"Planned {len(planned)} files:")
+    section = None
+    for file in planned:
+        if file.section != section:
+            section = file.section
+            print(f"  {section}")
+        print(f"    {file.source.name}")
+        print(f"      from: {file.source}")
+        print(f"      to:   {file.destination or 'not copied'}")
+        print(f"      url:  {file.url}")
 
 
 def _print_summary(
