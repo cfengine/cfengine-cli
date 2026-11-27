@@ -4,6 +4,12 @@ from cfengine_cli.release.build import read_build
 from cfengine_cli.release.checksums import verify_build
 from cfengine_cli.release.metadata import is_nightly, release_branch
 from cfengine_cli.release.plan import PlannedFile, plan_assets, plan_packages
+from cfengine_cli.release.copy_files import copy_files
+from cfengine_cli.release.utils import (
+    check_disk_space,
+    exit_on_sigterm,
+    output_lock,
+)
 from cfengine_cli.utils import UserError
 
 
@@ -19,6 +25,8 @@ def release(
     debug = is_nightly(version)
     if not os.path.isdir(build_dir):
         raise UserError(f"Build directory '{build_dir}' does not exist")
+
+    exit_on_sigterm()
 
     _print_summary(
         project,
@@ -37,6 +45,10 @@ def release(
         project, version, build, output_dir, debug
     )
     _print_plan(planned)
+
+    with output_lock(output_dir, dry_run=dry_run):
+        check_disk_space([(f.source, f.destination) for f in planned], output_dir)
+        copy_files(planned, output_dir, dry_run=dry_run)
     return 0
 
 
